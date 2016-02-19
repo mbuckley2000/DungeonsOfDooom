@@ -1,9 +1,4 @@
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 
@@ -28,8 +23,8 @@ public class Map {
 	 * Reads a map from a given file with the format:
 	 * name <mapName>
 	 * win <totalGold>
-	 * 
-	 * @par am map A File pointed to a correctly formatted map file
+	 *
+	 * @param mapFile A File pointed to a correctly formatted map file
 	 */
 	public void readMap(File mapFile) {
 		// a buffered reader for the map
@@ -67,7 +62,7 @@ public class Map {
 	{
 		
 		boolean error = false;
-		ArrayList<char[]> tempMap = new ArrayList<char[]>();
+		ArrayList<char[]> tempMap = new ArrayList<>();
 		int width = -1;
 		
 		String in = reader.readLine();
@@ -114,11 +109,30 @@ public class Map {
 		return map;
 	}
 	private boolean setWin(String in) {
-		// TODO Auto-generated method stub
+		if (!in.startsWith("win "))
+			return true;
+		int win = 0;
+		try {
+			win = Integer.parseInt(in.split(" ")[1].trim());
+		} catch (NumberFormatException n) {
+			System.err.println("the map does not contain a valid win criteria!");
+		}
+		if (win < 0)
+			return true;
+		this.totalGoldOnMap = win;
+		
 		return false;
 	}
 	private boolean setName(String in) {
-		// TODO Auto-generated method stub
+		if (!in.startsWith("name ") && in.length() < 4)
+			return true;
+		String name = in.substring(4).trim();
+
+		if (name.length() < 1)
+			return true;
+
+		this.mapName = name;
+		
 		return false;
 	}
 	
@@ -146,15 +160,15 @@ public class Map {
 	
 	/**
 	 * The method returns the Tile at a given location. The tile is not removed.
-	 * @param y the vertical position of the tile to replace
-	 * @param x the horizontal position of the tile to replace
-	 * @param tile the char character of the tile to replace
-	 * @return The old character which was replaced will be returned.
+	 * @param y the vertical position of the tile to look at
+	 * @param x the horizontal position of the tile to look at
+	 * @return The character at the tile is returned
 	 */
 	protected char lookAtTile(int y, int x) {
-		char output = map[y][x];
-		
-		return output;
+		if (y < 0 || x < 0 || y >= map.length || x >= map[0].length)
+			return '#';
+
+		return map[y][x];
 	}
 	
 	/**
@@ -164,7 +178,7 @@ public class Map {
 	 * @param x X coordinate of the location
 	 * @param radius The radius defining the area which will be returned. 
 	 * Without the usage of a lamp the standard value is 5 units.
-	 * @return
+	 * @return Returns a view window as a 2D char array of tiles
 	 */
 	protected char[][] lookWindow(int y, int x, int radius) {
 		char[][] reply = new char[radius][radius];
@@ -172,11 +186,11 @@ public class Map {
 			for (int j = 0; j < radius; j++) {
 				int posX = x + j - radius/2;
 				int posY = y + i - radius/2;
-				if (posX > 0 && posX < getMapWidth() && 
-						posY > 0 && posY < getMapHeight())
-					reply[i][j] = map[posY][posX];
+				if (posX >= 0 && posX < getMapWidth() &&
+						posY >= 0 && posY < getMapHeight())
+					reply[j][i] = map[posY][posX];
 				else
-					reply[i][j] = '#';
+					reply[j][i] = '#';
 			}
 		}
 		reply[0][0] = 'X';

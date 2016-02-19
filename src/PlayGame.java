@@ -13,23 +13,34 @@ public class PlayGame {
 		logic = new GameLogic();
 		userInput = new Scanner(System.in);
 	}
+
+	public static void main(String[] args) {
+		PlayGame game = new PlayGame();
+		System.out.println("Do you want to load a specitic map?");
+		System.out.println("Press enter for default map");
+		game.selectMap(game.readUserInput());
+		System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
+		game.update();
+
+
+	}
 	
 	/**
-	 * 
-	 * @return
+	 * Returns the user input
+	 * @return The user input
 	 */
 	public String readUserInput(){
 		return userInput.nextLine();
 	}
 	
 	public void update(){
-		String answer = "";
+		String answer;
 		while (logic.gameRunning()){
 			answer = parseCommand(readUserInput());
 			printAnswer (answer);
 		}
 	}
-	
+
 	protected void printAnswer(String answer) {
 		System.out.println(answer);
 	}
@@ -37,16 +48,17 @@ public class PlayGame {
 	public void selectMap(String mapName){
 		logic.setMap(new File(mapName));
 	}
+
 	/**
 	 * Parsing and Evaluating the User Input.
 	 * @param readUserInput input the user generates
 	 * @return answer of GameLogic
 	 */
 	protected String parseCommand(String readUserInput) {
-		
+
 		String [] command = readUserInput.trim().split(" ");
 		String answer = "FAIL";
-		
+
 		switch (command[0].toUpperCase()){
 		case "HELLO":
 			answer = hello();
@@ -66,11 +78,9 @@ public class PlayGame {
 		default:
 			answer = "FAIL";
 		}
-		
+
 		return answer;
 	}
-
-
 
 	public String hello() {
 		return logic.hello();
@@ -86,15 +96,6 @@ public class PlayGame {
 
 	public String look() {
 		return logic.look();
-	}
-
-	public static void main(String [] args) {
-		PlayGame game = new PlayGame();
-		System.out.println("Do you want to load a specitic map?");
-		game.selectMap(game.readUserInput());
-		
-		game.update();
-		
 	}
 
 }

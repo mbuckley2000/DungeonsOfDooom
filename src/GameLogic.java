@@ -41,8 +41,8 @@ public class GameLogic implements IGameLogic{
 	 * @return If the move was executed Success is returned. If the move could not execute Fail is returned.
 	 */
 	public String move(char direction) {
-		
-		int[] newPosition = playerPosition;
+
+		int[] newPosition = playerPosition.clone();
 		switch (direction){
 		case 'N':
 			newPosition[0] -=1;
