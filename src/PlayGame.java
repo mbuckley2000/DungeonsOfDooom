@@ -35,7 +35,7 @@ public class PlayGame {
 	
 	public void update(){
 		String answer;
-		while (true) { //logic.gameRunning()
+		while (logic.gameRunning()) {
 			answer = parseCommand(readUserInput());
 			printAnswer (answer);
 		}
@@ -74,11 +74,10 @@ public class PlayGame {
 			answer = look();
 			break;
 		case "QUIT":
+			answer = "Quitting game";
 			logic.quitGame();
-		default:
-			answer = "FAIL";
+			break;
 		}
-
 		return answer;
 	}
 

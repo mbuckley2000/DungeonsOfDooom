@@ -5,11 +5,13 @@ import java.net.Socket;
  * Created by matt on 24/02/2016.
  */
 public class GameLogicClient implements IGameLogic {
-	int port = 25543;
-	String address = "127.0.0.1";
+    static boolean debug = true;
+    int port = 25543;
+    String address = "127.0.0.1";
 	Socket socket;
 	PrintWriter writer;
 	BufferedReader reader;
+    boolean connected;
 
 	public GameLogicClient() {
 		try {
@@ -19,8 +21,9 @@ public class GameLogicClient implements IGameLogic {
 			System.out.println("Just connected to " + socket.getRemoteSocketAddress());
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream(), true);
-		} catch (IOException e) {
-			e.printStackTrace();
+            connected = true;
+        } catch (IOException e) {
+            e.printStackTrace();
 		}
 	}
 
@@ -31,36 +34,65 @@ public class GameLogicClient implements IGameLogic {
 
 	@Override
 	public String hello() {
-		try {
-			writer.write("HELLO");
-			return (reader.readLine());
-		} catch (IOException e) {
-		}
-		return null;
-	}
+        send("HELLO");
+        return receive();
+    }
 
 	@Override
 	public String move(char direction) {
-		return null;
-	}
+        send("MOVE " + direction);
+        return receive();
+    }
 
 	@Override
 	public String pickup() {
-		return null;
-	}
+        send("PICKUP");
+        return receive();
+    }
 
 	@Override
 	public String look() {
-		return null;
-	}
+        send("LOOK");
+        String lookWindow = "";
+        for (int i = 0; i < 6; i++) {
+            lookWindow += receive().replaceAll(".(?!$)", "$0  ");
+            lookWindow += '\n';
+        }
+        return lookWindow;
+    }
 
 	@Override
 	public boolean gameRunning() {
-		return false;
-	}
+        return connected;
+    }
 
 	@Override
 	public void quitGame() {
+        try {
+            writer.println("QUIT");
+            writer.close();
+            reader.close();
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        connected = false;
+    }
 
-	}
+    private void send(String string) {
+        writer.println(string);
+    }
+
+    private String receive() {
+        try {
+            String string = reader.readLine();
+            if (string == null) {
+                connected = false;
+            }
+            return string;
+        } catch (IOException e) {
+            connected = false;
+        }
+        return null;
+    }
 }

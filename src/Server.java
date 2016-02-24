@@ -12,8 +12,10 @@ import java.util.Set;
 public class Server implements Runnable, IGameLogic {
 	static Map map;
 	static Set<Server> connections = new HashSet<>();
-	Socket clientSocket;
-	boolean connected;
+    static boolean debug = true;
+    static boolean gameRunning;
+    Socket clientSocket;
+    boolean connected;
 	int[] playerPosition;
 	int collectedGold;
 
@@ -29,14 +31,16 @@ public class Server implements Runnable, IGameLogic {
 		ServerSocket serverSocket = new ServerSocket(25543);
 		System.out.println("Listening");
 
+        gameRunning = true;
+
 		//Setup
 		//Load map
 		map = new Map();
 		map.readMap(new File("maps/example_map.txt"));
 
 
-		while (true) {
-			Socket clientSocket = serverSocket.accept();
+        while (gameRunning) {
+            Socket clientSocket = serverSocket.accept();
 			System.out.println("Received connection from: " + clientSocket.getInetAddress());
 			new Thread(new Server(clientSocket)).start();
 		}
@@ -53,24 +57,28 @@ public class Server implements Runnable, IGameLogic {
 
 			while (connected) {
 				input = reader.readLine();
-				if (input != null) {
-					writer.write(parseInput(input));
-				}
-			}
+                if (debug) System.out.println("Received from " + clientSocket.getInetAddress() + ":   " + input);
+                if (input != null) {
+                    writer.println(parseInput(input));
+                } else {
+                    connected = false;
+                }
+            }
 
-			writer.close();
-			reader.close();
-			clientSocket.close();
+            if (debug) System.out.println(clientSocket.getInetAddress() + " has disconnected.");
+            writer.close();
+            reader.close();
+            clientSocket.close();
 		}
 		// handle exception (more work needed here)
 		catch (IOException e) {
-			System.out.println(e);
-		}
+            e.printStackTrace();
+        }
 	}
 
 	private String parseInput(String input) {
-		String[] command = input.trim().split(" ");
-		String answer = "FAIL";
+        String[] command = input.toUpperCase().trim().split(" ");
+        String answer = "FAIL";
 
 		switch (command[0].toUpperCase()) {
 			case "HELLO":
@@ -88,9 +96,9 @@ public class Server implements Runnable, IGameLogic {
 				answer = look();
 				break;
 			case "QUIT":
-				quitGame();
-				break;
-			default:
+                connected = false;
+                break;
+            default:
 				answer = "FAIL";
 				break;
 		}
@@ -109,8 +117,9 @@ public class Server implements Runnable, IGameLogic {
 
 	@Override
 	public String move(char direction) {
-		int[] newPosition = playerPosition.clone();
-		switch (direction) {
+        if (debug) System.out.println(clientSocket.getInetAddress() + " is moving " + direction);
+        int[] newPosition = playerPosition.clone();
+        switch (direction) {
 			case 'N':
 				newPosition[0] -= 1;
 				break;
@@ -127,14 +136,16 @@ public class Server implements Runnable, IGameLogic {
 				return ("FAIL");
 		}
 
-		if (map.lookAtTile(newPosition[0], newPosition[1]) != '#' && playerOnTile(newPosition[0], newPosition[1])) {
-			playerPosition = newPosition;
-			//if (checkWin())
-			return "SUCCESS";
-		} else {
-			return "FAIL";
-		}
-	}
+        synchronized (map) {
+            if (map.lookAtTile(newPosition[0], newPosition[1]) != '#' && !playerOnTile(newPosition[0], newPosition[1])) {
+                playerPosition = newPosition;
+                //if (checkWin())
+                return "SUCCESS";
+            } else {
+                return "FAIL";
+            }
+        }
+    }
 
 	@Override
 	public String pickup() {
@@ -155,9 +166,13 @@ public class Server implements Runnable, IGameLogic {
 
 		for (int i = 0; i < lookReply.length; i++) {
 			for (int j = 0; j < lookReply[0].length; j++) {
-				output += lookReply[j][i];
-			}
-			output += "\n";
+                if (playerOnTile(playerPosition[0] - 2 + i, playerPosition[1] - 2 + j)) {
+                    output += 'P';
+                } else {
+                    output += lookReply[j][i];
+                }
+            }
+            output += "\n";
 		}
 		return output;
 	}
