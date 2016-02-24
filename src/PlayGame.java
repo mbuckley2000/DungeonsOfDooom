@@ -8,9 +8,9 @@ public class PlayGame {
 	
 	protected IGameLogic logic;
 	protected Scanner userInput;
-	
+
 	public PlayGame(){
-		logic = new GameLogic();
+		logic = new GameLogicClient();
 		userInput = new Scanner(System.in);
 	}
 
@@ -30,12 +30,12 @@ public class PlayGame {
 	 * @return The user input
 	 */
 	public String readUserInput(){
-		return userInput.nextLine();
+		return userInput.nextLine().toLowerCase();
 	}
 	
 	public void update(){
 		String answer;
-		while (logic.gameRunning()){
+		while (true) { //logic.gameRunning()
 			answer = parseCommand(readUserInput());
 			printAnswer (answer);
 		}

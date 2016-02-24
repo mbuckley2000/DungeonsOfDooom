@@ -1,5 +1,3 @@
-
-
 import java.io.File;
 import java.util.Random;
 
@@ -41,31 +39,30 @@ public class GameLogic implements IGameLogic{
 	 * @return If the move was executed Success is returned. If the move could not execute Fail is returned.
 	 */
 	public String move(char direction) {
-
 		int[] newPosition = playerPosition.clone();
 		switch (direction){
-		case 'N':
-			newPosition[0] -=1;
-			break;
-		case 'E':
-			newPosition[1] +=1;
-			break;
-		case 'S':
-			newPosition[0] +=1;
-			break;
-		case 'W':
-			newPosition[1] -=1;
-			break;
-		default:
-			break;
+			case 'N':
+				newPosition[0] -= 1;
+				break;
+			case 'E':
+				newPosition[1] += 1;
+				break;
+			case 'S':
+				newPosition[0] += 1;
+				break;
+			case 'W':
+				newPosition[1] -= 1;
+				break;
+			default:
+				break;
 		}
-		
+
 		if(map.lookAtTile(newPosition[0], newPosition[1]) != '#'){
 			playerPosition = newPosition;
-			
+
 			if (checkWin())
 				quitGame();
-			
+
 			return "SUCCESS";
 		} else {
 			return "FAIL";
@@ -131,7 +128,7 @@ public class GameLogic implements IGameLogic{
 	 * @return True if all conditions are met, false otherwise
 	 */
 	protected boolean checkWin() {
-		if (collectedGold >= map.getWin() && 
+		if (collectedGold >= map.getWin() &&
 				map.lookAtTile(playerPosition[0], playerPosition[1]) == 'E') {
 			System.out.println("Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \n"
 					+ "Thank you for playing!");
@@ -147,7 +144,7 @@ public class GameLogic implements IGameLogic{
 		System.out.println("The game will now exit");
 		active = false;
 	}
-	
+
 	public boolean gameRunning(){
 		return active;
 	}

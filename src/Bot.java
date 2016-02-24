@@ -3,7 +3,7 @@ import java.util.Random;
 
 
 public class Bot extends PlayGame{
-	private static final char [] DIRECTIONS = {'N','S','E','W'};
+	private static final char[] DIRECTIONS = {'n', 's', 'e', 'w'};
 	private Random random;
 	
 	public Bot(){
@@ -13,7 +13,7 @@ public class Bot extends PlayGame{
 
 	public static void main(String[] args) {
 		Bot game = new Bot();
-		System.out.println("Do you want to load a specitic map?");
+		System.out.println("Do you want to load a specific map?");
 		System.out.println("Press enter for default map");
 		game.selectMap(game.readUserInput());
 
@@ -25,7 +25,7 @@ public class Bot extends PlayGame{
 		switch (lastAnswer.split(" ")[0]){
 		case "":
 			return "HELLO";
-			case "GOLD:":
+			case "GOLD":
 			case "FAIL":
 			return "LOOK";
 		default:
@@ -37,7 +37,7 @@ public class Bot extends PlayGame{
 		String answer = "";
 		while (logic.gameRunning()){
 
-			answer = parseCommand(botAction(answer));
+			answer = parseCommand(botAction(answer).toLowerCase());
 			printAnswer (answer);
 		}
 	}
