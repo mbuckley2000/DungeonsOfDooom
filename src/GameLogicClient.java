@@ -5,24 +5,26 @@ import java.net.Socket;
  * Created by matt on 24/02/2016.
  */
 public class GameLogicClient implements IGameLogic {
-    static boolean debug = true;
-    int port = 25543;
-    String address = "127.0.0.1";
+	int port = 40004;
+	String address = "localhost";
 	Socket socket;
 	PrintWriter writer;
 	BufferedReader reader;
     boolean connected;
+	OutputClient outputClient;
 
 	public GameLogicClient() {
 		try {
-			System.out.println("Connecting to " + address + " on port " + port);
+			System.out.println("Connecting to " + address + ":" + port);
 			socket = new Socket(address, port);
 
-			System.out.println("Just connected to " + socket.getRemoteSocketAddress());
+			System.out.println("Connected to server");
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream(), true);
             connected = true;
-        } catch (IOException e) {
+			outputClient = new OutputClient(reader);
+			new Thread(outputClient).start();
+		} catch (IOException e) {
             e.printStackTrace();
 		}
 	}
@@ -53,13 +55,8 @@ public class GameLogicClient implements IGameLogic {
 	@Override
 	public String look() {
         send("LOOK");
-        String lookWindow = "";
-        for (int i = 0; i < 6; i++) {
-            lookWindow += receive().replaceAll(".(?!$)", "$0  ");
-            lookWindow += '\n';
-        }
-        return lookWindow;
-    }
+		return receive();
+	}
 
 	@Override
 	public boolean gameRunning() {
@@ -71,8 +68,9 @@ public class GameLogicClient implements IGameLogic {
         try {
             writer.println("QUIT");
             writer.close();
-            reader.close();
-            socket.close();
+	        outputClient.stop();
+	        reader.close();
+	        socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,8 +82,15 @@ public class GameLogicClient implements IGameLogic {
     }
 
     private String receive() {
+	    /*
+	    String string = "empty";
         try {
-            String string = reader.readLine();
+	        while (string.equals("empty")) {
+		        string = reader.readLine() + "\n";
+	        }
+	        while (reader.ready()) {
+		        string += reader.readLine() + "\n";
+	        }
             if (string == null) {
                 connected = false;
             }
@@ -94,5 +99,7 @@ public class GameLogicClient implements IGameLogic {
             connected = false;
         }
         return null;
+        */
+	    return "";
     }
 }

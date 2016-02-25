@@ -10,9 +10,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class Server implements Runnable, IGameLogic {
+	static int port = 40004;
 	static Map map;
 	static Set<Server> connections = new HashSet<>();
-    static boolean debug = true;
     static boolean gameRunning;
     Socket clientSocket;
     boolean connected;
@@ -28,8 +28,8 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	public static void main(String args[]) throws Exception {
-		ServerSocket serverSocket = new ServerSocket(25543);
-		System.out.println("Listening");
+		ServerSocket serverSocket = new ServerSocket(port);
+		System.out.println("Listening for connections");
 
         gameRunning = true;
 
@@ -41,8 +41,14 @@ public class Server implements Runnable, IGameLogic {
 
         while (gameRunning) {
             Socket clientSocket = serverSocket.accept();
-			System.out.println("Received connection from: " + clientSocket.getInetAddress());
+	        System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
 			new Thread(new Server(clientSocket)).start();
+		}
+	}
+
+	static private void closeAllConnections() {
+		for (Server connection : connections) {
+			connection.close();
 		}
 	}
 
@@ -57,18 +63,19 @@ public class Server implements Runnable, IGameLogic {
 
 			while (connected) {
 				input = reader.readLine();
-                if (debug) System.out.println("Received from " + clientSocket.getInetAddress() + ":   " + input);
-                if (input != null) {
-                    writer.println(parseInput(input));
-                } else {
+				System.out.println(clientSocket.getInetAddress() + "\t\t" + input);
+				if (input != null) {
+	                writer.println(parseInput(input.toUpperCase()));
+				} else {
                     connected = false;
                 }
             }
 
-            if (debug) System.out.println(clientSocket.getInetAddress() + " has disconnected.");
-            writer.close();
+			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
+			writer.close();
             reader.close();
             clientSocket.close();
+			connections.remove(this);
 		}
 		// handle exception (more work needed here)
 		catch (IOException e) {
@@ -77,8 +84,8 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	private String parseInput(String input) {
-        String[] command = input.toUpperCase().trim().split(" ");
-        String answer = "FAIL";
+		String[] command = input.trim().split(" ");
+		String answer = "FAIL";
 
 		switch (command[0].toUpperCase()) {
 			case "HELLO":
@@ -93,7 +100,7 @@ public class Server implements Runnable, IGameLogic {
 				answer = pickup();
 				break;
 			case "LOOK":
-				answer = look();
+				answer = look().replaceAll(".(?!$)", "$0  ");
 				break;
 			case "QUIT":
                 connected = false;
@@ -117,7 +124,6 @@ public class Server implements Runnable, IGameLogic {
 
 	@Override
 	public String move(char direction) {
-        if (debug) System.out.println(clientSocket.getInetAddress() + " is moving " + direction);
         int[] newPosition = playerPosition.clone();
         switch (direction) {
 			case 'N':
@@ -139,13 +145,28 @@ public class Server implements Runnable, IGameLogic {
         synchronized (map) {
             if (map.lookAtTile(newPosition[0], newPosition[1]) != '#' && !playerOnTile(newPosition[0], newPosition[1])) {
                 playerPosition = newPosition;
-                //if (checkWin())
+	            if (checkWin()) {
+		            return "Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!";
+	            }
                 return "SUCCESS";
             } else {
                 return "FAIL";
             }
         }
     }
+
+	/**
+	 * checks if the player collected all GOLD and is on the exit tile
+	 *
+	 * @return True if all conditions are met, false otherwise
+	 */
+	protected boolean checkWin() {
+		if (collectedGold >= map.getWin() && map.lookAtTile(playerPosition[0], playerPosition[1]) == 'E') {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	@Override
 	public String pickup() {
@@ -155,7 +176,7 @@ public class Server implements Runnable, IGameLogic {
 			return "SUCCESS, GOLD COINS: " + collectedGold;
 		}
 
-		return "FAIL" + "\n" + "There is nothing to pick up...";
+		return "FAIL\nThere is nothing to pick up...";
 	}
 
 	@Override
@@ -179,11 +200,17 @@ public class Server implements Runnable, IGameLogic {
 
 	@Override
 	public boolean gameRunning() {
-		return true;
+		return gameRunning;
 	}
 
 	@Override
 	public void quitGame() {
+		gameRunning = false;
+		closeAllConnections();
+	}
+
+	private void close() {
+		connected = false;
 	}
 
 	/**
