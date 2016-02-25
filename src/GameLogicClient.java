@@ -6,15 +6,17 @@ import java.net.Socket;
  */
 public class GameLogicClient implements IGameLogic {
 	int port = 40004;
-	String address = "localhost";
+	String address = "localhost"; //Ricky's IP: 138.38.171.121
 	Socket socket;
 	PrintWriter writer;
 	BufferedReader reader;
     boolean connected;
+	boolean output;
 	OutputClient outputClient;
 
-	public GameLogicClient() {
+	public GameLogicClient(boolean output) {
 		try {
+			this.output = output;
 			System.out.println("Connecting to " + address + ":" + port);
 			socket = new Socket(address, port);
 
@@ -22,8 +24,10 @@ public class GameLogicClient implements IGameLogic {
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream(), true);
             connected = true;
-			outputClient = new OutputClient(reader);
-			new Thread(outputClient).start();
+			if (output) {
+				outputClient = new OutputClient(reader);
+				new Thread(outputClient).start();
+			}
 		} catch (IOException e) {
             e.printStackTrace();
 		}
@@ -37,25 +41,25 @@ public class GameLogicClient implements IGameLogic {
 	@Override
 	public String hello() {
         send("HELLO");
-        return receive();
-    }
+		return null;
+	}
 
 	@Override
 	public String move(char direction) {
         send("MOVE " + direction);
-        return receive();
-    }
+		return null;
+	}
 
 	@Override
 	public String pickup() {
         send("PICKUP");
-        return receive();
-    }
+		return null;
+	}
 
 	@Override
 	public String look() {
         send("LOOK");
-		return receive();
+		return null;
 	}
 
 	@Override
@@ -68,7 +72,7 @@ public class GameLogicClient implements IGameLogic {
         try {
             writer.println("QUIT");
             writer.close();
-	        outputClient.stop();
+	        if (output) outputClient.stop();
 	        reader.close();
 	        socket.close();
         } catch (Exception e) {
@@ -79,27 +83,5 @@ public class GameLogicClient implements IGameLogic {
 
     private void send(String string) {
         writer.println(string);
-    }
-
-    private String receive() {
-	    /*
-	    String string = "empty";
-        try {
-	        while (string.equals("empty")) {
-		        string = reader.readLine() + "\n";
-	        }
-	        while (reader.ready()) {
-		        string += reader.readLine() + "\n";
-	        }
-            if (string == null) {
-                connected = false;
-            }
-            return string;
-        } catch (IOException e) {
-            connected = false;
-        }
-        return null;
-        */
-	    return "";
     }
 }

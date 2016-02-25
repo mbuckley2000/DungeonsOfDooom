@@ -5,20 +5,24 @@ import java.util.Scanner;
 
 
 public class PlayGame {
-	
+
+	private static boolean networkedMode = true;
 	protected IGameLogic logic;
 	protected Scanner userInput;
 
+
 	public PlayGame(){
-		logic = new GameLogicClient();
+		logic = new GameLogicClient(true);
 		userInput = new Scanner(System.in);
 	}
 
 	public static void main(String[] args) {
 		PlayGame game = new PlayGame();
-		System.out.println("Do you want to load a specitic map?");
-		System.out.println("Press enter for default map");
-		game.selectMap(game.readUserInput());
+		if (!networkedMode) {
+			System.out.println("Do you want to load a specitic map?");
+			System.out.println("Press enter for default map");
+			game.selectMap(game.readUserInput());
+		}
 		System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
 		game.update();
 

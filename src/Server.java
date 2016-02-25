@@ -18,6 +18,7 @@ public class Server implements Runnable, IGameLogic {
     boolean connected;
 	int[] playerPosition;
 	int collectedGold;
+	PrintWriter writer;
 
 	Server(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -42,6 +43,7 @@ public class Server implements Runnable, IGameLogic {
         while (gameRunning) {
             Socket clientSocket = serverSocket.accept();
 	        System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
+	        broadcast(clientSocket.getInetAddress() + " has joined the game");
 			new Thread(new Server(clientSocket)).start();
 		}
 	}
@@ -52,16 +54,20 @@ public class Server implements Runnable, IGameLogic {
 		}
 	}
 
+	static void broadcast(String message) {
+		for (Server connection : connections) {
+			connection.getWriter().println(message);
+		}
+	}
+
 	public void run() {
 		try {
 			// Get input from client
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
+			writer = new PrintWriter(clientSocket.getOutputStream(), true);
 			String input;
-			//to read: String input = reader.readLine();
-			//to write: writer.println("The time in " + input + " is " + new Date().toString());
 
-			while (connected) {
+			while (connected && gameRunning) {
 				input = reader.readLine();
 				System.out.println(clientSocket.getInetAddress() + "\t\t" + input);
 				if (input != null) {
@@ -72,6 +78,7 @@ public class Server implements Runnable, IGameLogic {
             }
 
 			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
+			broadcast(clientSocket.getInetAddress() + " has left the game");
 			writer.close();
             reader.close();
             clientSocket.close();
@@ -146,6 +153,9 @@ public class Server implements Runnable, IGameLogic {
             if (map.lookAtTile(newPosition[0], newPosition[1]) != '#' && !playerOnTile(newPosition[0], newPosition[1])) {
                 playerPosition = newPosition;
 	            if (checkWin()) {
+		            broadcast("Player x just won! Game is now over.");
+		            broadcast("Seriously, get out.");
+		            gameRunning = false;
 		            return "Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!";
 	            }
                 return "SUCCESS";
@@ -154,6 +164,10 @@ public class Server implements Runnable, IGameLogic {
             }
         }
     }
+
+	public PrintWriter getWriter() {
+		return writer;
+	}
 
 	/**
 	 * checks if the player collected all GOLD and is on the exit tile
@@ -205,8 +219,7 @@ public class Server implements Runnable, IGameLogic {
 
 	@Override
 	public void quitGame() {
-		gameRunning = false;
-		closeAllConnections();
+		connected = false;
 	}
 
 	private void close() {

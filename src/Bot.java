@@ -4,41 +4,41 @@ import java.util.Random;
 
 public class Bot extends PlayGame{
 	private static final char[] DIRECTIONS = {'n', 's', 'e', 'w'};
+	private static boolean networkedMode = true;
 	private Random random;
-	
-	public Bot(){
-		super();
+
+	public Bot() {
+		//logic = new GameLogicClient(false);
+		//super();
 		random = new Random();
 	}
 
 	public static void main(String[] args) {
 		Bot game = new Bot();
-		System.out.println("Do you want to load a specific map?");
-		System.out.println("Press enter for default map");
-		game.selectMap(game.readUserInput());
+		if (!networkedMode) {
+			System.out.println("Do you want to load a specific map?");
+			System.out.println("Press enter for default map");
+			game.selectMap(game.readUserInput());
+		}
 
 		game.update();
 
 	}
 
 	private String botAction(String lastAnswer) {
-		switch (lastAnswer.split(" ")[0]){
-		case "":
-			return "HELLO";
-			case "GOLD":
-			case "FAIL":
-			return "LOOK";
-		default:
-			return "MOVE " + DIRECTIONS[random.nextInt(4)];
-		}
+		return "MOVE N";
 	}
 	
 	public void update(){
 		String answer = "";
-		while (logic.gameRunning()){
-
+		while (logic.gameRunning()) {
 			answer = parseCommand(botAction(answer).toLowerCase());
 			printAnswer (answer);
+			try {
+				Thread.currentThread().sleep(random.nextInt(2000) + 1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
