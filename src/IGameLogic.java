@@ -3,9 +3,7 @@
 import java.io.File;
 
 public interface IGameLogic {
-	
-	
-	
+
 	public void setMap(File file);
 	
 
@@ -24,5 +22,8 @@ public interface IGameLogic {
 	
 	
 	public void quitGame();
-	
+
+	public String say(String message);
+
+	public String name(String name);
 }

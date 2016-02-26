@@ -6,7 +6,7 @@ import java.net.Socket;
  */
 public class GameLogicClient implements IGameLogic {
 	int port = 40004;
-	String address = "localhost"; //Ricky's IP: 138.38.171.121
+	String address = "138.38.165.213"; //Ricky's IP: 138.38.171.121
 	Socket socket;
 	PrintWriter writer;
 	BufferedReader reader;
@@ -63,8 +63,23 @@ public class GameLogicClient implements IGameLogic {
 	}
 
 	@Override
+	public String say(String message) {
+		send("SAY " + message);
+		return null;
+	}
+
+	@Override
+	public String name(String name) {
+		send("NAME " + name);
+		return null;
+	}
+
+	@Override
 	public boolean gameRunning() {
-        return connected;
+		if (connected) {
+			connected = outputClient.isConnected();
+		}
+		return connected;
     }
 
 	@Override

@@ -34,7 +34,7 @@ public class PlayGame {
 	 * @return The user input
 	 */
 	public String readUserInput(){
-		return userInput.nextLine().toLowerCase();
+		return userInput.nextLine();
 	}
 	
 	public void update(){
@@ -64,23 +64,31 @@ public class PlayGame {
 		String answer = "FAIL";
 
 		switch (command[0].toUpperCase()){
-		case "HELLO":
-			answer = hello();
+			case "HELLO":
+				answer = hello();
+				break;
+			case "NAME":
+				logic.name(command[1]);
+				answer = "";
+				break;
+			case "SAY":
+				logic.say(readUserInput.substring(4, readUserInput.length()));
+				answer = "";
+				break;
+			case "MOVE":
+				if (command.length == 2)
+					answer = move(command[1].toUpperCase().charAt(0));
 			break;
-		case "MOVE":
-			if (command.length == 2 )
-			answer = move(command[1].charAt(0));
-		break;
-		case "PICKUP":
-			answer = pickup();
-			break;
-		case "LOOK":
-			answer = look();
-			break;
-		case "QUIT":
-			answer = "Quitting game";
-			logic.quitGame();
-			break;
+			case "PICKUP":
+				answer = pickup();
+				break;
+			case "LOOK":
+				answer = look();
+				break;
+			case "QUIT":
+				answer = "Quitting game";
+				logic.quitGame();
+				break;
 		}
 		return answer;
 	}

@@ -3,6 +3,7 @@
  */
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
@@ -18,6 +19,8 @@ public class Server implements Runnable, IGameLogic {
     boolean connected;
 	int[] playerPosition;
 	int collectedGold;
+	InetAddress address;
+	String name;
 	PrintWriter writer;
 
 	Server(Socket clientSocket) {
@@ -26,6 +29,8 @@ public class Server implements Runnable, IGameLogic {
 		collectedGold = 0;
 		playerPosition = initialisePlayer();
 		connections.add(this);
+		address = clientSocket.getInetAddress();
+		this.name = randomName();
 	}
 
 	public static void main(String args[]) throws Exception {
@@ -43,8 +48,14 @@ public class Server implements Runnable, IGameLogic {
         while (gameRunning) {
             Socket clientSocket = serverSocket.accept();
 	        System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
-	        broadcast(clientSocket.getInetAddress() + " has joined the game");
-			new Thread(new Server(clientSocket)).start();
+	        if (findPlayer(clientSocket.getInetAddress()) == null) {
+		        new Thread(new Server(clientSocket)).start();
+	        } else {
+		        if (!findPlayer(clientSocket.getInetAddress()).isConnected()) {
+			        findPlayer(clientSocket.getInetAddress()).reconnect(clientSocket);
+			        new Thread(findPlayer(clientSocket.getInetAddress())).start();
+		        }
+	        }
 		}
 	}
 
@@ -60,29 +71,45 @@ public class Server implements Runnable, IGameLogic {
 		}
 	}
 
+	private static String randomName() {
+		Random random = new Random();
+		String[] names = {"DampHydra", "WoodenCoffee", "PurpleRiver", "WhiteBored", "WoodySteelRider", "RIPLenny", "ChromeWheelie", "SpicyRice", "LogicGod"};
+		return names[random.nextInt(names.length - 1)];
+	}
+
+	private static Server findPlayer(InetAddress address) {
+		for (Server connection : connections) {
+			if (connection.getAddress().equals(address)) {
+				return connection;
+			}
+		}
+		return null;
+	}
+
 	public void run() {
 		try {
 			// Get input from client
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
+			broadcast(name + " has joined the game");
 			String input;
 
 			while (connected && gameRunning) {
 				input = reader.readLine();
 				System.out.println(clientSocket.getInetAddress() + "\t\t" + input);
 				if (input != null) {
-	                writer.println(parseInput(input.toUpperCase()));
+					writer.println(parseInput(input));
 				} else {
                     connected = false;
                 }
             }
 
 			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
-			broadcast(clientSocket.getInetAddress() + " has left the game");
+			broadcast(name + " has left the game");
 			writer.close();
             reader.close();
             clientSocket.close();
-			connections.remove(this);
+			//connections.remove(this);
 		}
 		// handle exception (more work needed here)
 		catch (IOException e) {
@@ -100,7 +127,7 @@ public class Server implements Runnable, IGameLogic {
 				break;
 			case "MOVE":
 				if (command.length == 2) {
-					answer = move(command[1].charAt(0));
+					answer = move(command[1].toUpperCase().charAt(0));
 				}
 				break;
 			case "PICKUP":
@@ -112,7 +139,13 @@ public class Server implements Runnable, IGameLogic {
 			case "QUIT":
                 connected = false;
                 break;
-            default:
+			case "NAME":
+				answer = name(command[1]);
+				break;
+			case "SAY":
+				answer = say(input.substring(4, input.length()));
+				break;
+			default:
 				answer = "FAIL";
 				break;
 		}
@@ -183,6 +216,12 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	@Override
+	public String say(String message) {
+		broadcast(name + " says: " + message);
+		return ("SUCCESS");
+	}
+
+	@Override
 	public String pickup() {
 		if (map.lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
 			collectedGold++;
@@ -224,6 +263,10 @@ public class Server implements Runnable, IGameLogic {
 
 	private void close() {
 		connected = false;
+	}
+
+	public boolean isConnected() {
+		return connected;
 	}
 
 	/**
@@ -269,4 +312,26 @@ public class Server implements Runnable, IGameLogic {
 		return (map.lookAtTile(pos[0], pos[1]) == '#') ? null : pos;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String name(String name) {
+		for (Server connection : connections) {
+			if (connection.getName().equals(name)) {
+				return "FAIL";
+			}
+		}
+		this.name = name;
+		return "TRUE";
+	}
+
+	public InetAddress getAddress() {
+		return address;
+	}
+
+	public void reconnect(Socket clientSocket) {
+		connected = true;
+		this.clientSocket = clientSocket;
+	}
 }

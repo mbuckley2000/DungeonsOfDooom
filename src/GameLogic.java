@@ -149,6 +149,13 @@ public class GameLogic implements IGameLogic{
 		return active;
 	}
 
+	public String say(String message) {
+		return "FAIL";
+	}
+
+	public String name(String name) {
+		return "FAIL";
+	}
 
 
 
