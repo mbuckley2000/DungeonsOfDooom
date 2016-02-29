@@ -25,6 +25,8 @@ public class OutputClient implements Runnable {
 					string = reader.readLine();
 					if (string == null) {
 						connected = false;
+					} else if (string.equals("KICK")) {
+						connected = false;
 					} else {
 						System.out.println(string);
 					}

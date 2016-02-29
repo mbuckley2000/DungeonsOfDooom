@@ -25,8 +25,6 @@ public class PlayGame {
 		}
 		System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
 		game.update();
-
-
 	}
 	
 	/**
@@ -46,7 +44,7 @@ public class PlayGame {
 	}
 
 	protected void printAnswer(String answer) {
-		System.out.println(answer);
+		//System.out.println(answer);
 	}
 
 	public void selectMap(String mapName){

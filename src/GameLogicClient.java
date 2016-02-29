@@ -6,7 +6,7 @@ import java.net.Socket;
  */
 public class GameLogicClient implements IGameLogic {
 	int port = 40004;
-	String address = "138.38.165.213"; //Ricky's IP: 138.38.171.121
+	String address = "localhost"; //Ricky's IP: 138.38.171.121
 	Socket socket;
 	PrintWriter writer;
 	BufferedReader reader;
@@ -19,11 +19,10 @@ public class GameLogicClient implements IGameLogic {
 			this.output = output;
 			System.out.println("Connecting to " + address + ":" + port);
 			socket = new Socket(address, port);
-
 			System.out.println("Connected to server");
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream(), true);
-            connected = true;
+			connected = true;
 			if (output) {
 				outputClient = new OutputClient(reader);
 				new Thread(outputClient).start();
@@ -76,11 +75,8 @@ public class GameLogicClient implements IGameLogic {
 
 	@Override
 	public boolean gameRunning() {
-		if (connected) {
-			connected = outputClient.isConnected();
-		}
-		return connected;
-    }
+		return connected && outputClient.isConnected();
+	}
 
 	@Override
 	public void quitGame() {

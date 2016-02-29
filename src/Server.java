@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class Server implements Runnable, IGameLogic {
 
 
         while (gameRunning) {
-            Socket clientSocket = serverSocket.accept();
+	        Socket clientSocket = serverSocket.accept();
 	        System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
 	        if (findPlayer(clientSocket.getInetAddress()) == null) {
 		        new Thread(new Server(clientSocket)).start();
@@ -54,6 +55,8 @@ public class Server implements Runnable, IGameLogic {
 		        if (!findPlayer(clientSocket.getInetAddress()).isConnected()) {
 			        findPlayer(clientSocket.getInetAddress()).reconnect(clientSocket);
 			        new Thread(findPlayer(clientSocket.getInetAddress())).start();
+		        } else {
+			        clientSocket.close();
 		        }
 	        }
 		}
@@ -61,7 +64,7 @@ public class Server implements Runnable, IGameLogic {
 
 	static private void closeAllConnections() {
 		for (Server connection : connections) {
-			connection.close();
+			connection.kick();
 		}
 	}
 
@@ -100,8 +103,8 @@ public class Server implements Runnable, IGameLogic {
 				if (input != null) {
 					writer.println(parseInput(input));
 				} else {
-                    connected = false;
-                }
+					kick();
+				}
             }
 
 			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
@@ -113,8 +116,11 @@ public class Server implements Runnable, IGameLogic {
 		}
 		// handle exception (more work needed here)
 		catch (IOException e) {
-            e.printStackTrace();
-        }
+			if (e.getClass().equals(SocketException.class)) {
+				//Connection reset
+				kick();
+			}
+		}
 	}
 
 	private String parseInput(String input) {
@@ -137,8 +143,8 @@ public class Server implements Runnable, IGameLogic {
 				answer = look().replaceAll(".(?!$)", "$0  ");
 				break;
 			case "QUIT":
-                connected = false;
-                break;
+				kick();
+				break;
 			case "NAME":
 				answer = name(command[1]);
 				break;
@@ -150,6 +156,11 @@ public class Server implements Runnable, IGameLogic {
 				break;
 		}
 		return answer;
+	}
+
+	private void kick() {
+		writer.println("KICK");
+		connected = false;
 	}
 
 	@Override
@@ -258,11 +269,7 @@ public class Server implements Runnable, IGameLogic {
 
 	@Override
 	public void quitGame() {
-		connected = false;
-	}
-
-	private void close() {
-		connected = false;
+		kick();
 	}
 
 	public boolean isConnected() {
