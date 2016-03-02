@@ -1,29 +1,13 @@
-
-
-import java.io.File;
-
 public interface IGameLogic {
+	String hello();
 
-	public void setMap(File file);
-	
+	String move(char direction);
 
-	public String hello();
-	
+	String pickup();
 
-	public String move(char direction);
-	
+	String look();
 
-	public String pickup();
-	
+	boolean gameRunning();
 
-	public String look();
-	
-	public boolean gameRunning();
-	
-	
-	public void quitGame();
-
-	public String say(String message);
-
-	public String name(String name);
+	void quitGame();
 }

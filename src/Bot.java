@@ -1,14 +1,14 @@
 import java.util.Random;
 
 public class Bot extends PlayGame{
-	private static final char[] DIRECTIONS = {'n', 's', 'e', 'w'};
-	private static boolean networkedMode = true;
+	final int sleepMax = 100;
 	private Random random;
 	private DiscoverableMap map;
 	private int[] moveDelta = {0, 0};
+	private int[] position = {0, 0};
+	private String lastCommand;
 
 	public Bot() {
-		//logic = new GameLogicClient(false);
 		super();
 		random = new Random();
 		map = new DiscoverableMap();
@@ -16,16 +16,41 @@ public class Bot extends PlayGame{
 
 	public static void main(String[] args) {
 		Bot game = new Bot();
-		if (!networkedMode) {
-			System.out.println("Do you want to load a specific map?");
-			System.out.println("Press enter for default map");
-			game.selectMap(game.readUserInput());
-		}
-
+		System.out.println("Bot is now running");
 		game.update();
 	}
 
-	private String botAction(String lastAnswer) {
+	private String botAction() {
+		if (lastCommand.equals("LOOK")) {
+			//logic.getOutputClient().printLastLookWindow();
+			map.update(logic.getOutputClient().getLastLookWindow(), moveDelta);
+			position[0] += moveDelta[0];
+			position[1] += moveDelta[1];
+			moveDelta[0] = 0;
+			moveDelta[1] = 0;
+			System.out.println("Updated internal map: ");
+			map.print();
+		} else if (lastCommand.contains("MOVE")) {
+			//Check that the move was successful
+			if (logic.getOutputClient().getLastBoolResponse()) {
+				char dir = lastCommand.toUpperCase().charAt(5);
+				switch (dir) {
+					case 'N':
+						moveDelta[0] -= 1; //North
+						break;
+					case 'E':
+						moveDelta[1] += 1; //East
+						break;
+					case 'S':
+						moveDelta[0] += 1; //South
+						break;
+					case 'W':
+						moveDelta[1] -= 1; //West
+						break;
+				}
+			}
+		}
+
 		String command;
 		if (length(moveDelta) >= 2) {
 			command = "LOOK";
@@ -33,27 +58,26 @@ public class Bot extends PlayGame{
 			command = "MOVE " + getMovement();
 		}
 		System.out.println("Sent command: " + command);
+		lastCommand = command;
 		return command;
 	}
 
 	private char getMovement() {
 		Random random = new Random();
-		int dir = random.nextInt(3);
+		int dir = random.nextInt(4);
 		switch (dir) {
 			case 0:
-				moveDelta[0] -= 1; //North
 				return 'N';
 			case 1:
-				moveDelta[1] += 1; //East
 				return 'E';
 			case 2:
-				moveDelta[0] += 1; //South
 				return 'S';
 			case 3:
-				moveDelta[1] -= 1; //West
 				return 'W';
+			default:
+				System.out.println("AI generated an invalid movement. Trying again");
+				return getMovement();
 		}
-		return 'N';
 	}
 
 	private double length(int[] vector) {
@@ -61,16 +85,14 @@ public class Bot extends PlayGame{
 	}
 
 	public void update(){
-		String answer = "";
 		while (logic.gameRunning()) {
-			answer = parseCommand(botAction(answer).toLowerCase());
-			printAnswer (answer);
+			if (lastCommand == null) lastCommand = "";
+			parseCommand(botAction().toLowerCase());
 			try {
-				Thread.currentThread().sleep(random.nextInt(2000) + 1000);
+				Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-
 }

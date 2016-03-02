@@ -13,16 +13,16 @@ import java.util.Set;
 
 public class Server implements Runnable, IGameLogic {
 	static int port = 40004;
-	static Map map;
 	static Set<Server> connections = new HashSet<>();
-    static boolean gameRunning;
-    Socket clientSocket;
-    boolean connected;
+	static boolean gameRunning;
+	private static Map map;
+	Socket clientSocket;
+	boolean connected;
 	int[] playerPosition;
 	int collectedGold;
 	InetAddress address;
-	String name;
 	PrintWriter writer;
+
 
 	Server(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -31,14 +31,13 @@ public class Server implements Runnable, IGameLogic {
 		playerPosition = initialisePlayer();
 		connections.add(this);
 		address = clientSocket.getInetAddress();
-		this.name = randomName();
 	}
 
 	public static void main(String args[]) throws Exception {
 		ServerSocket serverSocket = new ServerSocket(port);
 		System.out.println("Listening for connections");
 
-        gameRunning = true;
+		gameRunning = true;
 
 		//Setup
 		//Load map
@@ -46,20 +45,24 @@ public class Server implements Runnable, IGameLogic {
 		map.readMap(new File("maps/example_map.txt"));
 
 
-        while (gameRunning) {
-	        Socket clientSocket = serverSocket.accept();
-	        System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
-	        if (findPlayer(clientSocket.getInetAddress()) == null) {
-		        new Thread(new Server(clientSocket)).start();
-	        } else {
-		        if (!findPlayer(clientSocket.getInetAddress()).isConnected()) {
-			        findPlayer(clientSocket.getInetAddress()).reconnect(clientSocket);
-			        new Thread(findPlayer(clientSocket.getInetAddress())).start();
-		        } else {
-			        clientSocket.close();
-		        }
-	        }
+		while (gameRunning) {
+			Socket clientSocket = serverSocket.accept();
+			System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
+
+			if (findPlayer(clientSocket.getInetAddress()) == null) {
+				new Thread(new Server(clientSocket)).start();
+			} else {
+				if (!findPlayer(clientSocket.getInetAddress()).isConnected()) {
+					findPlayer(clientSocket.getInetAddress()).reconnect(clientSocket);
+					new Thread(findPlayer(clientSocket.getInetAddress())).start();
+				} else {
+					System.out.println(clientSocket.getInetAddress() + "\t\tConnection refused. Address already connected");
+					clientSocket.close();
+				}
+			}
 		}
+
+		closeAllConnections();
 	}
 
 	static private void closeAllConnections() {
@@ -74,12 +77,6 @@ public class Server implements Runnable, IGameLogic {
 		}
 	}
 
-	private static String randomName() {
-		Random random = new Random();
-		String[] names = {"DampHydra", "WoodenCoffee", "PurpleRiver", "WhiteBored", "WoodySteelRider", "RIPLenny", "ChromeWheelie", "SpicyRice", "LogicGod"};
-		return names[random.nextInt(names.length - 1)];
-	}
-
 	private static Server findPlayer(InetAddress address) {
 		for (Server connection : connections) {
 			if (connection.getAddress().equals(address)) {
@@ -90,11 +87,11 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	public void run() {
+		System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
 		try {
-			// Get input from client
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
-			broadcast(name + " has joined the game");
+			//broadcast(name + " has joined the game");
 			String input;
 
 			while (connected && gameRunning) {
@@ -105,16 +102,14 @@ public class Server implements Runnable, IGameLogic {
 				} else {
 					kick();
 				}
-            }
+			}
 
 			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
-			broadcast(name + " has left the game");
+			//broadcast(name + " has left the game");
 			writer.close();
-            reader.close();
-            clientSocket.close();
-			//connections.remove(this);
+			reader.close();
+			clientSocket.close();
 		}
-		// handle exception (more work needed here)
 		catch (IOException e) {
 			if (e.getClass().equals(SocketException.class)) {
 				//Connection reset
@@ -145,15 +140,6 @@ public class Server implements Runnable, IGameLogic {
 			case "QUIT":
 				kick();
 				break;
-			case "NAME":
-				answer = name(command[1]);
-				break;
-			case "SAY":
-				answer = say(input.substring(4, input.length()));
-				break;
-			default:
-				answer = "FAIL";
-				break;
 		}
 		return answer;
 	}
@@ -163,20 +149,13 @@ public class Server implements Runnable, IGameLogic {
 		connected = false;
 	}
 
-	@Override
-	public void setMap(File file) {
-		map.readMap(file);
-	}
-
-	@Override
 	public String hello() {
-		return Integer.toString(map.getWin());
+		return "GOLD: " + Integer.toString(map.getWin());
 	}
 
-	@Override
 	public String move(char direction) {
-        int[] newPosition = playerPosition.clone();
-        switch (direction) {
+		int[] newPosition = playerPosition.clone();
+		switch (direction) {
 			case 'N':
 				newPosition[0] -= 1;
 				break;
@@ -193,21 +172,21 @@ public class Server implements Runnable, IGameLogic {
 				return ("FAIL");
 		}
 
-        synchronized (map) {
-            if (map.lookAtTile(newPosition[0], newPosition[1]) != '#' && !playerOnTile(newPosition[0], newPosition[1])) {
-                playerPosition = newPosition;
-	            if (checkWin()) {
-		            broadcast("Player x just won! Game is now over.");
-		            broadcast("Seriously, get out.");
-		            gameRunning = false;
-		            return "Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!";
-	            }
-                return "SUCCESS";
-            } else {
-                return "FAIL";
-            }
-        }
-    }
+		synchronized (map) {
+			if (map.lookAtTile(newPosition[0], newPosition[1]) != '#' && !playerOnTile(newPosition[0], newPosition[1])) {
+				playerPosition = newPosition;
+				if (checkWin()) {
+					broadcast("Player x just won! Game is now over.");
+					broadcast("Seriously, get out.");
+					gameRunning = false;
+					return "Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!";
+				}
+				return "SUCCESS";
+			} else {
+				return "FAIL";
+			}
+		}
+	}
 
 	public PrintWriter getWriter() {
 		return writer;
@@ -226,13 +205,6 @@ public class Server implements Runnable, IGameLogic {
 		}
 	}
 
-	@Override
-	public String say(String message) {
-		broadcast(name + " says: " + message);
-		return ("SUCCESS");
-	}
-
-	@Override
 	public String pickup() {
 		if (map.lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
 			collectedGold++;
@@ -243,7 +215,6 @@ public class Server implements Runnable, IGameLogic {
 		return "FAIL\nThere is nothing to pick up...";
 	}
 
-	@Override
 	public String look() {
 		String output = "";
 		char[][] lookReply = map.lookWindow(playerPosition[0], playerPosition[1], 5);
@@ -251,23 +222,21 @@ public class Server implements Runnable, IGameLogic {
 
 		for (int i = 0; i < lookReply.length; i++) {
 			for (int j = 0; j < lookReply[0].length; j++) {
-                if (playerOnTile(playerPosition[0] - 2 + i, playerPosition[1] - 2 + j)) {
-                    output += 'P';
-                } else {
-                    output += lookReply[j][i];
-                }
-            }
-            output += "\n";
+				if (playerOnTile(playerPosition[0] - 2 + i, playerPosition[1] - 2 + j)) {
+					output += 'P';
+				} else {
+					output += lookReply[j][i];
+				}
+			}
+			output += "\n";
 		}
 		return output;
 	}
 
-	@Override
 	public boolean gameRunning() {
 		return gameRunning;
 	}
 
-	@Override
 	public void quitGame() {
 		kick();
 	}
@@ -317,20 +286,6 @@ public class Server implements Runnable, IGameLogic {
 			counter++;
 		}
 		return (map.lookAtTile(pos[0], pos[1]) == '#') ? null : pos;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String name(String name) {
-		for (Server connection : connections) {
-			if (connection.getName().equals(name)) {
-				return "FAIL";
-			}
-		}
-		this.name = name;
-		return "TRUE";
 	}
 
 	public InetAddress getAddress() {
