@@ -29,6 +29,7 @@ public class PlayGame {
 		while (logic.gameRunning()) {
 			parseCommand(readUserInput());
 		}
+		logic.close();
 	}
 
 	/**

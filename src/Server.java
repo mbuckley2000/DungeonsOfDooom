@@ -23,7 +23,6 @@ public class Server implements Runnable, IGameLogic {
 	InetAddress address;
 	PrintWriter writer;
 
-
 	Server(Socket clientSocket) {
 		this.clientSocket = clientSocket;
 		connected = true;
@@ -44,6 +43,8 @@ public class Server implements Runnable, IGameLogic {
 		map = new Map();
 		map.readMap(new File("maps/example_map.txt"));
 
+		ServerBroadcastThread broadcastThread = new ServerBroadcastThread();
+		new Thread(broadcastThread).start();
 
 		while (gameRunning) {
 			Socket clientSocket = serverSocket.accept();
@@ -63,6 +64,8 @@ public class Server implements Runnable, IGameLogic {
 		}
 
 		closeAllConnections();
+		broadcastThread.close();
+		serverSocket.close();
 	}
 
 	static private void closeAllConnections() {
@@ -88,6 +91,7 @@ public class Server implements Runnable, IGameLogic {
 
 	public void run() {
 		System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
+
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -145,7 +149,6 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	private void kick() {
-		writer.println("KICK");
 		connected = false;
 	}
 

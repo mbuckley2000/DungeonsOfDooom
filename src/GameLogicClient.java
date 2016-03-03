@@ -10,7 +10,7 @@ import java.net.Socket;
  */
 public class GameLogicClient implements IGameLogic {
 	private final int port = 40004;
-	private final String address = "localhost"; //Ricky's IP: 138.38.153.79     My ip 138.38.193.197
+	private final String address = "localhost"; //Ricky's IP: 138.38.153.79  James' IP 138.38.159.174   My ip 138.38.193.197
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;
@@ -25,23 +25,18 @@ public class GameLogicClient implements IGameLogic {
 			try {
 				System.out.println("Attempting to connect to " + address + ":" + port);
 				socket = new Socket(address, port);
-				Thread.sleep(1000);
-				if (socket.getInputStream().read() != -1) {
-					System.out.println("Connection successful");
-				} else {
-					System.err.println("Connection refused. There is already a connection from this address");
-					break;
-				}
+
 				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				writer = new PrintWriter(socket.getOutputStream(), true);
 
+				connected = true;
 				this.outputEnabled = outputEnabled;
 				if (outputEnabled) {
 					outputClient = new OutputClient(reader);
 					new Thread(outputClient).start();
 				}
 
-				connected = true;
+				Thread.sleep(1000); //Sleep to give outputClient thread time to validate connection
 			} catch (ConnectException e) {
 				System.err.println("Unable to connect: " + e.getMessage());
 				System.err.println("Attempting to re-establish connection");
@@ -97,13 +92,24 @@ public class GameLogicClient implements IGameLogic {
 		return connected && outputClient.isConnected();
 	}
 
+	public void close() {
+		try {
+			writer.close();
+			if (outputEnabled) outputClient.stop();
+			reader.close();
+			socket.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void quitGame() {
         try {
             writer.println("QUIT");
-            writer.close();
-	        if (outputEnabled) outputClient.stop();
-	        reader.close();
-	        socket.close();
+	        //writer.close();
+	        //if (outputEnabled) outputClient.stop();
+	        //reader.close();
+	        //socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

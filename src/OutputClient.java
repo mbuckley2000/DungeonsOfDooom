@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.SocketException;
 
 /**
  * Created by matt on 25/02/2016.
@@ -22,30 +23,30 @@ public class OutputClient implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Reader is running");
 		String string;
-		while (running) {
+		while (running && connected) {
 			try {
-				if (reader.ready()) {
-					string = reader.readLine();
-					if (string == null) {
-						connected = false;
-					} else if (string.equals("KICK")) {
-						connected = false;
-					} else {
-						System.out.println(string);
+				string = reader.readLine();
+				if (string == null) {
+					connected = false;
+					System.err.println("Lost connection to server. Shutting down.");
+					break;
+				} else {
+					System.out.println(string);
+				}
+				if (string.length() > 0) {
+					if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
+						addToLookWindow(string);
 					}
-					if (string.length() > 0) {
-						if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
-							addToLookWindow(string);
-						}
-						if (string.toUpperCase().equals("SUCCESS")) {
-							lastBoolResponse = true;
-						} else if (string.toUpperCase().equals("FAIL")) {
-							lastBoolResponse = false;
-						}
+					if (string.toUpperCase().equals("SUCCESS")) {
+						lastBoolResponse = true;
+					} else if (string.toUpperCase().equals("FAIL")) {
+						lastBoolResponse = false;
 					}
 				}
+			} catch (SocketException e) {
+				connected = false;
+				System.err.println("Lost connection to server. Shutting down.");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -82,5 +83,6 @@ public class OutputClient implements Runnable {
 
 	public void stop() {
 		running = false;
+		connected = false;
 	}
 }
