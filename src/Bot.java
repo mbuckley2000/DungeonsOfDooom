@@ -1,24 +1,24 @@
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Random;
+import java.util.Stack;
 
-public class Bot extends PlayGame{
-	Queue<AITask> taskBacklog;
+public class Bot extends PlayGame {
+	Stack<AITask> taskStack;
 	AITask exploreTask;
-	private int sleepMax = 500;
+	String command;
+	private int sleepMax = 50;
 	private Random random;
 	private AIMap map;
-	private int[] moveDelta = {0, 0};
 	private int[] position = {0, 0};
-	private String lastCommand;
+	private int stepsSinceLastLook = 0;
 
 	public Bot() {
 		super();
 		random = new Random();
 		map = new AIMap();
-		taskBacklog = new PriorityQueue<>();
-		exploreTask = new ExploreTask(map, logic.getOutputClient(), position);
-		taskBacklog.add(exploreTask);
+		taskStack = new Stack<>();
+		exploreTask = new ExploreTask(map, logic.getOutputClient(), this);
+		taskStack.add(exploreTask);
+		command = "HELLO";
 	}
 
 	public static void main(String[] args) {
@@ -41,27 +41,35 @@ public class Bot extends PlayGame{
 
 	}
 
-	private String botAction() {
-		if (!taskBacklog.isEmpty()) {
-			if (taskBacklog.peek().hasNextCommand()) {
-				return taskBacklog.peek().getNextCommand();
-			} else {
-				taskBacklog.remove();
-			}
+	public OutputClient getOutputClient() {
+		return logic.getOutputClient();
 	}
 
-		if (taskBacklog.isEmpty()) {
-			//Make a new task please
-			taskBacklog.add(new TraverseTask(map.getPath(position, new int[]{0, 0})));
-			sleepMax = 1000;
+	public void addTask(AITask task) {
+		taskStack.add(task);
+	}
+
+
+	private String botAction() {
+		if (needToLook()) {
+			return "LOOK";
+		} else if (!taskStack.isEmpty()) {
+			if (taskStack.peek().hasNextCommand()) {
+				return taskStack.peek().getNextCommand();
+			} else {
+				taskStack.pop();
+				return botAction();
+			}
 		}
-		return "nah";
+		return null;
 	}
 
 
 	public void update(){
 		while (logic.gameRunning()) {
-			String command = botAction().toUpperCase();
+			updatePosition();
+			updateMap();
+			command = botAction().toUpperCase();
 			parseCommand(command);
 			System.out.println(command);
 			try {
@@ -69,6 +77,57 @@ public class Bot extends PlayGame{
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public int[] getPosition() {
+		return position;
+	}
+
+	private void updatePosition() {
+		if (command.contains("MOVE") && logic.getOutputClient().getLastBoolResponse()) {
+			stepped(command.charAt(5));
+		}
+	}
+
+	private void updateMap() {
+		if (command.equals("LOOK")) {
+			logic.getOutputClient().printLastLookWindow();
+			map.update(logic.getOutputClient().getLastLookWindow(), position);
+			System.out.println("Updated internal map: ");
+			map.print();
+		}
+	}
+
+	private void updateGoldToWin() {
+		if (command.equals("HELLO")) {
+		}
+	}
+
+	private boolean needToLook() {
+		if (stepsSinceLastLook > 1) {
+			stepsSinceLastLook = 0;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private void stepped(char dir) {
+		stepsSinceLastLook++;
+		switch (dir) {
+			case 'N':
+				position[0] -= 1; //North
+				break;
+			case 'E':
+				position[1] += 1; //East
+				break;
+			case 'S':
+				position[0] += 1; //South
+				break;
+			case 'W':
+				position[1] -= 1; //West
+				break;
 		}
 	}
 }

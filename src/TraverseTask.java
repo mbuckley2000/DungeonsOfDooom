@@ -1,53 +1,65 @@
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Stack;
 
 /**
  * Created by matt on 03/03/2016.
  */
 public class TraverseTask implements AITask {
-	Stack<Character> movements;
+	private Queue<Character> movements;
+	private Bot bot;
+	private AIMap map;
+	private int[] destination;
 
-	public TraverseTask(Stack<MapTile> path) {
-		movements = new Stack<>();
-		int dir = 0;
-		for (int i = 0; i < path.size() - 1; i++) {
-			MapTile nextTile = path.get(i + 1);
-			MapTile currentTile = path.get(i);
-			if (nextTile.getX() - currentTile.getX() > 0) {
-				dir = 3;
-			} else if (nextTile.getX() - currentTile.getX() < 0) {
-				dir = 1;
-			} else if (nextTile.getY() - currentTile.getY() > 0) {
-				dir = 0;
-			} else if (nextTile.getY() - currentTile.getY() < 0) {
-				dir = 2;
+	public TraverseTask(Bot bot, AIMap map, int[] destination) {
+		this.bot = bot;
+		this.map = map;
+		this.destination = destination;
+		generateMovements(map.getPath(bot.getPosition(), destination));
+	}
+
+	private void generateMovements(Stack<MapTile> path) {
+		movements = new PriorityQueue<>();
+		if (path != null) {
+			while (path.size() > 1) {
+				char movement = getMovement(path.pop(), path.peek());
+				movements.add(movement);
+				System.out.println(movement);
 			}
-			movements.add(dirIntToChar(dir));
+		} else {
+			System.err.println("Null path in traverse task.");
 		}
+	}
+
+	private char getMovement(MapTile start, MapTile end) {
+		char dir = 0;
+		if (end.getX() - start.getX() > 0) {
+			dir = 'E';
+		} else if (end.getX() - start.getX() < 0) {
+			dir = 'W';
+		} else if (end.getY() - start.getY() > 0) {
+			dir = 'S';
+		} else if (end.getY() - start.getY() < 0) {
+			dir = 'N';
+		}
+		return dir;
 	}
 
 	public String getNextCommand() {
-		return "MOVE " + movements.pop();
-	}
-
-	private char dirIntToChar(int dir) {
-		switch (dir) {
-			case 0:
-				return 'N';
-			case 1:
-				return 'E';
-			case 2:
-				return 'S';
-			case 3:
-				return 'W';
+		System.out.println("TraverseTask command get");
+		if (!movements.isEmpty()) {
+			return "MOVE " + movements.remove();
+		} else {
+			generateMovements(map.getPath(bot.getPosition(), destination));
+			return getNextCommand();
 		}
-		return 'X';
 	}
 
 	public boolean hasNextCommand() {
-		if (movements.isEmpty()) {
-			return false;
-		} else {
+		if (bot.getPosition()[0] != destination[0] || bot.getPosition()[1] != destination[1]) {
 			return true;
+		} else {
+			return false;
 		}
 	}
 }

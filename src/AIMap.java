@@ -8,7 +8,6 @@ import java.util.Stack;
 public class AIMap {
 	final int lookSize = 5;
 	private final int offset = 50;
-	private int[] lastPos = {0, 0};
 	private char[][] map = new char[offset * 2][offset * 2];
 	private int[] bounds = new int[4];
 
@@ -23,10 +22,8 @@ public class AIMap {
 		return bounds;
 	}
 
-	public void update(char[][] lookWindow, int[] moveDelta) {
-		lastPos[0] += moveDelta[0];
-		lastPos[1] += moveDelta[1];
-		replace(lastPos[0], lastPos[1], lookWindow);
+	public void update(char[][] lookWindow, int[] botPos) {
+		replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
 	}
 
 	private void replace(int posY, int posX, char[][] lookWindow) {
@@ -39,7 +36,18 @@ public class AIMap {
 		}
 	}
 
-	private void setTile(int y, int x, char tile) {
+	public int[] findTile(char tile) {
+		for (int y = 0; y < map.length; y++) {
+			for (int x = 0; x < map[0].length; x++) {
+				if (map[y][x] == tile) {
+					return new int[]{y - offset, x - offset};
+				}
+			}
+		}
+		return null;
+	}
+
+	public void setTile(int y, int x, char tile) {
 		int offsetY = y + offset;
 		int offsetX = x + offset;
 
@@ -59,13 +67,16 @@ public class AIMap {
 	}
 
 	public void print() {
-		for (int y = bounds[0]; y < bounds[2]; y++) {
-			for (int x = bounds[1]; x < bounds[3]; x++) {
+		for (int y = bounds[0]; y < bounds[2] + 1; y++) {
+			for (int x = bounds[1]; x < bounds[3] + 1; x++) {
+				System.out.print(map[y][x]);
+				/*
 				if (map[y][x] == '#' || map[y][x] == '.' || map[y][x] == 'G' || map[y][x] == 'E' || map[y][x] == 'X' || map[y][x] == 'P') {
 					System.out.print(map[y][x]);
 				} else {
-					System.out.print("");
+					System.out.print("-");
 				}
+				*/
 			}
 			System.out.println();
 		}
@@ -108,9 +119,11 @@ public class AIMap {
 			//Get best tile and add to closed list
 			MapTile bestTile = getBestTile(openList);
 			closedList.add(bestTile);
+			System.out.println("Added to closedList:" + bestTile.toString());
 			openList.remove(bestTile);
 
 			if (listContains(closedList, endTile)) {
+				System.out.println("Found path");
 				break;
 				//Found the path!
 			}
@@ -124,6 +137,7 @@ public class AIMap {
 						t.setH(t.getManhattenDistanceTo(endTile));
 						t.setParent(bestTile);
 						openList.add(t);
+						System.out.println("Added to openList:" + t.toString());
 					} else {
 						//If T is already in the open list: Check if the F score is lower when we use the current generated path to get there.
 						//If it is, update its score and update its parent as well.
@@ -135,12 +149,17 @@ public class AIMap {
 		//Reverse engineer the path
 		Stack<MapTile> path = new Stack<>();
 		MapTile lastTile = getFromList(closedList, end);
-		path.add(lastTile);
-		while (!path.contains(startTile) && lastTile != null) {
-			lastTile = lastTile.getParent();
-			path.add(lastTile);
+		if (lastTile != null) {
+			while (lastTile != null) {
+				path.add(lastTile);
+				lastTile = lastTile.getParent();
+			}
+			System.out.println("Found path! Number of tiles:" + path.size());
+			return path;
+		} else {
+			System.out.println("Unable to find path");
+			return null;
 		}
-		return path;
 	}
 
 	private MapTile getFromList(HashSet<MapTile> list, int[] tile) {
@@ -189,6 +208,7 @@ public class AIMap {
 		if (tileWalkable(y - 1, x)) {
 			set.add(new MapTile(x, y - 1));
 		}
+		System.out.println("Found " + set.size() + " adjacent tiles.");
 		return set;
 	}
 

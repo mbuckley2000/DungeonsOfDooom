@@ -36,7 +36,9 @@ public class OutputClient implements Runnable {
 				}
 				if (string.length() > 0) {
 					if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
-						addToLookWindow(string);
+						if (!string.contains("GOLD")) {
+							addToLookWindow(string);
+						}
 					}
 					if (string.toUpperCase().equals("SUCCESS")) {
 						lastBoolResponse = true;
