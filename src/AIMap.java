@@ -62,7 +62,7 @@ public class AIMap {
 		}
 	}
 
-	private char getTile(int y, int x) {
+	public char getTile(int y, int x) {
 		return (map[y + offset][x + offset]);
 	}
 
@@ -83,26 +83,6 @@ public class AIMap {
 	}
 
 
-	/*
-	-Get the square on the open list which has the lowest score. Let’s call this square S.
-	-Remove S from the open list and add S to the closed list.
-	-For each square T in S’s walkable adjacent tiles:
-		*If T is in the closed list: Ignore it.
-		*If T is not in the open list: Add it and compute its score.
-		*If T is already in the open list: Check if the F score is lower when we use the current generated path to get there. If it is, update its score and update its parent as well.
-	 */
-
-	/*
-
-	At initialization add the starting location to the open list and empty the closed list
-	While there are still more possible next steps in the open list and we haven’t found the target:
-		-Select the most likely next step (based on both the heuristic and path costs)
-		-Remove it from the open list and add it to the closed
-		-Consider each neighbor of the step. For each neighbor:
-			-Calculate the path cost of reaching the neighbor
-			-If the cost is less than the cost known for this location then remove it from the open or closed lists (since we’ve now found a better route)
-			-If the location isn’t in either the open or closed list then record the costs for the location and add it to the open list (this means it’ll be considered in the next search). Record how we got to this location
-	 */
 	public Stack<MapTile> getPath(int[] start, int[] end) {
 		//A* pathfinding
 		HashSet<MapTile> closedList = new HashSet<>();
@@ -119,13 +99,11 @@ public class AIMap {
 			//Get best tile and add to closed list
 			MapTile bestTile = getBestTile(openList);
 			closedList.add(bestTile);
-			System.out.println("Added to closedList:" + bestTile.toString());
+			//System.out.println("Added to closedList:" + bestTile.toString());
 			openList.remove(bestTile);
 
 			if (listContains(closedList, endTile)) {
-				System.out.println("Found path");
 				break;
-				//Found the path!
 			}
 
 			//Check and score adjacent tiles
@@ -137,7 +115,7 @@ public class AIMap {
 						t.setH(t.getManhattenDistanceTo(endTile));
 						t.setParent(bestTile);
 						openList.add(t);
-						System.out.println("Added to openList:" + t.toString());
+						//System.out.println("Added to openList:" + t.toString());
 					} else {
 						//If T is already in the open list: Check if the F score is lower when we use the current generated path to get there.
 						//If it is, update its score and update its parent as well.
@@ -208,7 +186,7 @@ public class AIMap {
 		if (tileWalkable(y - 1, x)) {
 			set.add(new MapTile(x, y - 1));
 		}
-		System.out.println("Found " + set.size() + " adjacent tiles.");
+		//System.out.println("Found " + set.size() + " adjacent tiles.");
 		return set;
 	}
 

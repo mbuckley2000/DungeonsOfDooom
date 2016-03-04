@@ -13,6 +13,7 @@ public class OutputClient implements Runnable {
 	char[][] lastLookWindow;
 	int lookWindowYIndex = 0;
 	boolean lastBoolResponse;
+	private int lastGoldResponse = -1;
 
 	public OutputClient(BufferedReader reader) {
 		this.reader = reader;
@@ -38,6 +39,8 @@ public class OutputClient implements Runnable {
 					if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
 						if (!string.contains("GOLD")) {
 							addToLookWindow(string);
+						} else {
+							lastGoldResponse = Integer.parseInt(string.replaceFirst("GOLD: ", ""));
 						}
 					}
 					if (string.toUpperCase().equals("SUCCESS")) {
@@ -73,6 +76,10 @@ public class OutputClient implements Runnable {
 			}
 			System.out.println();
 		}
+	}
+
+	public int getLastGoldResponse() {
+		return lastGoldResponse;
 	}
 
 	public boolean getLastBoolResponse() {

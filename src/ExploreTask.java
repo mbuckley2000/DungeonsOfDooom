@@ -18,18 +18,25 @@ public class ExploreTask implements AITask {
 	}
 
 	public String getNextCommand() {
-		System.out.println("ExploreTask command get");
+		//System.out.println("ExploreTask command get");
 		if (lastCommand.contains("MOVE") && !outputClient.getLastBoolResponse()) {
 			dir = (dir + 1) % 4; //Turn right and continue moving forward
 		}
 
 		String command;
 
+		if (bot.getGoldNeeded() == 0 && map.findTile('E') != null) {
+			//Moving to exit
+			int[] exitPos = map.findTile('E');
+			System.out.println("We found an exit! Exit pos: " + exitPos[1] + ", " + exitPos[0]);
+			bot.addTask(new TraverseTask(bot, map, exitPos));
+			return "HELLO";
+		}
+
 		if (map.findTile('G') != null) {
 			//We have some gold!!
 			int[] goldPos = map.findTile('G');
-			System.out.println("We found gold! Pos: " + goldPos[1] + ", " + goldPos[0]);
-			System.out.println("We are at pos: " + bot.getPosition()[1] + ", " + bot.getPosition()[0]);
+			System.out.println("We found gold! Gold pos: " + goldPos[1] + ", " + goldPos[0]);
 			bot.addTask(new GetGoldTask(bot, map, goldPos));
 			return "HELLO";
 		}

@@ -5,11 +5,12 @@ public class Bot extends PlayGame {
 	Stack<AITask> taskStack;
 	AITask exploreTask;
 	String command;
-	private int sleepMax = 50;
+	private int sleepMax = 2000;
 	private Random random;
 	private AIMap map;
 	private int[] position = {0, 0};
 	private int stepsSinceLastLook = 0;
+	private int goldNeeded = -1;
 
 	public Bot() {
 		super();
@@ -41,6 +42,10 @@ public class Bot extends PlayGame {
 
 	}
 
+	public int getGoldNeeded() {
+		return goldNeeded;
+	}
+
 	public OutputClient getOutputClient() {
 		return logic.getOutputClient();
 	}
@@ -69,6 +74,7 @@ public class Bot extends PlayGame {
 		while (logic.gameRunning()) {
 			updatePosition();
 			updateMap();
+			updateGoldToWin();
 			command = botAction().toUpperCase();
 			parseCommand(command);
 			System.out.println(command);
@@ -87,12 +93,13 @@ public class Bot extends PlayGame {
 	private void updatePosition() {
 		if (command.contains("MOVE") && logic.getOutputClient().getLastBoolResponse()) {
 			stepped(command.charAt(5));
+			System.out.println("Bot position: " + position[1] + ", " + position[0]);
 		}
 	}
 
 	private void updateMap() {
 		if (command.equals("LOOK")) {
-			logic.getOutputClient().printLastLookWindow();
+			//logic.getOutputClient().printLastLookWindow();
 			map.update(logic.getOutputClient().getLastLookWindow(), position);
 			System.out.println("Updated internal map: ");
 			map.print();
@@ -101,11 +108,12 @@ public class Bot extends PlayGame {
 
 	private void updateGoldToWin() {
 		if (command.equals("HELLO")) {
+			goldNeeded = logic.getOutputClient().getLastGoldResponse();
 		}
 	}
 
 	private boolean needToLook() {
-		if (stepsSinceLastLook > 1) {
+		if (stepsSinceLastLook > 2) {
 			stepsSinceLastLook = 0;
 			return true;
 		} else {

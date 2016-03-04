@@ -18,11 +18,16 @@ public class GetGoldTask implements AITask {
 	}
 
 	public String getNextCommand() {
-		System.out.println("GoldTask command get");
+		//System.out.println("GoldTask command get");
+
+		if (map.getTile(goldPos[0], goldPos[1]) != 'G') {
+			running = false;
+			return "HELLO";
+		}
+
 		if (traverseTask.hasNextCommand()) {
 			return traverseTask.getNextCommand();
 		} else {
-			running = false;
 			map.setTile(goldPos[0], goldPos[1], '.');
 			return "PICKUP";
 		}

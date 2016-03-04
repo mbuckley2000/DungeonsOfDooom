@@ -20,12 +20,14 @@ public class TraverseTask implements AITask {
 
 	private void generateMovements(Stack<MapTile> path) {
 		movements = new PriorityQueue<>();
+		System.out.print("Movements: ");
 		if (path != null) {
 			while (path.size() > 1) {
 				char movement = getMovement(path.pop(), path.peek());
 				movements.add(movement);
-				System.out.println(movement);
+				System.out.print(movement + ", ");
 			}
+			System.out.println();
 		} else {
 			System.err.println("Null path in traverse task.");
 		}
@@ -46,7 +48,7 @@ public class TraverseTask implements AITask {
 	}
 
 	public String getNextCommand() {
-		System.out.println("TraverseTask command get");
+		//System.out.println("TraverseTask command get");
 		if (!movements.isEmpty()) {
 			return "MOVE " + movements.remove();
 		} else {

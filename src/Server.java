@@ -153,7 +153,7 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	public String hello() {
-		return "GOLD: " + Integer.toString(map.getWin());
+		return "GOLD: " + (map.getWin() - collectedGold);
 	}
 
 	public String move(char direction) {
