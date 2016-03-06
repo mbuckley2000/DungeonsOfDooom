@@ -69,15 +69,6 @@ public class OutputClient implements Runnable {
 		return lastLookWindow;
 	}
 
-	public void printLastLookWindow() {
-		for (char[] y : lastLookWindow) {
-			for (char x : y) {
-				System.out.print(x + "  ");
-			}
-			System.out.println();
-		}
-	}
-
 	public int getLastGoldResponse() {
 		return lastGoldResponse;
 	}

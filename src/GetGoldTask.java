@@ -4,8 +4,8 @@
 public class GetGoldTask implements AITask {
 	private boolean running;
 	private AIMap map;
-	private Bot bot;
 	private int[] goldPos;
+	private Bot bot;
 	private TraverseTask traverseTask;
 
 	public GetGoldTask(Bot bot, AIMap map, int[] goldPos) {
@@ -13,7 +13,7 @@ public class GetGoldTask implements AITask {
 		this.map = map;
 		this.goldPos = goldPos;
 		this.running = true;
-		traverseTask = new TraverseTask(bot, map, goldPos, true);
+		traverseTask = new TraverseTask(bot, map, goldPos);
 		System.out.println("Moving to gold!");
 	}
 
@@ -28,8 +28,12 @@ public class GetGoldTask implements AITask {
 		if (traverseTask.hasNextCommand()) {
 			return traverseTask.getNextCommand();
 		} else {
-			map.setTile(goldPos[0], goldPos[1], '.');
-			return "PICKUP";
+			if (bot.getPosition()[0] == goldPos[0] && bot.getPosition()[1] == goldPos[1]) {
+				map.setTile(goldPos[0], goldPos[1], '.');
+				return "PICKUP";
+			} else {
+				return null;
+			}
 		}
 	}
 

@@ -1,18 +1,18 @@
 import java.util.*;
 
 public class Bot extends PlayGame {
+	private final int sleepMax = 10;
 	Stack<AITask> taskStack;
 	AITask exploreTask;
 	String command;
-	private int sleepMax = 500;
 	private Random random;
 	private AIMap map;
 	private int[] position = {0, 0};
 	public final Comparator<int[]> distanceFromBot =
 			new Comparator<int[]>() {
 				public int compare(int[] t1, int[] t2) {
-					int t1Dist = AIMap.getManhattenDistance(t1, position);
-					int t2Dist = AIMap.getManhattenDistance(t2, position);
+					int t1Dist = AIMap.getManhattanDistance(t1, position);
+					int t2Dist = AIMap.getManhattanDistance(t2, position);
 					if (t1Dist == t2Dist) {
 						return 0;
 					} else if (t1Dist > t2Dist) {
@@ -30,7 +30,7 @@ public class Bot extends PlayGame {
 		random = new Random();
 		map = new AIMap();
 		taskStack = new Stack<>();
-		exploreTask = new ExploreTask(map, logic.getOutputClient(), this);
+		exploreTask = new ExploreTask(map, this);
 		taskStack.add(exploreTask);
 		command = "HELLO";
 	}
@@ -57,10 +57,6 @@ public class Bot extends PlayGame {
 
 	public int getGoldNeeded() {
 		return goldNeeded;
-	}
-
-	public OutputClient getOutputClient() {
-		return logic.getOutputClient();
 	}
 
 	public void addTask(AITask task) {

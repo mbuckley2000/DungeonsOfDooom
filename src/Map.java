@@ -14,11 +14,6 @@ public class Map {
 		totalGoldOnMap = -1;
 	}
 	
-	public Map(File mapFile){
-		this();
-		readMap(mapFile);
-	}
-	
 	/**
 	 * Reads a map from a given file with the format:
 	 * name <mapName>
@@ -148,16 +143,8 @@ public class Map {
 		map[y][x] = tile;
 		return output;
 	}
-	
-	protected void printMap(){
-	for (int y = 0; y < getMapHeight(); y++) {
-		for (int x = 0; x < getMapWidth(); x++) {
-			System.out.print(map[y][x]);
-		}
-		System.out.println();
-	}
-	}
-	
+
+
 	/**
 	 * The method returns the Tile at a given location. The tile is not removed.
 	 * @param y the vertical position of the tile to look at
@@ -203,10 +190,6 @@ public class Map {
 
 	public int getWin() {
 		return totalGoldOnMap;
-	}
-
-	public String getMapName() {
-		return mapName;
 	}
 
 	protected int getMapWidth() {

@@ -27,9 +27,17 @@ public class AIMap {
 		*/
 	}
 
-	static int getManhattenDistance(int[] start, int[] end) {
-		int distance = Math.abs(start[0] - end[0]) + Math.abs(start[1] - end[1]);
-		return distance;
+	static int getManhattanDistance(int[] start, int[] end) {
+		return Math.abs(start[0] - end[0]) + Math.abs(start[1] - end[1]);
+	}
+
+	private MapTile findInList(HashSet<MapTile> list, int[] tile) {
+		for (MapTile t : list) {
+			if (t.getX() == tile[1] && t.getY() == tile[0]) {
+				return t;
+			}
+		}
+		return null;
 	}
 
 	public int[] getBounds() {
@@ -66,7 +74,6 @@ public class AIMap {
 		ArrayList<int[]> list = new ArrayList<>();
 		for (int y = bounds[0] - 1; y < bounds[2] + 2; y++) {
 			for (int x = bounds[1] - 1; x < bounds[3] + 2; x++) {
-				//if (tileOnMap(y, x)) {
 				if (tile != ' ') {
 					if (map[y][x] == tile) {
 						list.add(new int[]{y - offset, x - offset});
@@ -75,8 +82,7 @@ public class AIMap {
 					if (tileEmpty(y, x)) {
 						list.add(new int[]{y - offset, x - offset});
 					}
-					}
-				//}
+				}
 			}
 		}
 		return list;
@@ -90,25 +96,31 @@ public class AIMap {
 		int offsetY = y + offset;
 		int offsetX = x + offset;
 
-		if (offsetX >= 0 && offsetX < map.length && offsetY >= 0 && offsetY < map.length) {
+		if (tileOnMap(y, x)) {
 			map[offsetY][offsetX] = tile;
+			//Adjust bounds
 			if (offsetY < bounds[0]) bounds[0] = offsetY;
 			if (offsetX < bounds[1]) bounds[1] = offsetX;
 			if (offsetY > bounds[2]) bounds[2] = offsetY;
 			if (offsetX > bounds[3]) bounds[3] = offsetX;
 		} else {
-			System.err.println("Out of bounds");
+			System.err.println("Trying to set tile out of bounds on map");
 		}
 	}
 
 	public char getTile(int y, int x) {
-		if (y + offset < map.length && x + offset < map.length && y + offset > 0 && x + offset > 0) {
+		if (tileOnMap(y, x)) {
 			return (map[y + offset][x + offset]);
 		} else {
-			return ' ';
+			return 'X';
 		}
 	}
 
+	/**
+	 * Prints the map in it's currently discovered state. Ignores all other players
+	 *
+	 * @param botPosition Current position of the bot
+	 */
 	public void print(int[] botPosition) {
 		for (int y = bounds[0]; y < bounds[2] + 1; y++) {
 			for (int x = bounds[1]; x < bounds[3] + 1; x++) {
@@ -117,18 +129,18 @@ public class AIMap {
 				} else {
 					System.out.print(map[y][x]);
 				}
-				/*
-				if (map[y][x] == '#' || map[y][x] == '.' || map[y][x] == 'G' || map[y][x] == 'E' || map[y][x] == 'X' || map[y][x] == 'P') {
-					System.out.print(map[y][x]);
-				} else {
-					System.out.print("-");
-				}
-				*/
 			}
 			System.out.println();
 		}
 	}
 
+
+	/**
+	 * A* pathfinding implementation to find a path on the AIMap from the specified start location to the specified end location
+	 * @param start Start location
+	 * @param end End location
+	 * @return The path int he form of a stack of map tiles. Null if no path is found
+	 */
 	public Stack<MapTile> getPath(int[] start, int[] end) {
 		//A* pathfinding
 		HashSet<MapTile> closedList = new HashSet<>();
@@ -137,13 +149,13 @@ public class AIMap {
 		//Init
 		MapTile startTile = new MapTile(start);
 		MapTile endTile = new MapTile(end);
-		startTile.setH(startTile.getManhattenDistanceTo(endTile));
+		startTile.setH(startTile.getManhattanDistanceTo(endTile));
 		startTile.setG(0);
 		openList.add(startTile);
 
 		while (!openList.isEmpty()) {
 			//Get best tile and add to closed list
-			MapTile bestTile = getBestTile(openList);
+			MapTile bestTile = findLowestScore(openList);
 			closedList.add(bestTile);
 			//System.out.println("Added to closedList:" + bestTile.toString());
 			openList.remove(bestTile);
@@ -154,18 +166,15 @@ public class AIMap {
 			}
 
 			//Check and score adjacent tiles
-			for (MapTile t : getAdjacentWalkableTiles(bestTile)) {
+			for (MapTile t : findAdjacentWalkableTiles(bestTile)) {
 				if (!listContains(closedList, t)) {
 					if (!listContains(openList, t)) {
 						//Calculate Score
 						t.setG(bestTile.getG() + 1);
-						t.setH(t.getManhattenDistanceTo(endTile));
+						t.setH(t.getManhattanDistanceTo(endTile));
 						t.setParent(bestTile);
 						openList.add(t);
 						//System.out.println("Added to openList:" + t.toString());
-					} else {
-						//If T is already in the open list: Check if the F score is lower when we use the current generated path to get there.
-						//If it is, update its score and update its parent as well.
 					}
 				}
 			}
@@ -173,7 +182,7 @@ public class AIMap {
 
 		//Reverse engineer the path
 		Stack<MapTile> path = new Stack<>();
-		MapTile lastTile = getFromList(closedList, end);
+		MapTile lastTile = findInList(closedList, end);
 		if (lastTile != null) {
 			while (lastTile != null) {
 				path.add(lastTile);
@@ -191,15 +200,6 @@ public class AIMap {
 		}
 	}
 
-	private MapTile getFromList(HashSet<MapTile> list, int[] tile) {
-		for (MapTile t : list) {
-			if (t.getX() == tile[1] && t.getY() == tile[0]) {
-				return t;
-			}
-		}
-		return null;
-	}
-
 	private boolean listContains(HashSet<MapTile> list, MapTile tile) {
 		for (MapTile t : list) {
 			if (t.getX() == tile.getX() && t.getY() == tile.getY()) {
@@ -213,7 +213,7 @@ public class AIMap {
 		return (getPath(start, end) != null);
 	}
 
-	private MapTile getBestTile(HashSet<MapTile> openList) {
+	private MapTile findLowestScore(HashSet<MapTile> openList) {
 		MapTile lowest = null;
 		for (MapTile tile : openList) {
 			if (lowest == null) {
@@ -225,36 +225,25 @@ public class AIMap {
 		return lowest;
 	}
 
-	public Set<MapTile> getAdjacentWalkableTiles(MapTile tile) {
-		Set set = new HashSet();
+	public Set<MapTile> findAdjacentWalkableTiles(MapTile tile) {
+		Set<MapTile> set = new HashSet<>();
 		int x = tile.getX();
 		int y = tile.getY();
 
-		if (tileOnMap(y, x + 1))
-			if (tileWalkable(y, x + 1)) {
+		if (tileWalkable(y, x + 1))
 				set.add(new MapTile(x + 1, y));
-			}
-		if (tileOnMap(y, x - 1)) {
-			if (tileWalkable(y, x - 1)) {
+		if (tileWalkable(y, x - 1))
 				set.add(new MapTile(x - 1, y));
-			}
-		}
-		if (tileOnMap(y + 1, x)) {
-			if (tileWalkable(y + 1, x)) {
+		if (tileWalkable(y + 1, x))
 				set.add(new MapTile(x, y + 1));
-			}
-		}
-		if (tileOnMap(y - 1, x)) {
-			if (tileWalkable(y - 1, x)) {
+		if (tileWalkable(y - 1, x))
 				set.add(new MapTile(x, y - 1));
-			}
-		}
-		//System.out.println("Found " + set.size() + " adjacent tiles.");
+
 		return set;
 	}
 
 	public boolean tileWalkable(int y, int x) {
-		return (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
+		return tileOnMap(y, x) && (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
 	}
 
 	public boolean tileOnMap(int y, int x) {

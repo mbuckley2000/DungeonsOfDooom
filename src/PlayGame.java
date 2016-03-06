@@ -5,7 +5,7 @@ public class PlayGame {
 	protected Scanner userInput;
 
 	public PlayGame(){
-		logic = new GameLogicClient(true);
+		logic = new GameLogicClient();
 		if (logic.isConnected()) {
 			System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
 			userInput = new Scanner(System.in);
@@ -24,7 +24,7 @@ public class PlayGame {
 	public String readUserInput(){
 		return userInput.nextLine();
 	}
-	
+
 	public void update(){
 		while (logic.gameRunning()) {
 			parseCommand(readUserInput());
@@ -35,7 +35,6 @@ public class PlayGame {
 	/**
 	 * Parsing and Evaluating the User Input.
 	 * @param readUserInput input the user generates
-	 * @return answer of GameLogic
 	 */
 	protected void parseCommand(String readUserInput) {
 		String [] command = readUserInput.trim().split(" ");

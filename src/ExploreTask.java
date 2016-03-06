@@ -5,16 +5,13 @@ import java.util.Collections;
  * Created by matt on 03/03/2016.
  */
 public class ExploreTask implements AITask {
-	final char[] directions = new char[]{'N', 'E', 'S', 'W'};
-	int dir;
 	private AIMap map;
 	private Bot bot;
 	private TraverseTask traverseTask;
 
-	public ExploreTask(AIMap map, OutputClient outputClient, Bot bot) {
+	public ExploreTask(AIMap map, Bot bot) {
 		this.bot = bot;
 		this.map = map;
-		dir = 0;
 	}
 
 	public String getNextCommand() {
@@ -25,7 +22,7 @@ public class ExploreTask implements AITask {
 			int[] exitPos = bot.getClosestReachableTile('E');
 			if (exitPos != null) {
 				System.out.println("We found an exit! Exit pos: " + exitPos[1] + ", " + exitPos[0]);
-				TraverseTask tt = new TraverseTask(bot, map, exitPos, true);
+				TraverseTask tt = new TraverseTask(bot, map, exitPos);
 				bot.addTask(tt);
 				return tt.getNextCommand();
 			}
@@ -57,10 +54,6 @@ public class ExploreTask implements AITask {
 		return traverseTask.getNextCommand();
 	}
 
-	private char getMovement() {
-		return directions[dir];
-	}
-
 	private void getNewDestination() {
 		int[] bestTile = null;
 
@@ -73,7 +66,7 @@ public class ExploreTask implements AITask {
 				break;
 			}
 			if (tile[0] != bot.getPosition()[0] || tile[1] != bot.getPosition()[1]) {
-				for (MapTile adjTile : map.getAdjacentWalkableTiles(new MapTile(tile))) {
+				for (MapTile adjTile : map.findAdjacentWalkableTiles(new MapTile(tile))) {
 					if (map.tileReachable(bot.getPosition(), adjTile.toIntArray())) {
 						bestTile = adjTile.toIntArray();
 						break;
@@ -86,16 +79,12 @@ public class ExploreTask implements AITask {
 		if (bestTile != null) {
 			System.out.println("Dest: " + bestTile[1] + ", " + bestTile[0]);
 			System.out.println("Bot: " + bot.getPosition()[1] + ", " + bot.getPosition()[0]);
-			traverseTask = new TraverseTask(bot, map, bestTile, false);
+			traverseTask = new TraverseTask(bot, map, bestTile);
 		} else {
 			//No good tile was found.
 			System.err.println("FATAL: Couldn't find new dest in explore task");
 			System.exit(0);
 		}
-	}
-
-	private double vectorLength(int[] vector) {
-		return Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));
 	}
 
 	public boolean hasNextCommand() {

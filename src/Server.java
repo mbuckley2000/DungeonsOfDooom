@@ -6,22 +6,21 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
 public class Server implements Runnable, IGameLogic {
-	static int port = 40004;
-	static Set<Server> connections = new HashSet<>();
-	static boolean gameRunning;
+	private static int port = 40004;
+	private static Set<Server> connections = new HashSet<>();
+	private static boolean gameRunning;
 	private static Map map;
-	Socket clientSocket;
-	boolean connected;
-	int[] playerPosition;
-	int collectedGold;
-	InetAddress address;
-	PrintWriter writer;
+	private Socket clientSocket;
+	private boolean connected;
+	private int[] playerPosition;
+	private int collectedGold;
+	private InetAddress address;
+	private PrintWriter writer;
 
 	Server(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -43,11 +42,6 @@ public class Server implements Runnable, IGameLogic {
 		map = new Map();
 		map.readMap(new File("maps/maze.txt"));
 
-
-		//ServerBroadcastThread broadcastThread = new ServerBroadcastThread();
-		//new Thread(broadcastThread).start();
-
-
 		while (gameRunning) {
 			Socket clientSocket = serverSocket.accept();
 			System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
@@ -66,7 +60,6 @@ public class Server implements Runnable, IGameLogic {
 		}
 
 		closeAllConnections();
-		//broadcastThread.close();
 		serverSocket.close();
 	}
 
@@ -97,7 +90,6 @@ public class Server implements Runnable, IGameLogic {
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
-			//broadcast(name + " has joined the game");
 			String input;
 
 			while (connected && gameRunning) {
@@ -111,23 +103,18 @@ public class Server implements Runnable, IGameLogic {
 			}
 
 			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
-			//broadcast(name + " has left the game");
 			writer.close();
 			reader.close();
 			clientSocket.close();
 		}
 		catch (IOException e) {
-			if (e.getClass().equals(SocketException.class)) {
-				//Connection reset
-				kick();
-			}
+			e.printStackTrace();
 		}
 	}
 
 	private String parseInput(String input) {
 		String[] command = input.trim().split(" ");
 		String answer = "FAIL";
-
 		switch (command[0].toUpperCase()) {
 			case "HELLO":
 				answer = hello();

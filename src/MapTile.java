@@ -14,12 +14,6 @@ public class MapTile {
 		this.y = y;
 	}
 
-	public MapTile(int x, int y, MapTile parent) {
-		this.x = x;
-		this.y = y;
-		this.parent = parent;
-
-	}
 	public MapTile(int[] position) {
 		this.y = position[0];
 		this.x = position[1];
@@ -45,9 +39,8 @@ public class MapTile {
 		this.parent = parent;
 	}
 
-	public int getManhattenDistanceTo(MapTile tile) {
-		int distance = Math.abs(tile.x - x) + Math.abs(tile.y - y);
-		return distance;
+	public int getManhattanDistanceTo(MapTile tile) {
+		return Math.abs(tile.x - x) + Math.abs(tile.y - y);
 	}
 
 	public int getScore() {
