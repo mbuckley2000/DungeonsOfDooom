@@ -43,8 +43,10 @@ public class Server implements Runnable, IGameLogic {
 		map = new Map();
 		map.readMap(new File("maps/maze.txt"));
 
-		ServerBroadcastThread broadcastThread = new ServerBroadcastThread();
-		new Thread(broadcastThread).start();
+
+		//ServerBroadcastThread broadcastThread = new ServerBroadcastThread();
+		//new Thread(broadcastThread).start();
+
 
 		while (gameRunning) {
 			Socket clientSocket = serverSocket.accept();
@@ -64,7 +66,7 @@ public class Server implements Runnable, IGameLogic {
 		}
 
 		closeAllConnections();
-		broadcastThread.close();
+		//broadcastThread.close();
 		serverSocket.close();
 	}
 
@@ -201,11 +203,7 @@ public class Server implements Runnable, IGameLogic {
 	 * @return True if all conditions are met, false otherwise
 	 */
 	protected boolean checkWin() {
-		if (collectedGold >= map.getWin() && map.lookAtTile(playerPosition[0], playerPosition[1]) == 'E') {
-			return true;
-		} else {
-			return false;
-		}
+		return collectedGold >= map.getWin() && map.lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
 	}
 
 	public String pickup() {
@@ -231,8 +229,11 @@ public class Server implements Runnable, IGameLogic {
 					output += lookReply[j][i];
 				}
 			}
-			output += "\n";
+			if (i != lookReply.length - 1) {
+				output += "\n";
+			}
 		}
+
 		return output;
 	}
 

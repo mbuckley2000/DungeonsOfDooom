@@ -46,7 +46,7 @@ public class MapTile {
 	}
 
 	public int getManhattenDistanceTo(MapTile tile) {
-		int distance = Math.abs((tile.x - x) + (tile.y - y));
+		int distance = Math.abs(tile.x - x) + Math.abs(tile.y - y);
 		return distance;
 	}
 

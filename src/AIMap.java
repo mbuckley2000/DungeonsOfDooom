@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -27,7 +28,7 @@ public class AIMap {
 	}
 
 	static int getManhattenDistance(int[] start, int[] end) {
-		int distance = Math.abs((start[0] - end[0]) + (start[1] - end[1]));
+		int distance = Math.abs(start[0] - end[0]) + Math.abs(start[1] - end[1]);
 		return distance;
 	}
 
@@ -61,22 +62,24 @@ public class AIMap {
 		return null;
 	}
 
-	public HashSet<int[]> findAllTiles(char tile) {
-		HashSet<int[]> set = new HashSet<>();
-		for (int y = 0; y < map.length; y++) {
-			for (int x = 0; x < map[0].length; x++) {
+	public ArrayList<int[]> findAllTiles(char tile) {
+		ArrayList<int[]> list = new ArrayList<>();
+		for (int y = bounds[0] - 1; y < bounds[2] + 2; y++) {
+			for (int x = bounds[1] - 1; x < bounds[3] + 2; x++) {
+				//if (tileOnMap(y, x)) {
 				if (tile != ' ') {
 					if (map[y][x] == tile) {
-						set.add(new int[]{y - offset, x - offset});
+						list.add(new int[]{y - offset, x - offset});
 					}
 				} else {
 					if (tileEmpty(y, x)) {
-						set.add(new int[]{y - offset, x - offset});
+						list.add(new int[]{y - offset, x - offset});
 					}
-				}
+					}
+				//}
 			}
 		}
-		return set;
+		return list;
 	}
 
 	public boolean tileEmpty(int y, int x) {
@@ -106,10 +109,14 @@ public class AIMap {
 		}
 	}
 
-	public void print() {
+	public void print(int[] botPosition) {
 		for (int y = bounds[0]; y < bounds[2] + 1; y++) {
 			for (int x = bounds[1]; x < bounds[3] + 1; x++) {
-				System.out.print(map[y][x]);
+				if (y == botPosition[0] + offset && x == botPosition[1] + offset) {
+					System.out.print("B");
+				} else {
+					System.out.print(map[y][x]);
+				}
 				/*
 				if (map[y][x] == '#' || map[y][x] == '.' || map[y][x] == 'G' || map[y][x] == 'E' || map[y][x] == 'X' || map[y][x] == 'P') {
 					System.out.print(map[y][x]);
@@ -147,7 +154,7 @@ public class AIMap {
 			}
 
 			//Check and score adjacent tiles
-			for (MapTile t : getAdjacentTiles(bestTile)) {
+			for (MapTile t : getAdjacentWalkableTiles(bestTile)) {
 				if (!listContains(closedList, t)) {
 					if (!listContains(openList, t)) {
 						//Calculate Score
@@ -218,7 +225,7 @@ public class AIMap {
 		return lowest;
 	}
 
-	public Set<MapTile> getAdjacentTiles(MapTile tile) {
+	public Set<MapTile> getAdjacentWalkableTiles(MapTile tile) {
 		Set set = new HashSet();
 		int x = tile.getX();
 		int y = tile.getY();
@@ -247,8 +254,7 @@ public class AIMap {
 	}
 
 	public boolean tileWalkable(int y, int x) {
-		//if (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.') {
-		return (getTile(y, x) != '#');
+		return (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
 	}
 
 	public boolean tileOnMap(int y, int x) {

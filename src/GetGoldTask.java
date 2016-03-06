@@ -13,12 +13,12 @@ public class GetGoldTask implements AITask {
 		this.map = map;
 		this.goldPos = goldPos;
 		this.running = true;
-		traverseTask = new TraverseTask(bot, map, goldPos);
+		traverseTask = new TraverseTask(bot, map, goldPos, true);
 		System.out.println("Moving to gold!");
 	}
 
 	public String getNextCommand() {
-		//System.out.println("GoldTask command get");
+		System.out.println("GoldTask command get");
 
 		if (map.getTile(goldPos[0], goldPos[1]) != 'G') {
 			running = false;

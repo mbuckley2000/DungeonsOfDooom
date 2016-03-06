@@ -15,7 +15,9 @@ public class ServerBroadcastThread implements Runnable {
 	@Override
 	public void run() {
 		while (running) {
+			//if (input.hasNextLine()) {
 			Server.broadcast("CoolBigDaddyB: " + input.nextLine());
+			//}
 		}
 		input.close();
 	}

@@ -1,4 +1,5 @@
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by matt on 03/03/2016.
@@ -6,66 +7,54 @@ import java.util.Random;
 public class ExploreTask implements AITask {
 	final char[] directions = new char[]{'N', 'E', 'S', 'W'};
 	int dir;
-	private OutputClient outputClient;
 	private AIMap map;
-	private String lastCommand;
 	private Bot bot;
 	private TraverseTask traverseTask;
 
 	public ExploreTask(AIMap map, OutputClient outputClient, Bot bot) {
 		this.bot = bot;
-		this.outputClient = outputClient;
 		this.map = map;
-		lastCommand = "";
 		dir = 0;
 	}
 
 	public String getNextCommand() {
-		//System.out.println("ExploreTask command get");
-		if (lastCommand.contains("MOVE") && !outputClient.getLastBoolResponse()) {
-			dir = (dir + new Random().nextInt(2) + 1) % 4; //Turn right and continue moving forward
-		}
-
-		String command;
+		System.out.println("ExploreTask command get");
 
 		if (bot.getGoldNeeded() == 0 && map.findTile('E') != null) {
 			//Moving to exit
-			int[] exitPos = map.findTile('E');
-			//System.out.println("We found an exit! Exit pos: " + exitPos[1] + ", " + exitPos[0]);
-			if (map.tileReachable(bot.getPosition(), exitPos)) {
-				bot.addTask(new TraverseTask(bot, map, exitPos));
-				return "HELLO";
+			int[] exitPos = bot.getClosestReachableTile('E');
+			if (exitPos != null) {
+				System.out.println("We found an exit! Exit pos: " + exitPos[1] + ", " + exitPos[0]);
+				TraverseTask tt = new TraverseTask(bot, map, exitPos, true);
+				bot.addTask(tt);
+				return tt.getNextCommand();
 			}
 		}
 
-		if (map.findTile('G') != null) {
+		if (map.findTile('G') != null && bot.getGoldNeeded() != 0) {
 			//We have some gold!!
-			int[] goldPos = map.findTile('G');
-			//System.out.println("We found gold! Gold pos: " + goldPos[1] + ", " + goldPos[0]);
-			if (map.tileReachable(bot.getPosition(), goldPos)) {
-				bot.addTask(new GetGoldTask(bot, map, goldPos));
-				return "HELLO";
+			int[] goldPos = bot.getClosestReachableTile('G');
+			if (goldPos != null) {
+				System.out.println("We found gold! Gold pos: " + goldPos[1] + ", " + goldPos[0]);
+				GetGoldTask gt = new GetGoldTask(bot, map, goldPos);
+				bot.addTask(gt);
+				return gt.getNextCommand();
 			}
 		}
 
-		//command = "MOVE " + getMovement();
-
-		if (traverseTask != null) {
-			if (traverseTask.hasNextCommand()) {
-				command = traverseTask.getNextCommand();
-			} else {
-				getNewDestination();
-				command = traverseTask.getNextCommand();
-			}
-		} else {
-			command = "MOVE " + getMovement();
-			if (!map.isEmpty()) {
-				getNewDestination();
-			}
+		if (map.isEmpty()) {
+			return "LOOK";
 		}
 
-		lastCommand = command;
-		return command;
+		if (traverseTask == null) {
+			getNewDestination();
+		}
+
+		if (!traverseTask.hasNextCommand()) {
+			getNewDestination();
+		}
+
+		return traverseTask.getNextCommand();
 	}
 
 	private char getMovement() {
@@ -73,37 +62,36 @@ public class ExploreTask implements AITask {
 	}
 
 	private void getNewDestination() {
-		//System.err.println("Looking for one");
-		/*
-		HashSet<int[]> potentialDestinations = new HashSet<>();
-		for (int[] tile : map.findAllTiles(' ')) {
-			for (MapTile adjTile : map.getAdjacentTiles(new MapTile(tile))) {
-				if (map.tileReachable(bot.getPosition(), adjTile.toIntArray())) {
-					potentialDestinations.add(adjTile.toIntArray());
-				}
+		int[] bestTile = null;
+
+		ArrayList<int[]> potentialDestinations = map.findAllTiles(' ');
+		Collections.sort(potentialDestinations, bot.distanceFromBot);
+
+
+		for (int[] tile : potentialDestinations) {
+			if (bestTile != null) {
+				break;
 			}
-		}
-*/
-		int[] best = null;
-		//for (int[] tile : potentialDestinations) {
-		for (int[] tile : map.findAllTiles(' ')) {
-			if (best == null) {
-				best = tile;
-			} else {
-				if (AIMap.getManhattenDistance(bot.getPosition(), best) > AIMap.getManhattenDistance(bot.getPosition(), tile)) {
-					if (map.tileReachable(bot.getPosition(), best)) {
-						best = tile;
+			if (tile[0] != bot.getPosition()[0] || tile[1] != bot.getPosition()[1]) {
+				for (MapTile adjTile : map.getAdjacentWalkableTiles(new MapTile(tile))) {
+					if (map.tileReachable(bot.getPosition(), adjTile.toIntArray())) {
+						bestTile = adjTile.toIntArray();
+						break;
 					}
 				}
 			}
-
 		}
-		System.out.println("Empty tiles: " + map.findAllTiles(' ').size());
-		//System.out.println("Possibilities: " + potentialDestinations.size());
-		System.out.println("Dest: " + best[1] + ", " + best[0]);
-		System.out.println("Bot: " + bot.getPosition()[1] + ", " + bot.getPosition()[0]);
-		traverseTask = new TraverseTask(bot, map, best);
 
+		System.out.println("Undiscovered tiles: " + (potentialDestinations.size() - 1)); //-1 for player position
+		if (bestTile != null) {
+			System.out.println("Dest: " + bestTile[1] + ", " + bestTile[0]);
+			System.out.println("Bot: " + bot.getPosition()[1] + ", " + bot.getPosition()[0]);
+			traverseTask = new TraverseTask(bot, map, bestTile, false);
+		} else {
+			//No good tile was found.
+			System.err.println("FATAL: Couldn't find new dest in explore task");
+			System.exit(0);
+		}
 	}
 
 	private double vectorLength(int[] vector) {
