@@ -49,6 +49,7 @@ public class TraverseTask implements AITask {
 
 	public String getNextCommand() {
 		//System.out.println("TraverseTask command get");
+		//generateMovements(map.getPath(bot.getPosition(), destination));
 		if (!movements.isEmpty()) {
 			return "MOVE " + movements.remove();
 		} else {
@@ -58,7 +59,7 @@ public class TraverseTask implements AITask {
 	}
 
 	public boolean hasNextCommand() {
-		if (bot.getPosition()[0] != destination[0] || bot.getPosition()[1] != destination[1]) {
+		if ((bot.getPosition()[0] != destination[0] || bot.getPosition()[1] != destination[1]) && map.tileWalkable(destination[0], destination[1])) {
 			return true;
 		} else {
 			return false;

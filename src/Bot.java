@@ -5,7 +5,7 @@ public class Bot extends PlayGame {
 	Stack<AITask> taskStack;
 	AITask exploreTask;
 	String command;
-	private int sleepMax = 2000;
+	private int sleepMax = 50;
 	private Random random;
 	private AIMap map;
 	private int[] position = {0, 0};
@@ -91,9 +91,12 @@ public class Bot extends PlayGame {
 	}
 
 	private void updatePosition() {
-		if (command.contains("MOVE") && logic.getOutputClient().getLastBoolResponse()) {
-			stepped(command.charAt(5));
-			System.out.println("Bot position: " + position[1] + ", " + position[0]);
+		if (command.contains("MOVE")) {
+			stepsSinceLastLook++;
+			if (logic.getOutputClient().getLastBoolResponse()) {
+				stepped(command.charAt(5));
+				System.out.println("Bot position: " + position[1] + ", " + position[0]);
+			}
 		}
 	}
 
@@ -113,7 +116,7 @@ public class Bot extends PlayGame {
 	}
 
 	private boolean needToLook() {
-		if (stepsSinceLastLook > 2) {
+		if (stepsSinceLastLook > 0) {
 			stepsSinceLastLook = 0;
 			return true;
 		} else {
@@ -122,7 +125,6 @@ public class Bot extends PlayGame {
 	}
 
 	private void stepped(char dir) {
-		stepsSinceLastLook++;
 		switch (dir) {
 			case 'N':
 				position[0] -= 1; //North

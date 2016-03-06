@@ -65,4 +65,8 @@ public class MapTile {
 	public String toString() {
 		return x + ", " + y;
 	}
+
+	public int[] toIntArray() {
+		return new int[]{y, x};
+	}
 }

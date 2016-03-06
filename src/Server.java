@@ -41,7 +41,7 @@ public class Server implements Runnable, IGameLogic {
 		//Setup
 		//Load map
 		map = new Map();
-		map.readMap(new File("maps/example_map.txt"));
+		map.readMap(new File("maps/maze.txt"));
 
 		ServerBroadcastThread broadcastThread = new ServerBroadcastThread();
 		new Thread(broadcastThread).start();

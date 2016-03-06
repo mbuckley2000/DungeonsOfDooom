@@ -10,12 +10,25 @@ public class AIMap {
 	private final int offset = 50;
 	private char[][] map = new char[offset * 2][offset * 2];
 	private int[] bounds = new int[4];
+	private boolean empty = true;
 
 	public AIMap() {
 		bounds[0] = offset;
 		bounds[1] = offset;
 		bounds[2] = offset;
 		bounds[3] = offset;
+		/*
+		for (char[] y : map) {
+			for (char x : y) {
+				x = ' ';
+			}
+		}
+		*/
+	}
+
+	static int getManhattenDistance(int[] start, int[] end) {
+		int distance = Math.abs((start[0] - end[0]) + (start[1] - end[1]));
+		return distance;
 	}
 
 	public int[] getBounds() {
@@ -23,6 +36,7 @@ public class AIMap {
 	}
 
 	public void update(char[][] lookWindow, int[] botPos) {
+		empty = false;
 		replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
 	}
 
@@ -47,6 +61,28 @@ public class AIMap {
 		return null;
 	}
 
+	public HashSet<int[]> findAllTiles(char tile) {
+		HashSet<int[]> set = new HashSet<>();
+		for (int y = 0; y < map.length; y++) {
+			for (int x = 0; x < map[0].length; x++) {
+				if (tile != ' ') {
+					if (map[y][x] == tile) {
+						set.add(new int[]{y - offset, x - offset});
+					}
+				} else {
+					if (tileEmpty(y, x)) {
+						set.add(new int[]{y - offset, x - offset});
+					}
+				}
+			}
+		}
+		return set;
+	}
+
+	public boolean tileEmpty(int y, int x) {
+		return map[y][x] != 'G' && map[y][x] != 'E' && map[y][x] != '#' && map[y][x] != '.';
+	}
+
 	public void setTile(int y, int x, char tile) {
 		int offsetY = y + offset;
 		int offsetX = x + offset;
@@ -63,7 +99,11 @@ public class AIMap {
 	}
 
 	public char getTile(int y, int x) {
-		return (map[y + offset][x + offset]);
+		if (y + offset < map.length && x + offset < map.length && y + offset > 0 && x + offset > 0) {
+			return (map[y + offset][x + offset]);
+		} else {
+			return ' ';
+		}
 	}
 
 	public void print() {
@@ -81,7 +121,6 @@ public class AIMap {
 			System.out.println();
 		}
 	}
-
 
 	public Stack<MapTile> getPath(int[] start, int[] end) {
 		//A* pathfinding
@@ -103,6 +142,7 @@ public class AIMap {
 			openList.remove(bestTile);
 
 			if (listContains(closedList, endTile)) {
+				//System.out.println("Found the last tile.");
 				break;
 			}
 
@@ -132,10 +172,14 @@ public class AIMap {
 				path.add(lastTile);
 				lastTile = lastTile.getParent();
 			}
-			System.out.println("Found path! Number of tiles:" + path.size());
-			return path;
+			//System.out.println("Found path! Number of tiles:" + path.size());
+			if (path.size() > 1) {
+				return path;
+			} else {
+				return null;
+			}
 		} else {
-			System.out.println("Unable to find path");
+			//System.out.println("Unable to find path");
 			return null;
 		}
 	}
@@ -158,6 +202,10 @@ public class AIMap {
 		return false;
 	}
 
+	public boolean tileReachable(int[] start, int[] end) {
+		return (getPath(start, end) != null);
+	}
+
 	private MapTile getBestTile(HashSet<MapTile> openList) {
 		MapTile lowest = null;
 		for (MapTile tile : openList) {
@@ -170,31 +218,44 @@ public class AIMap {
 		return lowest;
 	}
 
-	private Set<MapTile> getAdjacentTiles(MapTile tile) {
+	public Set<MapTile> getAdjacentTiles(MapTile tile) {
 		Set set = new HashSet();
 		int x = tile.getX();
 		int y = tile.getY();
-		if (tileWalkable(y, x + 1)) {
-			set.add(new MapTile(x + 1, y));
+
+		if (tileOnMap(y, x + 1))
+			if (tileWalkable(y, x + 1)) {
+				set.add(new MapTile(x + 1, y));
+			}
+		if (tileOnMap(y, x - 1)) {
+			if (tileWalkable(y, x - 1)) {
+				set.add(new MapTile(x - 1, y));
+			}
 		}
-		if (tileWalkable(y, x - 1)) {
-			set.add(new MapTile(x - 1, y));
+		if (tileOnMap(y + 1, x)) {
+			if (tileWalkable(y + 1, x)) {
+				set.add(new MapTile(x, y + 1));
+			}
 		}
-		if (tileWalkable(y + 1, x)) {
-			set.add(new MapTile(x, y + 1));
-		}
-		if (tileWalkable(y - 1, x)) {
-			set.add(new MapTile(x, y - 1));
+		if (tileOnMap(y - 1, x)) {
+			if (tileWalkable(y - 1, x)) {
+				set.add(new MapTile(x, y - 1));
+			}
 		}
 		//System.out.println("Found " + set.size() + " adjacent tiles.");
 		return set;
 	}
 
-	private boolean tileWalkable(int y, int x) {
-		if (getTile(y, x) == '.' || getTile(y, x) == 'G' || getTile(y, x) == 'E') {
-			return true;
-		} else {
-			return false;
-		}
+	public boolean tileWalkable(int y, int x) {
+		//if (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.') {
+		return (getTile(y, x) != '#');
+	}
+
+	public boolean tileOnMap(int y, int x) {
+		return (y + offset > 0 && x + offset > 0 && y + offset < map.length && x + offset < map.length);
+	}
+
+	public boolean isEmpty() {
+		return empty;
 	}
 }
