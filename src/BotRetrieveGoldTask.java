@@ -3,8 +3,8 @@
  * Spawns a TraverseTask to get there, then attempts to pick the gold up
  * Terminates if the gold is picked up by the bot or somebody else, or if the gold is unreachable
  *
- * @since 03/03/2016
  * @author mb2070
+ * @since 03/03/2016
  */
 public class BotRetrieveGoldTask implements BotTask {
 	private boolean running;

@@ -6,9 +6,9 @@ import java.util.Collections;
  * Will head toward the nearest reachable undiscovered area using a TraverseTask
  * If reachable gold is found and needed, it will spawn a RetrieveGoldTask to pick it up
  * If reachable exit is found and needed, it will spawn a TraverseTask to get there
-
- * @since 03/03/2016
+ *
  * @author mb2070
+ * @since 03/03/2016
  */
 public class BotExploreTask implements BotTask {
 	private BotMap map;

@@ -62,6 +62,7 @@ public class BotMap {
 
 	/**
 	 * Returns the current bounds of the map. Used because most of the map is empty, and grows from the middle outwards as the bot discovers more tiles
+	 *
 	 * @return The bounds as an array: (top, left, bottom, right)
 	 */
 	public int[] getBounds() {
@@ -70,8 +71,9 @@ public class BotMap {
 
 	/**
 	 * Updates the map with a given lookWindow and bot position
+	 *
 	 * @param lookWindow The look window to use
-	 * @param botPos The bot's position when the look window was received
+	 * @param botPos     The bot's position when the look window was received
 	 */
 	public void update(char[][] lookWindow, int[] botPos) {
 		empty = false;
@@ -80,8 +82,9 @@ public class BotMap {
 
 	/**
 	 * Replaces a section of the map with a given lookWindow at a given position
-	 * @param posY Given position
-	 * @param posX Given position
+	 *
+	 * @param posY       Given position
+	 * @param posX       Given position
 	 * @param lookWindow Given lookWindow
 	 */
 	private void replace(int posY, int posX, char[][] lookWindow) {
@@ -96,6 +99,7 @@ public class BotMap {
 
 	/**
 	 * Finds the first occurrence of a tileType in the map
+	 *
 	 * @param tileType The type of tile to find
 	 * @return The found tile, or null if no such tile is found
 	 */
@@ -112,6 +116,7 @@ public class BotMap {
 
 	/**
 	 * Finds all occurrences of the given tileType in the map
+	 *
 	 * @param tileType The type of tile to find
 	 * @return A list of all occurrences of the tile
 	 */
@@ -135,6 +140,7 @@ public class BotMap {
 
 	/**
 	 * Checks if the given tile has been discovered
+	 *
 	 * @param y Tile position
 	 * @param x Tile position
 	 * @return True if the tile has been discovered, false otherwise
@@ -146,8 +152,9 @@ public class BotMap {
 	/**
 	 * Sets the tile at given coordinates to the given tileType
 	 * Also adjusts the map bounds
-	 * @param y Position of tile
-	 * @param x Position of tile
+	 *
+	 * @param y        Position of tile
+	 * @param x        Position of tile
 	 * @param tileType Given tileType
 	 */
 	public void setTile(int y, int x, char tileType) {
@@ -168,6 +175,7 @@ public class BotMap {
 
 	/**
 	 * Returns the tileType at the given location
+	 *
 	 * @param y Given location
 	 * @param x Given location
 	 * @return The tile type, or X if the tile is out of bounds
@@ -202,8 +210,9 @@ public class BotMap {
 
 	/**
 	 * A* pathfinding implementation to find a path from the specified start location to the specified end location
+	 *
 	 * @param start Start location
-	 * @param end End location
+	 * @param end   End location
 	 * @return The path in the form of a stack of MapTiles. Null if no path is found
 	 */
 	public Stack<BotMapTile> getPath(int[] start, int[] end) {
@@ -281,8 +290,9 @@ public class BotMap {
 	/**
 	 * Checks whether a path can be calculated from the given start tile to the given end tile
 	 * NOTE: if a tile is not reachable with the map in its current state, it may be reachable after more of the map is discovered
+	 *
 	 * @param start Start of the desired path
-	 * @param end End of the desired path
+	 * @param end   End of the desired path
 	 * @return True if a path is possible, false otherwise
 	 */
 	public boolean tileReachable(int[] start, int[] end) {
@@ -319,11 +329,11 @@ public class BotMap {
 		int y = tile.getY();
 
 		if (tileWalkable(y, x + 1))
-				set.add(new BotMapTile(x + 1, y));
+			set.add(new BotMapTile(x + 1, y));
 		if (tileWalkable(y, x - 1))
-				set.add(new BotMapTile(x - 1, y));
+			set.add(new BotMapTile(x - 1, y));
 		if (tileWalkable(y + 1, x))
-				set.add(new BotMapTile(x, y + 1));
+			set.add(new BotMapTile(x, y + 1));
 		if (tileWalkable(y - 1, x))
 			set.add(new BotMapTile(x, y - 1));
 
@@ -333,6 +343,7 @@ public class BotMap {
 	/**
 	 * Checks if a tile is walkable. Used for pathfinding
 	 * NOTE: Undiscovered tiles are assumed to be walkable!
+	 *
 	 * @param y Position of tile
 	 * @param x Position of tile
 	 * @return True if the tile is walkable, false otherwise
@@ -343,6 +354,7 @@ public class BotMap {
 
 	/**
 	 * Checks if a tile is inside the bounds of the map array
+	 *
 	 * @param y Position of tile
 	 * @param x Position of tile
 	 * @return True if the tile is inside the bounds of the map array, false otherwise
@@ -353,6 +365,7 @@ public class BotMap {
 
 	/**
 	 * Checks if the map has been updated, or if it is still in an empty state
+	 *
 	 * @return True if the map is empty, false otherwise
 	 */
 	public boolean isEmpty() {

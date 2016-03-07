@@ -7,17 +7,17 @@ import java.util.ArrayList;
  * Can be loaded from txt files
  */
 public class Map {
-	
+
 	private char[][] map;
 	private String mapName;
 	private int totalGoldOnMap;
-	
-	public Map(){
+
+	public Map() {
 		map = null;
 		mapName = "";
 		totalGoldOnMap = -1;
 	}
-	
+
 	/**
 	 * Reads a map from a given file with the format:
 	 * name <mapName>
@@ -28,21 +28,21 @@ public class Map {
 	public void readMap(File mapFile) {
 		// a buffered reader for the map
 		BufferedReader reader = null;
-		
+
 		try {
 			reader = new BufferedReader(new FileReader(mapFile));
 		} catch (FileNotFoundException e) {
 			try {
-				reader = new BufferedReader(new FileReader(new File("maps","example_map.txt")));
+				reader = new BufferedReader(new FileReader(new File("maps", "example_map.txt")));
 			} catch (FileNotFoundException e1) {
 				System.err.println("no valid map name given and default file example_map.txt not found");
 				System.exit(-1);
 			}
 		}
-		
+
 		try {
 			map = loadMap(reader);
-		} catch (IOException e){
+		} catch (IOException e) {
 			System.err.println("map file invalid or wrongly formatted");
 			System.exit(-1);
 		} finally {
@@ -53,40 +53,37 @@ public class Map {
 				e.printStackTrace();
 			}
 		}
-		
-		
-		
+
+
 	}
-	private char[][] loadMap(BufferedReader reader) throws IOException
-	{
-		
+
+	private char[][] loadMap(BufferedReader reader) throws IOException {
+
 		boolean error = false;
 		ArrayList<char[]> tempMap = new ArrayList<>();
 		int width = -1;
-		
+
 		String in = reader.readLine();
-		if (in.startsWith("name")){
+		if (in.startsWith("name")) {
 			error = setName(in);
 		}
-		
+
 		in = reader.readLine();
-		if (in.startsWith("win")){
-				error = setWin(in);
+		if (in.startsWith("win")) {
+			error = setWin(in);
 		}
-		
+
 		in = reader.readLine();
 		if (in.charAt(0) == '#' && in.length() > 1)
 			width = in.trim().length();
-		
-		while (in != null && !error)
-		{
+
+		while (in != null && !error) {
 
 			char[] row = new char[in.length()];
-			if  (in.length() != width)
+			if (in.length() != width)
 				error = true;
-			
-			for (int i = 0; i < in.length(); i++)
-			{
+
+			for (int i = 0; i < in.length(); i++) {
 				row[i] = in.charAt(i);
 			}
 
@@ -94,19 +91,20 @@ public class Map {
 
 			in = reader.readLine();
 		}
-		
+
 		if (error) {
 			setName("");
 			setWin("");
 			return null;
 		}
 		char[][] map = new char[tempMap.size()][width];
-		
-		for (int i=0;i<tempMap.size();i++){
+
+		for (int i = 0; i < tempMap.size(); i++) {
 			map[i] = tempMap.get(i);
 		}
 		return map;
 	}
+
 	private boolean setWin(String in) {
 		if (!in.startsWith("win "))
 			return true;
@@ -119,9 +117,10 @@ public class Map {
 		if (win < 0)
 			return true;
 		this.totalGoldOnMap = win;
-		
+
 		return false;
 	}
+
 	private boolean setName(String in) {
 		if (!in.startsWith("name ") && in.length() < 4)
 			return true;
@@ -131,14 +130,15 @@ public class Map {
 			return true;
 
 		this.mapName = name;
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * The method replaces a char at a given position of the map with a new char
-	 * @param y the vertical position of the tile to replace
-	 * @param x the horizontal position of the tile to replace
+	 *
+	 * @param y    the vertical position of the tile to replace
+	 * @param x    the horizontal position of the tile to replace
 	 * @param tile the char character of the tile to replace
 	 * @return The old character which was replaced will be returned.
 	 */
@@ -151,6 +151,7 @@ public class Map {
 
 	/**
 	 * The method returns the Tile at a given location. The tile is not removed.
+	 *
 	 * @param y the vertical position of the tile to look at
 	 * @param x the horizontal position of the tile to look at
 	 * @return The character at the tile is returned
@@ -161,22 +162,23 @@ public class Map {
 
 		return map[y][x];
 	}
-	
+
 	/**
 	 * This method is used to retrieve a map view around a certain location.
 	 * The method should be used to get the look() around the player location.
-	 * @param y Y coordinate of the location
-	 * @param x X coordinate of the location
-	 * @param radius The radius defining the area which will be returned. 
-	 * Without the usage of a lamp the standard value is 5 units.
+	 *
+	 * @param y      Y coordinate of the location
+	 * @param x      X coordinate of the location
+	 * @param radius The radius defining the area which will be returned.
+	 *               Without the usage of a lamp the standard value is 5 units.
 	 * @return Returns a view window as a 2D char array of tiles
 	 */
 	protected char[][] lookWindow(int y, int x, int radius) {
 		char[][] reply = new char[radius][radius];
 		for (int i = 0; i < radius; i++) {
 			for (int j = 0; j < radius; j++) {
-				int posX = x + j - radius/2;
-				int posY = y + i - radius/2;
+				int posX = x + j - radius / 2;
+				int posY = y + i - radius / 2;
 				if (posX >= 0 && posX < getMapWidth() &&
 						posY >= 0 && posY < getMapHeight())
 					reply[j][i] = map[posY][posX];
@@ -185,10 +187,10 @@ public class Map {
 			}
 		}
 		reply[0][0] = 'X';
-		reply[radius-1][0] = 'X';
-		reply[0][radius-1] = 'X';
-		reply[radius-1][radius-1] = 'X';
-		
+		reply[radius - 1][0] = 'X';
+		reply[0][radius - 1] = 'X';
+		reply[radius - 1][radius - 1] = 'X';
+
 		return reply;
 	}
 

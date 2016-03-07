@@ -7,11 +7,12 @@
  * If a player is standing where they used to be, they are re-initialised
  * Provides utility to check for stalemates (not enough gold left for anybody to win)
  *
- * @since 24/02/2016
  * @author mb2070
+ * @since 24/02/2016
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,7 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Server {
-	private static int port = 40004;
+	private static int port = 4362;
 	private static Set<RemoteClient> remoteClients = new HashSet<>();
 	private static boolean gameRunning;
 	private static Map map;
@@ -28,42 +29,58 @@ public class Server {
 		return gameRunning;
 	}
 
+	/**
+	 * Returns the game map
+	 *
+	 * @return The game map
+	 */
 	public static Map getMap() {
 		return map;
 	}
 
-	public static void main(String args[]) throws Exception {
-		ServerSocket serverSocket = new ServerSocket(port);
-		System.out.println("Listening for remoteClients");
+	/**
+	 * Initiates the server and detects new connections, spawning a new thread for each one
+	 */
+	public static void main(String args[]) {
+		try {
+			ServerSocket serverSocket = new ServerSocket(port);
+			System.out.println("Listening for remoteClients");
 
-		gameRunning = true;
+			gameRunning = true;
 
-		//Setup
-		//Load map
-		map = new Map();
-		map.readMap(new File("maps/example_map.txt"));
+			//Setup
+			//Load map
+			map = new Map();
+			map.readMap(new File("maps/example_map.txt"));
 
-		while (gameRunning) {
-			Socket clientSocket = serverSocket.accept();
-			System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
+			while (gameRunning) {
+				Socket clientSocket = serverSocket.accept();
+				System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
 
-			RemoteClient client = findClient(clientSocket.getInetAddress());
-			if (client == null) {
-				client = new RemoteClient(clientSocket);
-				remoteClients.add(client);
-				new Thread(client).start();
-			} else {
-				if (!client.isConnected()) {
-					client.reconnect(clientSocket);
-					new Thread(findClient(clientSocket.getInetAddress())).start();
+				RemoteClient client = findClient(clientSocket.getInetAddress());
+				if (client == null) {
+					client = new RemoteClient(clientSocket);
+					remoteClients.add(client);
+					new Thread(client).start();
 				} else {
-					System.out.println(clientSocket.getInetAddress() + "\t\tConnection refused. Address already connected");
-					clientSocket.close();
+					if (!client.isConnected()) {
+						client.reconnect(clientSocket);
+						new Thread(findClient(clientSocket.getInetAddress())).start();
+					} else {
+						System.out.println(clientSocket.getInetAddress() + "\t\tConnection refused. Address already connected");
+						clientSocket.close();
+					}
 				}
 			}
+		} catch (IOException e) {
+			System.err.println("Error starting server");
+			System.exit(0);
 		}
 	}
 
+	/**
+	 * Closes all connections on the server
+	 */
 	public static void closeAllConnections() {
 		for (RemoteClient connection : remoteClients) {
 			if (connection.isConnected()) {
@@ -72,6 +89,10 @@ public class Server {
 		}
 	}
 
+	/**
+	 * Sends a message to everybody on the server
+	 * @param message The message to send
+	 */
 	public static void broadcastMessage(String message) {
 		for (RemoteClient connection : remoteClients) {
 			if (connection.isConnected()) {
@@ -80,6 +101,11 @@ public class Server {
 		}
 	}
 
+	/**
+	 * Finds the client object for a given InetAddress. Used to find a client's data if they disconnect and reconnect
+	 * @param address InetAddress of the client
+	 * @return The found client. Null if none exist
+	 */
 	private static RemoteClient findClient(InetAddress address) {
 		for (RemoteClient connection : remoteClients) {
 			if (connection.getAddress().equals(address)) {
@@ -108,6 +134,9 @@ public class Server {
 		return hit;
 	}
 
+	/**
+	 * Shuts down all connections and ends the game
+	 */
 	public static void shutDown() {
 		System.out.println("Game over. Shutting down");
 		gameRunning = false;
@@ -115,6 +144,10 @@ public class Server {
 		System.exit(0);
 	}
 
+	/**
+	 * Checks if a stalemate has occurred (i.e. not enough gold for any connected player to finish)
+	 * If it has occurred, the game ends
+	 */
 	public static void checkStalemate() {
 		boolean hit = false;
 		for (RemoteClient client : remoteClients) {

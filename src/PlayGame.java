@@ -4,7 +4,7 @@ public class PlayGame {
 	protected Client logic;
 	protected Scanner userInput;
 
-	public PlayGame(){
+	public PlayGame() {
 		logic = new Client();
 		if (logic.isConnected()) {
 			System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
@@ -16,16 +16,17 @@ public class PlayGame {
 		PlayGame game = new PlayGame();
 		game.update();
 	}
-	
+
 	/**
 	 * Returns the user input
+	 *
 	 * @return The user input
 	 */
-	public String readUserInput(){
+	public String readUserInput() {
 		return userInput.nextLine();
 	}
 
-	public void update(){
+	public void update() {
 		while (logic.gameRunning()) {
 			parseInput(readUserInput());
 		}
@@ -34,12 +35,13 @@ public class PlayGame {
 
 	/**
 	 * Parsing and Evaluating the User Input.
+	 *
 	 * @param input input the user generates
 	 */
 	protected void parseInput(String input) {
 		String[] command = input.trim().split(" ");
 
-		switch (command[0].toUpperCase()){
+		switch (command[0].toUpperCase()) {
 			case "HELLO":
 				logic.hello();
 				break;
@@ -47,7 +49,7 @@ public class PlayGame {
 				if (command.length == 2) {
 					logic.move(command[1].toUpperCase().charAt(0));
 				}
-			break;
+				break;
 			case "PICKUP":
 				logic.pickup();
 				break;

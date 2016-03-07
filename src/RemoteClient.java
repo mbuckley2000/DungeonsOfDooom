@@ -57,7 +57,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 		}
 	}
 
-
 	//GameLogic
 	public String hello() {
 		return "GOLD: " + getGoldNeeded();
@@ -142,7 +141,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 	public void quitGame() {
 		closeConnection();
 	}
-
 
 	//Misc
 
@@ -242,5 +240,4 @@ public class RemoteClient implements Runnable, IGameLogic {
 	public InetAddress getAddress() {
 		return address;
 	}
-
 }

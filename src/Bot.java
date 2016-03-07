@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class Bot extends PlayGame {
-	private final int sleepMax = 50;
+	private final int sleepMax = 2000;
 	Stack<BotTask> taskStack;
 	BotTask exploreTask;
 	String command;
@@ -66,7 +66,7 @@ public class Bot extends PlayGame {
 		}
 	}
 
-	public void update(){
+	public void update() {
 		System.out.println("Bot is now running");
 		while (logic.gameRunning()) {
 			updatePosition();

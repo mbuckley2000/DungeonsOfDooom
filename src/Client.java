@@ -10,11 +10,12 @@ import java.net.Socket;
  * Can be used in place of the old GameLogic class.
  * Connects to server, performs very basic input filtering, and sends commands
  * All output from the server is picked up in a ClientOutputThread to prevent blocking
- * @since 24/02/2016
+ *
  * @author mb2070
+ * @since 24/02/2016
  */
 public class Client implements IGameLogic {
-	private final int port = 40004;
+	private final int port = 4362;
 	private final String address = "localhost"; //Ricky's IP: 138.38.153.79  James' IP 138.38.159.174   My ip 138.38.193.197
 	private Socket socket;
 	private PrintWriter writer;
@@ -72,22 +73,22 @@ public class Client implements IGameLogic {
 	}
 
 	public String hello() {
-        send("HELLO");
+		send("HELLO");
 		return null;
 	}
 
 	public String move(char direction) {
-        send("MOVE " + direction);
+		send("MOVE " + direction);
 		return null;
 	}
 
 	public String pickup() {
-        send("PICKUP");
+		send("PICKUP");
 		return null;
 	}
 
 	public String look() {
-        send("LOOK");
+		send("LOOK");
 		return null;
 	}
 
@@ -107,15 +108,15 @@ public class Client implements IGameLogic {
 	}
 
 	public void quitGame() {
-        try {
-            writer.println("QUIT");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        connected = false;
-    }
+		try {
+			writer.println("QUIT");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		connected = false;
+	}
 
-    private void send(String string) {
-        writer.println(string);
-    }
+	private void send(String string) {
+		writer.println(string);
+	}
 }
