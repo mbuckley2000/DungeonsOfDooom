@@ -16,7 +16,7 @@ import java.net.Socket;
  */
 public class Client implements IGameLogic {
 	private final int port = 40004;
-	private final String address = "138.38.133.97"; //Ricky's IP: 138.38.153.79  James' IP 138.38.159.174   My ip 138.38.193.197
+	private final String address = "138.38.133.97";
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;

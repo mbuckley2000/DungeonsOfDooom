@@ -1,7 +1,7 @@
 import java.util.Scanner;
 
 public class PlayGame {
-	private Client logic;
+	protected Client logic;
 	private Scanner userInput;
 
 	public PlayGame() {

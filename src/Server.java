@@ -13,6 +13,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,30 +22,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Server {
-	private static int port = 40004;
-	private static Set<RemoteClient> remoteClients = new HashSet<>();
-	private static boolean gameRunning;
-	private static Map map;
+	private int port = 40004;
+	private Set<RemoteClient> remoteClients = new HashSet<>();
+	private boolean gameRunning;
+	private Map map;
+	private ServerSocket serverSocket;
 
-	public static boolean isGameRunning() {
-		return gameRunning;
-	}
-
-	/**
-	 * Returns the game map
-	 *
-	 * @return The game map
-	 */
-	public static Map getMap() {
-		return map;
-	}
-
-	/**
-	 * Initiates the server and detects new connections, spawning a new thread for each one
-	 */
-	public static void main(String args[]) {
+	public Server() {
 		try {
-			ServerSocket serverSocket = new ServerSocket(port);
+			serverSocket = new ServerSocket(port);
 			System.out.println("Listening for remoteClients");
 
 			gameRunning = true;
@@ -52,8 +38,24 @@ public class Server {
 			//Setup
 			//Load map
 			map = new Map();
-			map.readMap(new File("maps/example_map.txt"));
+			map.readMap(new File("maps/maze.txt"));
 
+			update();
+		} catch (IOException e) {
+			System.err.println("Error starting server");
+			System.exit(0);
+		}
+	}
+
+	/**
+	 * Initiates the server and detects new connections, spawning a new thread for each one
+	 */
+	public static void main(String args[]) {
+		Server server = new Server();
+	}
+
+	private void update() {
+		try {
 			while (gameRunning) {
 				Socket clientSocket = serverSocket.accept();
 				System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
@@ -69,20 +71,33 @@ public class Server {
 						new Thread(findClient(clientSocket.getInetAddress())).start();
 					} else {
 						System.out.println(clientSocket.getInetAddress() + "\t\tConnection refused. Address already connected");
+						new PrintWriter(clientSocket.getOutputStream(), true).println("Connection refused. Address already connected");
 						clientSocket.close();
 					}
 				}
 			}
 		} catch (IOException e) {
-			System.err.println("Error starting server");
-			System.exit(0);
+			//Couldn't update server
 		}
+	}
+
+	public boolean isGameRunning() {
+		return gameRunning;
+	}
+
+	/**
+	 * Returns the game map
+	 *
+	 * @return The game map
+	 */
+	public Map getMap() {
+		return map;
 	}
 
 	/**
 	 * Closes all connections on the server
 	 */
-	public static void closeAllConnections() {
+	public void closeAllConnections() {
 		for (RemoteClient connection : remoteClients) {
 			if (connection.isConnected()) {
 				connection.closeConnection();
@@ -94,7 +109,7 @@ public class Server {
 	 * Sends a message to everybody on the server
 	 * @param message The message to send
 	 */
-	public static void broadcastMessage(String message, RemoteClient... excludedClients) {
+	public void broadcastMessage(String message, RemoteClient... excludedClients) {
 		for (RemoteClient client : remoteClients) {
 			if (client.isConnected() && !Arrays.asList(excludedClients).contains(client)) {
 				client.getWriter().println(message);
@@ -107,7 +122,7 @@ public class Server {
 	 * @param address InetAddress of the client
 	 * @return The found client. Null if none exist
 	 */
-	private static RemoteClient findClient(InetAddress address) {
+	private RemoteClient findClient(InetAddress address) {
 		for (RemoteClient connection : remoteClients) {
 			if (connection.getAddress().equals(address)) {
 				return connection;
@@ -123,7 +138,7 @@ public class Server {
 	 * @param x X ordinate of the tile
 	 * @return True if a player is on the specified tile, false otherwise
 	 */
-	public static boolean playerOnTile(int y, int x) {
+	public boolean playerOnTile(int y, int x) {
 		boolean hit = false;
 		for (RemoteClient connection : remoteClients) {
 			if (connection != null) {
@@ -138,7 +153,7 @@ public class Server {
 	/**
 	 * Shuts down all connections and ends the game
 	 */
-	public static void shutDown() {
+	public void shutDown() {
 		System.out.println("Game over. Shutting down");
 		gameRunning = false;
 		closeAllConnections();
@@ -149,7 +164,7 @@ public class Server {
 	 * Checks if a stalemate has occurred (i.e. not enough gold for any connected player to finish)
 	 * If it has occurred, the game ends
 	 */
-	public static void checkStalemate() {
+	public void checkStalemate() {
 		boolean hit = false;
 		for (RemoteClient client : remoteClients) {
 			if (client.isConnected()) {

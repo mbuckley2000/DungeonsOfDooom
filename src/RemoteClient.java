@@ -32,29 +32,31 @@ public class RemoteClient implements Runnable, IGameLogic {
 	public void run() {
 		System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
 
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			writer = new PrintWriter(clientSocket.getOutputStream(), true);
-			String input;
+		while (Server.isGameRunning()) {
+			try {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				writer = new PrintWriter(clientSocket.getOutputStream(), true);
+				String input;
 
-			while (connected && Server.isGameRunning()) {
-				Server.checkStalemate();
-				input = reader.readLine();
-				System.out.println(clientSocket.getInetAddress() + "\t\t" + input);
-				if (input != null) {
-					writer.println(parseInput(input));
-				} else {
-					closeConnection();
-
+				while (connected) {
+					Server.checkStalemate();
+					input = reader.readLine();
+					System.out.println(clientSocket.getInetAddress() + "\t\t" + input);
+					if (input != null) {
+						writer.println(parseInput(input));
+					} else {
+						closeConnection();
+					}
 				}
-			}
 
-			System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
-			writer.close();
-			reader.close();
-			clientSocket.close();
-		} catch (IOException e) {
-			connected = false;
+				System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
+				writer.close();
+				reader.close();
+				clientSocket.close();
+			} catch (IOException e) {
+				System.err.println(clientSocket.getInetAddress() + "\t\tSocket exception");
+				connected = false;
+			}
 		}
 	}
 
