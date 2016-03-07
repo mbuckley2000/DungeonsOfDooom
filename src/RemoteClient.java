@@ -20,43 +20,44 @@ public class RemoteClient implements Runnable, IGameLogic {
 	private int collectedGold;
 	private InetAddress address;
 	private PrintWriter writer;
+	private BufferedReader reader;
+	private Server server;
 
-	RemoteClient(Socket clientSocket) {
+	RemoteClient(Server server, Socket clientSocket) {
+		this.server = server;
 		this.clientSocket = clientSocket;
 		connected = true;
 		collectedGold = 0;
 		playerPosition = initialisePlayer();
 		address = clientSocket.getInetAddress();
+		System.out.println(address + "\t\tConnected");
 	}
 
 	public void run() {
-		System.out.println(clientSocket.getInetAddress() + "\t\tConnected");
+		try {
+			reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			writer = new PrintWriter(clientSocket.getOutputStream(), true);
+			String input;
 
-		while (Server.isGameRunning()) {
-			try {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-				writer = new PrintWriter(clientSocket.getOutputStream(), true);
-				String input;
-
-				while (connected) {
-					Server.checkStalemate();
-					input = reader.readLine();
-					System.out.println(clientSocket.getInetAddress() + "\t\t" + input);
-					if (input != null) {
-						writer.println(parseInput(input));
-					} else {
-						closeConnection();
-					}
+			while (connected && server.isGameRunning()) {
+				server.checkStalemate();
+				input = reader.readLine();
+				System.out.println(address + "\t\t" + input);
+				if (input != null) {
+					writer.println(parseInput(input));
+				} else {
+					closeConnection();
 				}
-
-				System.out.println(clientSocket.getInetAddress() + "\t\tDisconnected");
-				writer.close();
-				reader.close();
-				clientSocket.close();
-			} catch (IOException e) {
-				System.err.println(clientSocket.getInetAddress() + "\t\tSocket exception");
-				connected = false;
 			}
+
+			System.out.println(address + "\t\tDisconnected");
+			writer.close();
+			reader.close();
+			clientSocket.close();
+		} catch (IOException e) {
+			System.err.println(address + "\t\tSocket exception");
+			connected = false;
+			run();
 		}
 	}
 
@@ -84,14 +85,14 @@ public class RemoteClient implements Runnable, IGameLogic {
 				return ("FAIL");
 		}
 
-		if (Server.getMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !Server.playerOnTile(newPosition[0], newPosition[1])) {
+		if (server.getMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
 			playerPosition = newPosition;
 			if (checkWin()) {
-				Server.broadcastMessage("Somebody else just won the game", this);
-				Server.broadcastMessage("Get out of my dungeon.", this);
+				server.broadcastMessage("Somebody else just won the game", this);
+				server.broadcastMessage("Get out of my dungeon.", this);
 				writer.println("Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!");
 				closeConnection();
-				Server.shutDown();
+				server.shutDown();
 				return null;
 			}
 			return "SUCCESS";
@@ -107,9 +108,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return The response to be sent back to the player.
 	 */
 	public String pickup() {
-		if (Server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
+		if (server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
 			collectedGold++;
-			Server.getMap().replaceTile(playerPosition[0], playerPosition[1], '.');
+			server.getMap().replaceTile(playerPosition[0], playerPosition[1], '.');
 			return "SUCCESS, GOLD COINS: " + collectedGold;
 		}
 
@@ -118,12 +119,12 @@ public class RemoteClient implements Runnable, IGameLogic {
 
 	public String look() {
 		String output = "";
-		char[][] lookReply = Server.getMap().lookWindow(playerPosition[0], playerPosition[1], 5);
+		char[][] lookReply = server.getMap().lookWindow(playerPosition[0], playerPosition[1], 5);
 		lookReply[2][2] = 'P';
 
 		for (int i = 0; i < lookReply.length; i++) {
 			for (int j = 0; j < lookReply[0].length; j++) {
-				if (Server.playerOnTile(playerPosition[0] - 2 + i, playerPosition[1] - 2 + j)) {
+				if (server.playerOnTile(playerPosition[0] - 2 + i, playerPosition[1] - 2 + j)) {
 					output += 'P';
 				} else {
 					output += lookReply[j][i];
@@ -138,7 +139,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	}
 
 	public boolean gameRunning() {
-		return Server.isGameRunning();
+		return server.isGameRunning();
 	}
 
 	public void quitGame() {
@@ -153,7 +154,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return True if all conditions are met, false otherwise
 	 */
 	private boolean checkWin() {
-		return collectedGold >= Server.getMap().getWin() && Server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
+		return collectedGold >= server.getMap().getWin() && server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
 	}
 
 	public int[] getPlayerPosition() {
@@ -169,15 +170,15 @@ public class RemoteClient implements Runnable, IGameLogic {
 		int[] pos = new int[2];
 		Random rand = new Random();
 
-		pos[0] = rand.nextInt(Server.getMap().getMapHeight() - 1);
-		pos[1] = rand.nextInt(Server.getMap().getMapWidth() - 1);
+		pos[0] = rand.nextInt(server.getMap().getMapHeight() - 1);
+		pos[1] = rand.nextInt(server.getMap().getMapWidth() - 1);
 		int counter = 1;
-		while (Server.getMap().lookAtTile(pos[0], pos[1]) == '#' && !Server.playerOnTile(pos[0], pos[1]) && counter < Server.getMap().getMapHeight() * Server.getMap().getMapWidth()) {
+		while (server.getMap().lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < server.getMap().getMapHeight() * server.getMap().getMapWidth()) {
 			pos[1] = (int) (counter * Math.cos(counter));
 			pos[0] = (int) (counter * Math.sin(counter));
 			counter++;
 		}
-		if (Server.getMap().lookAtTile(pos[0], pos[1]) == '#') {
+		if (server.getMap().lookAtTile(pos[0], pos[1]) == '#') {
 			System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
 			closeConnection();
 			return null;
@@ -216,7 +217,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	}
 
 	public int getGoldNeeded() {
-		return (Server.getMap().getWin() - collectedGold);
+		return (server.getMap().getWin() - collectedGold);
 	}
 
 
@@ -227,7 +228,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 
 	public void reconnect(Socket clientSocket) {
 		this.clientSocket = clientSocket;
-		if (Server.playerOnTile(playerPosition[0], playerPosition[1])) {
+		if (server.playerOnTile(playerPosition[0], playerPosition[1])) {
 			//There is a player on out tile! Re-initialise player position
 			playerPosition = initialisePlayer();
 		}

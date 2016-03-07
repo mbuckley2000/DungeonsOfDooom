@@ -16,7 +16,7 @@ import java.net.Socket;
  */
 public class Client implements IGameLogic {
 	private final int port = 40004;
-	private final String address = "138.38.133.97";
+	private final String address = "localhost";
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;

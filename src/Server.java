@@ -1,5 +1,5 @@
 /**
- * Static server class.
+ * Server Class
  * Receives incoming connections and spawns a RemoteClient thread for each one
  * Keeps a collection of all connections to be used for player collision checking and broadcast messages etc..
  * Clients are PERSISTENT. When a client disconnects, all data is kept and their connected flag set to false
@@ -31,7 +31,7 @@ public class Server {
 	public Server() {
 		try {
 			serverSocket = new ServerSocket(port);
-			System.out.println("Listening for remoteClients");
+			System.out.println("Listening for remote client connections");
 
 			gameRunning = true;
 
@@ -40,7 +40,6 @@ public class Server {
 			map = new Map();
 			map.readMap(new File("maps/maze.txt"));
 
-			update();
 		} catch (IOException e) {
 			System.err.println("Error starting server");
 			System.exit(0);
@@ -52,22 +51,23 @@ public class Server {
 	 */
 	public static void main(String args[]) {
 		Server server = new Server();
+		server.update();
 	}
 
-	private void update() {
+	public void update() {
 		try {
 			while (gameRunning) {
 				Socket clientSocket = serverSocket.accept();
 				System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
 
-				RemoteClient client = findClient(clientSocket.getInetAddress());
-				if (client == null) {
-					client = new RemoteClient(clientSocket);
-					remoteClients.add(client);
-					new Thread(client).start();
+				RemoteClient remoteClient = findClient(clientSocket.getInetAddress());
+				if (remoteClient == null) {
+					remoteClient = new RemoteClient(this, clientSocket);
+					remoteClients.add(remoteClient);
+					new Thread(remoteClient).start();
 				} else {
-					if (!client.isConnected()) {
-						client.reconnect(clientSocket);
+					if (!remoteClient.isConnected()) {
+						remoteClient.reconnect(clientSocket);
 						new Thread(findClient(clientSocket.getInetAddress())).start();
 					} else {
 						System.out.println(clientSocket.getInetAddress() + "\t\tConnection refused. Address already connected");
@@ -76,8 +76,12 @@ public class Server {
 					}
 				}
 			}
+			broadcastMessage("Game is over. Server is shutting down");
+			closeAllConnections();
+			serverSocket.close();
 		} catch (IOException e) {
 			//Couldn't update server
+			e.printStackTrace();
 		}
 	}
 
