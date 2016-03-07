@@ -3,20 +3,20 @@ import java.util.Stack;
 /**
  * Created by matt on 03/03/2016.
  */
-public class TraverseTask implements AITask {
+public class BotTraverseTask implements BotTask {
 	private Bot bot;
-	private AIMap map;
+	private BotMap map;
 	private int[] destination;
 	private boolean running;
 
-	public TraverseTask(Bot bot, AIMap map, int[] destination) {
+	public BotTraverseTask(Bot bot, BotMap map, int[] destination) {
 		this.bot = bot;
 		this.map = map;
 		this.destination = destination;
 		running = true;
 	}
 
-	private char getMovement(MapTile t1, MapTile t2) {
+	private char getMovement(BotMapTile t1, BotMapTile t2) {
 		char dir = 0;
 		if (t2.getX() - t1.getX() > 0) {
 			dir = 'E';
@@ -31,13 +31,13 @@ public class TraverseTask implements AITask {
 	}
 
 	public String getNextCommand() {
-		System.out.println("TraverseTask command get");
+		System.out.println("BotTraverseTask command get");
 
 		if (!map.tileReachable(bot.getPosition(), destination)) {
 			running = false;
 			return null;
 		} else {
-			Stack<MapTile> path = map.getPath(bot.getPosition(), destination);
+			Stack<BotMapTile> path = map.getPath(bot.getPosition(), destination);
 			return "MOVE " + getMovement(path.pop(), path.peek());
 		}
 	}

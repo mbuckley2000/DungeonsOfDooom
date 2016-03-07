@@ -11,7 +11,7 @@ import java.util.Stack;
  * @author mb2070
  * @since 29/02/2016
  */
-public class AIMap {
+public class BotMap {
 	private final int lookSize = 5;
 	private final int offset = 200; //Large array to handle any map size;
 	private char[][] map;
@@ -20,8 +20,9 @@ public class AIMap {
 
 	/**
 	 * Constructs the AI Map
+	 * Initialises the bounds to the middle of the map
 	 */
-	public AIMap() {
+	public BotMap() {
 		map = new char[offset * 2][offset * 2];
 		bounds = new int[4];
 		empty = true;
@@ -44,14 +45,14 @@ public class AIMap {
 	}
 
 	/**
-	 * Finds a MapTile object in a given Set using it's co-ordinates. Used for pathfinding
+	 * Finds a BotMapTile object in a given Set using it's co-ordinates. Used for pathfinding
 	 *
 	 * @param set     Set of MapTiles to search
-	 * @param tilePos Coordinates of MapTile to find
-	 * @return The found MapTile object, or null if there is no such tile in the set
+	 * @param tilePos Coordinates of BotMapTile to find
+	 * @return The found BotMapTile object, or null if there is no such tile in the set
 	 */
-	private MapTile findInSet(HashSet<MapTile> set, int[] tilePos) {
-		for (MapTile t : set) {
+	private BotMapTile findInSet(HashSet<BotMapTile> set, int[] tilePos) {
+		for (BotMapTile t : set) {
 			if (t.getX() == tilePos[1] && t.getY() == tilePos[0]) {
 				return t;
 			}
@@ -153,7 +154,7 @@ public class AIMap {
 		int offsetY = y + offset;
 		int offsetX = x + offset;
 
-		if (tileInBounds(y, x)) {
+		if (tileInArrayBounds(y, x)) {
 			map[offsetY][offsetX] = tileType;
 			//Adjust bounds
 			if (offsetY < bounds[0]) bounds[0] = offsetY;
@@ -172,7 +173,7 @@ public class AIMap {
 	 * @return The tile type, or X if the tile is out of bounds
 	 */
 	public char getTile(int y, int x) {
-		if (tileInBounds(y, x)) {
+		if (tileInArrayBounds(y, x)) {
 			return (map[y + offset][x + offset]);
 		} else {
 			return 'X';
@@ -200,72 +201,76 @@ public class AIMap {
 
 
 	/**
-	 * A* pathfinding implementation to find a path on the AIMap from the specified start location to the specified end location
+	 * A* pathfinding implementation to find a path from the specified start location to the specified end location
 	 * @param start Start location
 	 * @param end End location
-	 * @return The path int he form of a stack of map tiles. Null if no path is found
+	 * @return The path in the form of a stack of MapTiles. Null if no path is found
 	 */
-	public Stack<MapTile> getPath(int[] start, int[] end) {
+	public Stack<BotMapTile> getPath(int[] start, int[] end) {
 		//A* pathfinding
-		HashSet<MapTile> closedList = new HashSet<>();
-		HashSet<MapTile> openList = new HashSet<>();
+		HashSet<BotMapTile> closedList = new HashSet<>();
+		HashSet<BotMapTile> openList = new HashSet<>();
 
 		//Init
-		MapTile startTile = new MapTile(start);
-		MapTile endTile = new MapTile(end);
+		BotMapTile startTile = new BotMapTile(start);
+		BotMapTile endTile = new BotMapTile(end);
 		startTile.setH(startTile.getManhattanDistanceTo(endTile));
 		startTile.setG(0);
 		openList.add(startTile);
 
 		while (!openList.isEmpty()) {
 			//Get best tile and add to closed list
-			MapTile bestTile = findLowestScore(openList);
+			BotMapTile bestTile = findLowestScore(openList);
 			closedList.add(bestTile);
-			//System.out.println("Added to closedList:" + bestTile.toString());
 			openList.remove(bestTile);
 
-			if (listContains(closedList, endTile)) {
-				//System.out.println("Found the last tile.");
+			if (setContains(closedList, endTile)) {
+				//Found the destination tile
 				break;
 			}
 
 			//Check and score adjacent tiles
-			for (MapTile t : findAdjacentWalkableTiles(bestTile)) {
-				if (!listContains(closedList, t)) {
-					if (!listContains(openList, t)) {
+			for (BotMapTile t : findAdjacentWalkableTiles(bestTile)) {
+				if (!setContains(closedList, t)) {
+					if (!setContains(openList, t)) {
 						//Calculate Score
 						t.setG(bestTile.getG() + 1);
 						t.setH(t.getManhattanDistanceTo(endTile));
 						t.setParent(bestTile);
 						openList.add(t);
-						//System.out.println("Added to openList:" + t.toString());
 					}
 				}
 			}
 		}
 
 		//Reverse engineer the path
-		Stack<MapTile> path = new Stack<>();
-		MapTile lastTile = findInSet(closedList, end);
+		Stack<BotMapTile> path = new Stack<>();
+		BotMapTile lastTile = findInSet(closedList, end);
 		if (lastTile != null) {
 			while (lastTile != null) {
 				path.add(lastTile);
 				lastTile = lastTile.getParent();
 			}
-			//System.out.println("Found path! Number of tiles:" + path.size());
 			if (path.size() > 1) {
 				return path;
 			} else {
 				return null;
 			}
 		} else {
-			//System.out.println("Unable to find path");
 			return null;
 		}
 	}
 
-	private boolean listContains(HashSet<MapTile> list, MapTile tile) {
-		for (MapTile t : list) {
+
+	/**
+	 * Returns true if the given set contains a tile with the same co-ordinates as the given tile. Used for pathfinding
+	 *
+	 * @param set  Set of tiles to search
+	 * @param tile Tile to search for
+	 * @return True if the given set contains a tile with the same co-ordinates as the given tile. False otherwise
+	 */
+	private boolean setContains(HashSet<BotMapTile> set, BotMapTile tile) {
+		for (BotMapTile t : set) {
 			if (t.getX() == tile.getX() && t.getY() == tile.getY()) {
 				return true;
 			}
@@ -273,13 +278,26 @@ public class AIMap {
 		return false;
 	}
 
+	/**
+	 * Checks whether a path can be calculated from the given start tile to the given end tile
+	 * NOTE: if a tile is not reachable with the map in its current state, it may be reachable after more of the map is discovered
+	 * @param start Start of the desired path
+	 * @param end End of the desired path
+	 * @return True if a path is possible, false otherwise
+	 */
 	public boolean tileReachable(int[] start, int[] end) {
 		return (getPath(start, end) != null);
 	}
 
-	private MapTile findLowestScore(HashSet<MapTile> openList) {
-		MapTile lowest = null;
-		for (MapTile tile : openList) {
+	/**
+	 * Finds the tile with the lowest score in the given set. Used for pathfinding
+	 *
+	 * @param set The set of tiles to search
+	 * @return The tile with the lowest score in the given set
+	 */
+	private BotMapTile findLowestScore(HashSet<BotMapTile> set) {
+		BotMapTile lowest = null;
+		for (BotMapTile tile : set) {
 			if (lowest == null) {
 				lowest = tile;
 			} else if (lowest.getScore() > tile.getScore()) {
@@ -289,31 +307,54 @@ public class AIMap {
 		return lowest;
 	}
 
-	public Set<MapTile> findAdjacentWalkableTiles(MapTile tile) {
-		Set<MapTile> set = new HashSet<>();
+	/**
+	 * Returns a set of all walkable tiles adjacent to the given tile. Used for pathfinding
+	 *
+	 * @param tile The given tile
+	 * @return Set of all walkable tiles adjacent to the given tile. Used for pathfinding
+	 */
+	public Set<BotMapTile> findAdjacentWalkableTiles(BotMapTile tile) {
+		Set<BotMapTile> set = new HashSet<>();
 		int x = tile.getX();
 		int y = tile.getY();
 
 		if (tileWalkable(y, x + 1))
-				set.add(new MapTile(x + 1, y));
+				set.add(new BotMapTile(x + 1, y));
 		if (tileWalkable(y, x - 1))
-				set.add(new MapTile(x - 1, y));
+				set.add(new BotMapTile(x - 1, y));
 		if (tileWalkable(y + 1, x))
-				set.add(new MapTile(x, y + 1));
+				set.add(new BotMapTile(x, y + 1));
 		if (tileWalkable(y - 1, x))
-				set.add(new MapTile(x, y - 1));
+			set.add(new BotMapTile(x, y - 1));
 
 		return set;
 	}
 
+	/**
+	 * Checks if a tile is walkable. Used for pathfinding
+	 * NOTE: Undiscovered tiles are assumed to be walkable!
+	 * @param y Position of tile
+	 * @param x Position of tile
+	 * @return True if the tile is walkable, false otherwise
+	 */
 	public boolean tileWalkable(int y, int x) {
-		return tileInBounds(y, x) && (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
+		return tileInArrayBounds(y, x) && (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
 	}
 
-	public boolean tileInBounds(int y, int x) {
+	/**
+	 * Checks if a tile is inside the bounds of the map array
+	 * @param y Position of tile
+	 * @param x Position of tile
+	 * @return True if the tile is inside the bounds of the map array, false otherwise
+	 */
+	public boolean tileInArrayBounds(int y, int x) {
 		return (y + offset > 0 && x + offset > 0 && y + offset < map.length && x + offset < map.length);
 	}
 
+	/**
+	 * Checks if the map has been updated, or if it is still in an empty state
+	 * @return True if the map is empty, false otherwise
+	 */
 	public boolean isEmpty() {
 		return empty;
 	}

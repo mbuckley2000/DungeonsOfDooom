@@ -5,7 +5,7 @@ import java.net.SocketException;
 /**
  * Created by matt on 25/02/2016.
  */
-public class OutputClient implements Runnable {
+public class ClientOutputThread implements Runnable {
 	final int lookSize = 5;
 	BufferedReader reader;
 	boolean running;
@@ -15,7 +15,7 @@ public class OutputClient implements Runnable {
 	boolean lastBoolResponse;
 	private int lastGoldResponse = -1;
 
-	public OutputClient(BufferedReader reader) {
+	public ClientOutputThread(BufferedReader reader) {
 		this.reader = reader;
 		running = true;
 		connected = true;

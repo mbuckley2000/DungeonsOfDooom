@@ -8,16 +8,16 @@ import java.net.Socket;
 /**
  * Created by matt on 24/02/2016.
  */
-public class GameLogicClient implements IGameLogic {
+public class Client implements IGameLogic {
 	private final int port = 40004;
 	private final String address = "138.38.185.249"; //Ricky's IP: 138.38.153.79  James' IP 138.38.159.174   My ip 138.38.193.197
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;
 	private boolean connected;
-	private OutputClient outputClient;
+	private ClientOutputThread clientOutputThread;
 
-	public GameLogicClient() {
+	public Client() {
 		int connectionAttempts = 0;
 		while (!connected && connectionAttempts < 5) {
 			connectionAttempts++;
@@ -29,10 +29,10 @@ public class GameLogicClient implements IGameLogic {
 				writer = new PrintWriter(socket.getOutputStream(), true);
 
 				connected = true;
-				outputClient = new OutputClient(reader);
-				new Thread(outputClient).start();
+				clientOutputThread = new ClientOutputThread(reader);
+				new Thread(clientOutputThread).start();
 
-				Thread.sleep(1000); //Sleep to give outputClient thread time to validate connection
+				Thread.sleep(1000); //Sleep to give outputClientThread time to validate connection
 			} catch (ConnectException e) {
 				System.err.println("Unable to connect: " + e.getMessage());
 				System.err.println("Attempting to re-establish connection");
@@ -62,8 +62,8 @@ public class GameLogicClient implements IGameLogic {
 		return connected;
 	}
 
-	public OutputClient getOutputClient() {
-		return outputClient;
+	public ClientOutputThread getClientOutputThread() {
+		return clientOutputThread;
 	}
 
 	public String hello() {
@@ -87,13 +87,13 @@ public class GameLogicClient implements IGameLogic {
 	}
 
 	public boolean gameRunning() {
-		return connected && outputClient.isConnected();
+		return connected && clientOutputThread.isConnected();
 	}
 
 	public void close() {
 		try {
 			writer.close();
-			outputClient.stop();
+			clientOutputThread.stop();
 			reader.close();
 			socket.close();
 		} catch (Exception e) {

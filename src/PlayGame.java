@@ -1,11 +1,11 @@
 import java.util.Scanner;
 
 public class PlayGame {
-	protected GameLogicClient logic;
+	protected Client logic;
 	protected Scanner userInput;
 
 	public PlayGame(){
-		logic = new GameLogicClient();
+		logic = new Client();
 		if (logic.isConnected()) {
 			System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
 			userInput = new Scanner(System.in);

@@ -2,17 +2,17 @@ import java.util.*;
 
 public class Bot extends PlayGame {
 	private final int sleepMax = 2000;
-	Stack<AITask> taskStack;
-	AITask exploreTask;
+	Stack<BotTask> taskStack;
+	BotTask exploreTask;
 	String command;
 	private Random random;
-	private AIMap map;
+	private BotMap map;
 	private int[] position = {0, 0};
 	public final Comparator<int[]> distanceFromBot =
 			new Comparator<int[]>() {
 				public int compare(int[] t1, int[] t2) {
-					int t1Dist = AIMap.getManhattanDistance(t1, position);
-					int t2Dist = AIMap.getManhattanDistance(t2, position);
+					int t1Dist = BotMap.getManhattanDistance(t1, position);
+					int t2Dist = BotMap.getManhattanDistance(t2, position);
 					if (t1Dist == t2Dist) {
 						return 0;
 					} else if (t1Dist > t2Dist) {
@@ -28,9 +28,9 @@ public class Bot extends PlayGame {
 	public Bot() {
 		super();
 		random = new Random();
-		map = new AIMap();
+		map = new BotMap();
 		taskStack = new Stack<>();
-		exploreTask = new ExploreTask(map, this);
+		exploreTask = new BotExploreTask(map, this);
 		taskStack.add(exploreTask);
 		command = "HELLO";
 	}
@@ -44,7 +44,7 @@ public class Bot extends PlayGame {
 		return goldNeeded;
 	}
 
-	public void addTask(AITask task) {
+	public void addTask(BotTask task) {
 		taskStack.add(task);
 	}
 
@@ -90,7 +90,7 @@ public class Bot extends PlayGame {
 	private void updatePosition() {
 		if (command.contains("MOVE")) {
 			stepsSinceLastLook++;
-			if (logic.getOutputClient().getLastBoolResponse()) {
+			if (logic.getClientOutputThread().getLastBoolResponse()) {
 				stepped(command.charAt(5));
 				System.out.println("Bot position: " + position[1] + ", " + position[0]);
 			}
@@ -99,7 +99,7 @@ public class Bot extends PlayGame {
 
 	private void updateMap() {
 		if (command.equals("LOOK")) {
-			map.update(logic.getOutputClient().getLastLookWindow(), position);
+			map.update(logic.getClientOutputThread().getLastLookWindow(), position);
 			System.out.println("Updated internal map: ");
 			map.print(position);
 		}
@@ -107,7 +107,7 @@ public class Bot extends PlayGame {
 
 	private void updateGoldToWin() {
 		if (command.equals("HELLO")) {
-			goldNeeded = logic.getOutputClient().getLastGoldResponse();
+			goldNeeded = logic.getClientOutputThread().getLastGoldResponse();
 		}
 	}
 

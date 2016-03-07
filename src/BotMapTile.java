@@ -2,19 +2,19 @@
  * Created by matt on 02/03/2016.
  * Used for AI pathfinding
  */
-public class MapTile {
+public class BotMapTile {
 	private int g;
 	private int h;
-	private MapTile parent;
+	private BotMapTile parent;
 	private int x;
 	private int y;
 
-	public MapTile(int x, int y) {
+	public BotMapTile(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public MapTile(int[] position) {
+	public BotMapTile(int[] position) {
 		this.y = position[0];
 		this.x = position[1];
 	}
@@ -31,15 +31,15 @@ public class MapTile {
 		this.h = h;
 	}
 
-	public MapTile getParent() {
+	public BotMapTile getParent() {
 		return parent;
 	}
 
-	public void setParent(MapTile parent) {
+	public void setParent(BotMapTile parent) {
 		this.parent = parent;
 	}
 
-	public int getManhattanDistanceTo(MapTile tile) {
+	public int getManhattanDistanceTo(BotMapTile tile) {
 		return Math.abs(tile.x - x) + Math.abs(tile.y - y);
 	}
 
