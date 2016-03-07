@@ -27,17 +27,17 @@ public class PlayGame {
 
 	public void update(){
 		while (logic.gameRunning()) {
-			parseCommand(readUserInput());
+			parseInput(readUserInput());
 		}
 		logic.close();
 	}
 
 	/**
 	 * Parsing and Evaluating the User Input.
-	 * @param readUserInput input the user generates
+	 * @param input input the user generates
 	 */
-	protected void parseCommand(String readUserInput) {
-		String [] command = readUserInput.trim().split(" ");
+	protected void parseInput(String input) {
+		String[] command = input.trim().split(" ");
 
 		switch (command[0].toUpperCase()){
 			case "HELLO":

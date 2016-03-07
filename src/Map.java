@@ -200,4 +200,16 @@ public class Map {
 		return map.length;
 	}
 
+	public int goldLeft() {
+		int goldCount = 0;
+		for (char[] y : map) {
+			for (char x : y) {
+				if (x == 'G') {
+					goldCount++;
+				}
+			}
+		}
+		return goldCount;
+	}
+
 }

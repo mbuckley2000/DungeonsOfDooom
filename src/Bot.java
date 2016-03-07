@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class Bot extends PlayGame {
-	private final int sleepMax = 2000;
+	private final int sleepMax = 50;
 	Stack<BotTask> taskStack;
 	BotTask exploreTask;
 	String command;
@@ -73,7 +73,7 @@ public class Bot extends PlayGame {
 			updateMap();
 			updateGoldToWin();
 			command = botAction().toUpperCase();
-			parseCommand(command);
+			parseInput(command);
 			System.out.println(command);
 			try {
 				Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
