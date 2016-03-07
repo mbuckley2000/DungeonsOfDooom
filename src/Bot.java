@@ -1,13 +1,13 @@
 import java.util.*;
 
 public class Bot extends PlayGame {
-	private final int sleepMax = 2000;
+	private final int sleepMax = 100;
 	Stack<BotTask> taskStack;
 	BotTask exploreTask;
 	String command;
 	private Random random;
 	private BotMap map;
-	private int[] position = {0, 0};
+	private int[] position;
 	public final Comparator<int[]> distanceFromBot =
 			new Comparator<int[]>() {
 				public int compare(int[] t1, int[] t2) {
@@ -22,11 +22,14 @@ public class Bot extends PlayGame {
 					}
 				}
 			};
-	private int stepsSinceLastLook = 0;
-	private int goldNeeded = 10;
+	private int stepsSinceLastLook;
+	private int goldNeeded;
 
 	public Bot() {
 		super();
+		position = new int[]{0, 0};
+		stepsSinceLastLook = 0;
+		goldNeeded = 10;
 		random = new Random();
 		map = new BotMap();
 		taskStack = new Stack<>();

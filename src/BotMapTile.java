@@ -6,8 +6,8 @@
  * @since 02/03/2016
  */
 public class BotMapTile {
-	private int g;
-	private int h;
+	private int g; //Used for pathfinding score
+	private int h; //Used for pathfinding score
 	private BotMapTile parent;
 	private int x;
 	private int y;

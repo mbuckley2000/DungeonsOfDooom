@@ -45,6 +45,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 					writer.println(parseInput(input));
 				} else {
 					closeConnection();
+
 				}
 			}
 
@@ -53,7 +54,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 			reader.close();
 			clientSocket.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			connected = false;
 		}
 	}
 
@@ -84,8 +85,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 		if (Server.getMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !Server.playerOnTile(newPosition[0], newPosition[1])) {
 			playerPosition = newPosition;
 			if (checkWin()) {
-				Server.broadcastMessage("Somebody else just won the game");
-				Server.broadcastMessage("Get out of my dungeon.");
+				Server.broadcastMessage("Somebody else just won the game", this);
+				Server.broadcastMessage("Get out of my dungeon.", this);
 				writer.println("Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!");
 				closeConnection();
 				Server.shutDown();

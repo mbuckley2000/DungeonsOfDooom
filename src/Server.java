@@ -16,11 +16,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Server {
-	private static int port = 4362;
+	private static int port = 40004;
 	private static Set<RemoteClient> remoteClients = new HashSet<>();
 	private static boolean gameRunning;
 	private static Map map;
@@ -93,10 +94,10 @@ public class Server {
 	 * Sends a message to everybody on the server
 	 * @param message The message to send
 	 */
-	public static void broadcastMessage(String message) {
-		for (RemoteClient connection : remoteClients) {
-			if (connection.isConnected()) {
-				connection.getWriter().println(message);
+	public static void broadcastMessage(String message, RemoteClient... excludedClients) {
+		for (RemoteClient client : remoteClients) {
+			if (client.isConnected() && !Arrays.asList(excludedClients).contains(client)) {
+				client.getWriter().println(message);
 			}
 		}
 	}

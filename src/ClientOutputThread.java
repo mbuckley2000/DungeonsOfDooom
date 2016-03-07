@@ -11,16 +11,18 @@ import java.net.SocketException;
  * @since 25/02/2016
  */
 public class ClientOutputThread implements Runnable {
-	final int lookSize = 5;
-	BufferedReader reader;
-	boolean running;
-	boolean connected;
-	char[][] lastLookWindow;
-	int lookWindowYIndex = 0;
-	boolean lastBoolResponse;
-	private int lastGoldResponse = -1;
+	private final int lookSize = 5;
+	private BufferedReader reader;
+	private boolean running;
+	private boolean connected;
+	private char[][] lastLookWindow;
+	private int lookWindowYIndex;
+	private boolean lastBoolResponse;
+	private int lastGoldResponse;
 
 	public ClientOutputThread(BufferedReader reader) {
+		lookWindowYIndex = 0;
+		lastGoldResponse = -1;
 		this.reader = reader;
 		running = true;
 		connected = true;

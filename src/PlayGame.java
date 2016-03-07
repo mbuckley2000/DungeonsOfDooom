@@ -1,8 +1,8 @@
 import java.util.Scanner;
 
 public class PlayGame {
-	protected Client logic;
-	protected Scanner userInput;
+	private Client logic;
+	private Scanner userInput;
 
 	public PlayGame() {
 		logic = new Client();
