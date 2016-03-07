@@ -90,7 +90,7 @@ public class BotMap {
 	private void replace(int posY, int posX, char[][] lookWindow) {
 		for (int x = 0; x < lookSize; x++) {
 			for (int y = 0; y < lookSize; y++) {
-				if (lookWindow[y][x] != 'X' && lookWindow[y][x] != 'P') {
+				if (lookWindow[y][x] != 'X' && !(x == lookSize / 2 && y == lookSize / 2)) {
 					setTile(posY + y, posX + x, lookWindow[y][x]);
 				}
 			}
@@ -146,7 +146,7 @@ public class BotMap {
 	 * @return True if the tile has been discovered, false otherwise
 	 */
 	public boolean tileDiscovered(int y, int x) {
-		return map[y][x] != 'G' && map[y][x] != 'E' && map[y][x] != '#' && map[y][x] != '.';
+		return map[y][x] != 'G' && map[y][x] != 'E' && map[y][x] != '#' && map[y][x] != '.' && map[y][x] != 'P';
 	}
 
 	/**

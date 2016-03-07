@@ -30,7 +30,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 		collectedGold = 0;
 		playerPosition = initialisePlayer();
 		address = clientSocket.getInetAddress();
-		System.out.println(address + "\t\tConnected");
 	}
 
 	public void run() {
@@ -38,6 +37,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 			reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
 			String input;
+
+			System.out.println(address + "\t\tConnected");
+			writer.println("Welcome to the dungeon! Mwuahaha");
 
 			while (connected && server.isGameRunning()) {
 				server.checkStalemate();
@@ -55,9 +57,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 			reader.close();
 			clientSocket.close();
 		} catch (IOException e) {
-			System.err.println(address + "\t\tSocket exception");
 			connected = false;
-			run();
+			System.out.println(address + "\t\tDisconnected");
 		}
 	}
 
@@ -142,8 +143,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 		return server.isGameRunning();
 	}
 
-	public void quitGame() {
+	public String quitGame() {
 		closeConnection();
+		return "SUCCESS";
 	}
 
 	//Misc
@@ -207,9 +209,10 @@ public class RemoteClient implements Runnable, IGameLogic {
 				answer = pickup();
 				break;
 			case "LOOK":
-				answer = look().replaceAll(".(?!$)", "$0  ");
+				answer = look();//.replaceAll(".(?!$)", "$0  ");
 				break;
 			case "QUIT":
+				writer.println("Thanks for playing!");
 				closeConnection();
 				break;
 		}

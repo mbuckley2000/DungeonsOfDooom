@@ -14,9 +14,9 @@ import java.net.Socket;
  * @author mb2070
  * @since 24/02/2016
  */
-public class Client implements IGameLogic {
+public class Client {
 	private final int port = 40004;
-	private final String address = "localhost";
+	private final String address = "138.38.192.221";
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;
@@ -64,32 +64,8 @@ public class Client implements IGameLogic {
 		}
 	}
 
-	public boolean isConnected() {
-		return connected;
-	}
-
 	public ClientOutputThread getClientOutputThread() {
 		return clientOutputThread;
-	}
-
-	public String hello() {
-		send("HELLO");
-		return null;
-	}
-
-	public String move(char direction) {
-		send("MOVE " + direction);
-		return null;
-	}
-
-	public String pickup() {
-		send("PICKUP");
-		return null;
-	}
-
-	public String look() {
-		send("LOOK");
-		return null;
 	}
 
 	public boolean gameRunning() {
@@ -107,16 +83,7 @@ public class Client implements IGameLogic {
 		}
 	}
 
-	public void quitGame() {
-		try {
-			writer.println("QUIT");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		connected = false;
-	}
-
-	private void send(String string) {
+	public void send(String string) {
 		writer.println(string);
 	}
 }

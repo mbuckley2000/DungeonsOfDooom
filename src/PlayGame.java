@@ -1,12 +1,12 @@
 import java.util.Scanner;
 
 public class PlayGame {
-	protected Client logic;
+	protected Client client;
 	private Scanner userInput;
 
 	public PlayGame() {
-		logic = new Client();
-		if (logic.isConnected()) {
+		client = new Client();
+		if (client.gameRunning()) {
 			System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
 			userInput = new Scanner(System.in);
 		}
@@ -27,10 +27,10 @@ public class PlayGame {
 	}
 
 	public void update() {
-		while (logic.gameRunning()) {
+		while (client.gameRunning()) {
 			parseInput(readUserInput());
 		}
-		logic.close();
+		client.close();
 	}
 
 	/**
@@ -43,26 +43,25 @@ public class PlayGame {
 
 		switch (command[0].toUpperCase()) {
 			case "HELLO":
-				logic.hello();
+				client.send("HELLO");
 				break;
 			case "MOVE":
 				if (command.length == 2) {
-					logic.move(command[1].toUpperCase().charAt(0));
+					client.send("MOVE " + command[1].toUpperCase().charAt(0));
 				}
 				break;
 			case "PICKUP":
-				logic.pickup();
+				client.send("PICKUP");
 				break;
 			case "LOOK":
-				logic.look();
+				client.send("LOOK");
 				break;
 			case "QUIT":
-				logic.quitGame();
+				client.send("QUIT");
 				break;
 			default:
 				System.out.println("Invalid command: " + command[0]);
 				break;
 		}
 	}
-
 }

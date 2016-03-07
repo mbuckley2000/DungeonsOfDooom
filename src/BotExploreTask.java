@@ -20,6 +20,13 @@ public class BotExploreTask implements BotTask {
 		this.map = map;
 	}
 
+	/**
+	 * Returns a movement command from the TraverseTask.
+	 * Gets a new destination when required
+	 * Spawns gold get tasks and traverse tasks to exits when needed.
+	 *
+	 * @return
+	 */
 	public String getNextCommand() {
 		System.out.println("BotExploreTask command get");
 
@@ -60,6 +67,9 @@ public class BotExploreTask implements BotTask {
 		return botTraverseTask.getNextCommand();
 	}
 
+	/**
+	 * Picks the nearest discovered, reachable tile that is adjacent to an undiscovered one, and updates the TraverseTask accordingly
+	 */
 	private void getNewDestination() {
 		int[] bestTile = null;
 
@@ -93,6 +103,10 @@ public class BotExploreTask implements BotTask {
 		}
 	}
 
+	/**
+	 * Checks if a new command is available
+	 * @return True if a new command is available
+	 */
 	public boolean hasNextCommand() {
 		int[] mapSize = new int[2];
 		mapSize[0] = map.getBounds()[3] - map.getBounds()[1];

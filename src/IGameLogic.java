@@ -13,5 +13,5 @@ public interface IGameLogic {
 
 	boolean gameRunning();
 
-	void quitGame();
+	String quitGame();
 }

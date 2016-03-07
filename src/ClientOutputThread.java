@@ -1,6 +1,4 @@
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.SocketException;
 
 /**
  * ClientOutputThread for the Client
@@ -37,7 +35,6 @@ public class ClientOutputThread implements Runnable {
 				string = reader.readLine();
 				if (string == null) {
 					connected = false;
-					System.err.println("Lost connection to server. Shutting down.");
 					break;
 				} else {
 					System.out.println(string);
@@ -56,11 +53,8 @@ public class ClientOutputThread implements Runnable {
 						lastBoolResponse = false;
 					}
 				}
-			} catch (SocketException e) {
+			} catch (Exception e) {
 				connected = false;
-				System.err.println("Lost connection to server. Shutting down.");
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 	}

@@ -71,7 +71,7 @@ public class Bot extends PlayGame {
 
 	public void update() {
 		System.out.println("Bot is now running");
-		while (logic.gameRunning()) {
+		while (client.gameRunning()) {
 			updatePosition();
 			updateMap();
 			updateGoldToWin();
@@ -93,7 +93,7 @@ public class Bot extends PlayGame {
 	private void updatePosition() {
 		if (command.contains("MOVE")) {
 			stepsSinceLastLook++;
-			if (logic.getClientOutputThread().getLastBoolResponse()) {
+			if (client.getClientOutputThread().getLastBoolResponse()) {
 				stepped(command.charAt(5));
 				System.out.println("Bot position: " + position[1] + ", " + position[0]);
 			}
@@ -102,7 +102,7 @@ public class Bot extends PlayGame {
 
 	private void updateMap() {
 		if (command.equals("LOOK")) {
-			map.update(logic.getClientOutputThread().getLastLookWindow(), position);
+			map.update(client.getClientOutputThread().getLastLookWindow(), position);
 			System.out.println("Updated internal map: ");
 			map.print(position);
 		}
@@ -110,7 +110,7 @@ public class Bot extends PlayGame {
 
 	private void updateGoldToWin() {
 		if (command.equals("HELLO")) {
-			goldNeeded = logic.getClientOutputThread().getLastGoldResponse();
+			goldNeeded = client.getClientOutputThread().getLastGoldResponse();
 		}
 	}
 

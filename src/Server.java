@@ -38,7 +38,7 @@ public class Server {
 			//Setup
 			//Load map
 			map = new Map();
-			map.readMap(new File("maps/maze.txt"));
+			map.readMap(new File("maps/example_map.txt"));
 
 		} catch (IOException e) {
 			System.err.println("Error starting server");
@@ -47,13 +47,16 @@ public class Server {
 	}
 
 	/**
-	 * Initiates the server and detects new connections, spawning a new thread for each one
+	 * Initiates the server and starts the update loop
 	 */
 	public static void main(String args[]) {
 		Server server = new Server();
 		server.update();
 	}
 
+	/**
+	 * The update loop: detects new connections, spawning a new thread for each one
+	 */
 	public void update() {
 		try {
 			while (gameRunning) {
@@ -85,6 +88,10 @@ public class Server {
 		}
 	}
 
+	/**
+	 * Checks if game is running
+	 * @return True if game is running, false otherwise
+	 */
 	public boolean isGameRunning() {
 		return gameRunning;
 	}
