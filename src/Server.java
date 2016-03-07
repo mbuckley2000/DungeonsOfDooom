@@ -1,5 +1,14 @@
 /**
- * Created by matt on 24/02/2016.
+ * Static server class.
+ * Receives incoming connections and spawns a RemoteClient thread for each one
+ * Keeps a collection of all connections to be used for player collision checking and broadcast messages etc..
+ * Clients are PERSISTENT. When a client disconnects, all data is kept and their connected flag set to false
+ * When they reconnect, they use the same RemoteClient object, with their old data and continue where they left off
+ * If a player is standing where they used to be, they are re-initialised
+ * Provides utility to check for stalemates (not enough gold left for anybody to win)
+ *
+ * @since 24/02/2016
+ * @author mb2070
  */
 
 import java.io.File;
@@ -38,13 +47,14 @@ public class Server {
 			Socket clientSocket = serverSocket.accept();
 			System.out.println(clientSocket.getInetAddress() + "\t\tRequested to connect");
 
-			if (findClient(clientSocket.getInetAddress()) == null) {
-				RemoteClient client = new RemoteClient(clientSocket);
+			RemoteClient client = findClient(clientSocket.getInetAddress());
+			if (client == null) {
+				client = new RemoteClient(clientSocket);
 				remoteClients.add(client);
 				new Thread(client).start();
 			} else {
-				if (!findClient(clientSocket.getInetAddress()).isConnected()) {
-					findClient(clientSocket.getInetAddress()).reconnect(clientSocket);
+				if (!client.isConnected()) {
+					client.reconnect(clientSocket);
 					new Thread(findClient(clientSocket.getInetAddress())).start();
 				} else {
 					System.out.println(clientSocket.getInetAddress() + "\t\tConnection refused. Address already connected");

@@ -6,7 +6,12 @@ import java.net.ConnectException;
 import java.net.Socket;
 
 /**
- * Created by matt on 24/02/2016.
+ * Client class implementing IGameLogic
+ * Can be used in place of the old GameLogic class.
+ * Connects to server, performs very basic input filtering, and sends commands
+ * All output from the server is picked up in a ClientOutputThread to prevent blocking
+ * @since 24/02/2016
+ * @author mb2070
  */
 public class Client implements IGameLogic {
 	private final int port = 40004;

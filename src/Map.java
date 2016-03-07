@@ -1,7 +1,11 @@
 import java.io.*;
 import java.util.ArrayList;
 
-
+/**
+ * Game map
+ * Stores level information
+ * Can be loaded from txt files
+ */
 public class Map {
 	
 	private char[][] map;

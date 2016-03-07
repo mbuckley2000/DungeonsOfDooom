@@ -1,6 +1,9 @@
 /**
- * Created by matt on 02/03/2016.
- * Used for AI pathfinding
+ * Used for Bot pathfinding
+ * Contains an x and y position and a scoring system for pathfinding
+ *
+ * @since 02/03/2016
+ * @author mb2070
  */
 public class BotMapTile {
 	private int g;

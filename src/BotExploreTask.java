@@ -2,7 +2,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Created by matt on 03/03/2016.
+ * A BotTask for exploring the map
+ * Will head toward the nearest reachable undiscovered area using a TraverseTask
+ * If reachable gold is found and needed, it will spawn a RetrieveGoldTask to pick it up
+ * If reachable exit is found and needed, it will spawn a TraverseTask to get there
+
+ * @since 03/03/2016
+ * @author mb2070
  */
 public class BotExploreTask implements BotTask {
 	private BotMap map;

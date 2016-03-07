@@ -3,7 +3,12 @@ import java.io.IOException;
 import java.net.SocketException;
 
 /**
- * Created by matt on 25/02/2016.
+ * ClientOutputThread for the Client
+ * Prints every line it receives from the given BufferedReader to STDOUT
+ * Used by the Client class to print output from server in an asynchronous manner
+ *
+ * @author mb2070
+ * @since 25/02/2016
  */
 public class ClientOutputThread implements Runnable {
 	final int lookSize = 5;

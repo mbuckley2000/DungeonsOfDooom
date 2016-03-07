@@ -7,7 +7,8 @@ import java.net.Socket;
 import java.util.Random;
 
 /**
- * Created by matt on 07/03/2016.
+ * Represents a client connected to the server
+ * Each client gets their own thread, so operations can happen simultaneously
  *
  * @author mb2070
  * @since 07/03/2016

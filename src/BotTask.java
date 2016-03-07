@@ -1,5 +1,5 @@
 /**
- * Interface for bot tasks
+ * Interface for bot tasks. Explained in Bot
  *
  * @author mb2070
  * @since 03/03/2016
