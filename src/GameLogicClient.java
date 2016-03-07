@@ -10,7 +10,7 @@ import java.net.Socket;
  */
 public class GameLogicClient implements IGameLogic {
 	private final int port = 40004;
-	private final String address = "localhst"; //Ricky's IP: 138.38.153.79  James' IP 138.38.159.174   My ip 138.38.193.197
+	private final String address = "138.38.185.249"; //Ricky's IP: 138.38.153.79  James' IP 138.38.159.174   My ip 138.38.193.197
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;
@@ -39,11 +39,13 @@ public class GameLogicClient implements IGameLogic {
 			} catch (IOException e) {
 				System.err.println("Unable to establish IO streams");
 				System.err.println("For debug:");
-				System.err.println("Socket bound: " + socket.isBound());
-				System.err.println("Socket connected: " + socket.isConnected());
-				System.err.println("Socket closed: " + socket.isClosed());
-				System.err.println("Input shutdown: " + socket.isInputShutdown());
-				System.err.println("Output shutdown: " + socket.isOutputShutdown());
+				if (socket != null) {
+					System.err.println("Socket bound: " + socket.isBound());
+					System.err.println("Socket connected: " + socket.isConnected());
+					System.err.println("Socket closed: " + socket.isClosed());
+					System.err.println("Input shutdown: " + socket.isInputShutdown());
+					System.err.println("Output shutdown: " + socket.isOutputShutdown());
+				}
 				System.err.println("Attempting to re-establish connection");
 			} catch (InterruptedException e) {
 				e.printStackTrace();

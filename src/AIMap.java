@@ -4,51 +4,85 @@ import java.util.Set;
 import java.util.Stack;
 
 /**
- * Created by matt on 29/02/2016.
+ * A discoverable map class used by the Bot to keep track of the map structure as well as gold and exit positions
+ * Can be updated by being given the bot position and a look window received at that positions
+ * Includes tile searching and pathfinding functionality
+ *
+ * @author mb2070
+ * @since 29/02/2016
  */
 public class AIMap {
-	final int lookSize = 5;
-	private final int offset = 50;
-	private char[][] map = new char[offset * 2][offset * 2];
-	private int[] bounds = new int[4];
-	private boolean empty = true;
+	private final int lookSize = 5;
+	private final int offset = 200; //Large array to handle any map size;
+	private char[][] map;
+	private int[] bounds;
+	private boolean empty;
 
+	/**
+	 * Constructs the AI Map
+	 */
 	public AIMap() {
+		map = new char[offset * 2][offset * 2];
+		bounds = new int[4];
+		empty = true;
 		bounds[0] = offset;
 		bounds[1] = offset;
 		bounds[2] = offset;
 		bounds[3] = offset;
-		/*
-		for (char[] y : map) {
-			for (char x : y) {
-				x = ' ';
-			}
-		}
-		*/
 	}
 
-	static int getManhattanDistance(int[] start, int[] end) {
-		return Math.abs(start[0] - end[0]) + Math.abs(start[1] - end[1]);
+	/**
+	 * Gets the manhattan distance between two tiles (X dist + Y dist)
+	 * This is the heuristic used for pathfinding
+	 *
+	 * @param t1 Tile 1
+	 * @param t2 Tile 2
+	 * @return Manhattan distance between t1 and t2
+	 */
+	static int getManhattanDistance(int[] t1, int[] t2) {
+		return Math.abs(t1[0] - t2[0]) + Math.abs(t1[1] - t2[1]);
 	}
 
-	private MapTile findInList(HashSet<MapTile> list, int[] tile) {
-		for (MapTile t : list) {
-			if (t.getX() == tile[1] && t.getY() == tile[0]) {
+	/**
+	 * Finds a MapTile object in a given Set using it's co-ordinates. Used for pathfinding
+	 *
+	 * @param set     Set of MapTiles to search
+	 * @param tilePos Coordinates of MapTile to find
+	 * @return The found MapTile object, or null if there is no such tile in the set
+	 */
+	private MapTile findInSet(HashSet<MapTile> set, int[] tilePos) {
+		for (MapTile t : set) {
+			if (t.getX() == tilePos[1] && t.getY() == tilePos[0]) {
 				return t;
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Returns the current bounds of the map. Used because most of the map is empty, and grows from the middle outwards as the bot discovers more tiles
+	 * @return The bounds as an array: (top, left, bottom, right)
+	 */
 	public int[] getBounds() {
 		return bounds;
 	}
 
+	/**
+	 * Updates the map with a given lookWindow and bot position
+	 * @param lookWindow The look window to use
+	 * @param botPos The bot's position when the look window was received
+	 */
 	public void update(char[][] lookWindow, int[] botPos) {
 		empty = false;
 		replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
 	}
 
+	/**
+	 * Replaces a section of the map with a given lookWindow at a given position
+	 * @param posY Given position
+	 * @param posX Given position
+	 * @param lookWindow Given lookWindow
+	 */
 	private void replace(int posY, int posX, char[][] lookWindow) {
 		for (int x = 0; x < lookSize; x++) {
 			for (int y = 0; y < lookSize; y++) {
@@ -59,10 +93,15 @@ public class AIMap {
 		}
 	}
 
-	public int[] findTile(char tile) {
+	/**
+	 * Finds the first occurrence of a tileType in the map
+	 * @param tileType The type of tile to find
+	 * @return The found tile, or null if no such tile is found
+	 */
+	public int[] findTile(char tileType) {
 		for (int y = 0; y < map.length; y++) {
 			for (int x = 0; x < map[0].length; x++) {
-				if (map[y][x] == tile) {
+				if (map[y][x] == tileType) {
 					return new int[]{y - offset, x - offset};
 				}
 			}
@@ -70,16 +109,21 @@ public class AIMap {
 		return null;
 	}
 
-	public ArrayList<int[]> findAllTiles(char tile) {
+	/**
+	 * Finds all occurrences of the given tileType in the map
+	 * @param tileType The type of tile to find
+	 * @return A list of all occurrences of the tile
+	 */
+	public ArrayList<int[]> findAllTiles(char tileType) {
 		ArrayList<int[]> list = new ArrayList<>();
 		for (int y = bounds[0] - 1; y < bounds[2] + 2; y++) {
 			for (int x = bounds[1] - 1; x < bounds[3] + 2; x++) {
-				if (tile != ' ') {
-					if (map[y][x] == tile) {
+				if (tileType != ' ') {
+					if (map[y][x] == tileType) {
 						list.add(new int[]{y - offset, x - offset});
 					}
 				} else {
-					if (tileEmpty(y, x)) {
+					if (tileDiscovered(y, x)) {
 						list.add(new int[]{y - offset, x - offset});
 					}
 				}
@@ -88,16 +132,29 @@ public class AIMap {
 		return list;
 	}
 
-	public boolean tileEmpty(int y, int x) {
+	/**
+	 * Checks if the given tile has been discovered
+	 * @param y Tile position
+	 * @param x Tile position
+	 * @return True if the tile has been discovered, false otherwise
+	 */
+	public boolean tileDiscovered(int y, int x) {
 		return map[y][x] != 'G' && map[y][x] != 'E' && map[y][x] != '#' && map[y][x] != '.';
 	}
 
-	public void setTile(int y, int x, char tile) {
+	/**
+	 * Sets the tile at given coordinates to the given tileType
+	 * Also adjusts the map bounds
+	 * @param y Position of tile
+	 * @param x Position of tile
+	 * @param tileType Given tileType
+	 */
+	public void setTile(int y, int x, char tileType) {
 		int offsetY = y + offset;
 		int offsetX = x + offset;
 
-		if (tileOnMap(y, x)) {
-			map[offsetY][offsetX] = tile;
+		if (tileInBounds(y, x)) {
+			map[offsetY][offsetX] = tileType;
 			//Adjust bounds
 			if (offsetY < bounds[0]) bounds[0] = offsetY;
 			if (offsetX < bounds[1]) bounds[1] = offsetX;
@@ -108,8 +165,14 @@ public class AIMap {
 		}
 	}
 
+	/**
+	 * Returns the tileType at the given location
+	 * @param y Given location
+	 * @param x Given location
+	 * @return The tile type, or X if the tile is out of bounds
+	 */
 	public char getTile(int y, int x) {
-		if (tileOnMap(y, x)) {
+		if (tileInBounds(y, x)) {
 			return (map[y + offset][x + offset]);
 		} else {
 			return 'X';
@@ -118,6 +181,7 @@ public class AIMap {
 
 	/**
 	 * Prints the map in it's currently discovered state. Ignores all other players
+	 * Includes the bot at given position
 	 *
 	 * @param botPosition Current position of the bot
 	 */
@@ -182,7 +246,7 @@ public class AIMap {
 
 		//Reverse engineer the path
 		Stack<MapTile> path = new Stack<>();
-		MapTile lastTile = findInList(closedList, end);
+		MapTile lastTile = findInSet(closedList, end);
 		if (lastTile != null) {
 			while (lastTile != null) {
 				path.add(lastTile);
@@ -243,10 +307,10 @@ public class AIMap {
 	}
 
 	public boolean tileWalkable(int y, int x) {
-		return tileOnMap(y, x) && (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
+		return tileInBounds(y, x) && (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
 	}
 
-	public boolean tileOnMap(int y, int x) {
+	public boolean tileInBounds(int y, int x) {
 		return (y + offset > 0 && x + offset > 0 && y + offset < map.length && x + offset < map.length);
 	}
 

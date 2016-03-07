@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class Bot extends PlayGame {
-	private final int sleepMax = 10;
+	private final int sleepMax = 2000;
 	Stack<AITask> taskStack;
 	AITask exploreTask;
 	String command;
@@ -37,22 +37,7 @@ public class Bot extends PlayGame {
 
 	public static void main(String[] args) {
 		Bot game = new Bot();
-		System.out.println("Bot is now running");
 		game.update();
-
-		/*
-		HashSet<Bot> botArmy = new HashSet<>();
-		for (int i=0; i<20; i++) {
-			botArmy.add(new Bot());
-		}
-
-		while (true) {
-			for (Bot b : botArmy) {
-				b.update();
-			}
-		}
-		*/
-
 	}
 
 	public int getGoldNeeded() {
@@ -82,6 +67,7 @@ public class Bot extends PlayGame {
 	}
 
 	public void update(){
+		System.out.println("Bot is now running");
 		while (logic.gameRunning()) {
 			updatePosition();
 			updateMap();
@@ -113,12 +99,7 @@ public class Bot extends PlayGame {
 
 	private void updateMap() {
 		if (command.equals("LOOK")) {
-			//logic.getOutputClient().printLastLookWindow();
 			map.update(logic.getOutputClient().getLastLookWindow(), position);
-			//final String ANSI_CLS = "\u001b[2J";
-			//final String ANSI_HOME = "\u001b[H";
-			//System.out.print(ANSI_CLS + ANSI_HOME);
-			//System.out.flush();
 			System.out.println("Updated internal map: ");
 			map.print(position);
 		}

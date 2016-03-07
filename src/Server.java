@@ -40,7 +40,7 @@ public class Server implements Runnable, IGameLogic {
 		//Setup
 		//Load map
 		map = new Map();
-		map.readMap(new File("maps/maze.txt"));
+		map.readMap(new File("maps/example_map.txt"));
 
 		while (gameRunning) {
 			Socket clientSocket = serverSocket.accept();
@@ -65,13 +65,17 @@ public class Server implements Runnable, IGameLogic {
 
 	static private void closeAllConnections() {
 		for (Server connection : connections) {
-			connection.kick();
+			if (connection.isConnected()) {
+				connection.closeConnection();
+			}
 		}
 	}
 
 	static void broadcast(String message) {
 		for (Server connection : connections) {
-			connection.getWriter().println(message);
+			if (connection.isConnected()) {
+				connection.getWriter().println(message);
+			}
 		}
 	}
 
@@ -98,7 +102,7 @@ public class Server implements Runnable, IGameLogic {
 				if (input != null) {
 					writer.println(parseInput(input));
 				} else {
-					kick();
+					closeConnection();
 				}
 			}
 
@@ -131,13 +135,13 @@ public class Server implements Runnable, IGameLogic {
 				answer = look().replaceAll(".(?!$)", "$0  ");
 				break;
 			case "QUIT":
-				kick();
+				closeConnection();
 				break;
 		}
 		return answer;
 	}
 
-	private void kick() {
+	private void closeConnection() {
 		connected = false;
 	}
 
@@ -193,6 +197,12 @@ public class Server implements Runnable, IGameLogic {
 		return collectedGold >= map.getWin() && map.lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
 	}
 
+	/**
+	 * If gold is on the player's tile, the player's gold count goes up and the gold is replaced with an empty tile.
+	 * No need for this to be synchronised, because movement is synchronised; two players cannot be on the same tile to pick up the same gold.
+	 *
+	 * @return The response to be sent back to the player.
+	 */
 	public String pickup() {
 		if (map.lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
 			collectedGold++;
@@ -229,7 +239,7 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	public void quitGame() {
-		kick();
+		closeConnection();
 	}
 
 	public boolean isConnected() {
@@ -247,7 +257,7 @@ public class Server implements Runnable, IGameLogic {
 		boolean hit = false;
 		for (Server connection : connections) {
 			if (connection != null) {
-				if (connection.getPlayerPosition()[0] == y && connection.getPlayerPosition()[1] == x) {
+				if (connection.isConnected() && connection.getPlayerPosition()[0] == y && connection.getPlayerPosition()[1] == x) {
 					hit = true;
 				}
 			}
@@ -276,7 +286,13 @@ public class Server implements Runnable, IGameLogic {
 			pos[0] = (int) (counter * Math.sin(counter));
 			counter++;
 		}
-		return (map.lookAtTile(pos[0], pos[1]) == '#') ? null : pos;
+		if (map.lookAtTile(pos[0], pos[1]) == '#') {
+			System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
+			closeConnection();
+			return null;
+		} else {
+			return pos;
+		}
 	}
 
 	public InetAddress getAddress() {
@@ -284,7 +300,13 @@ public class Server implements Runnable, IGameLogic {
 	}
 
 	public void reconnect(Socket clientSocket) {
-		connected = true;
 		this.clientSocket = clientSocket;
+		if (playerOnTile(playerPosition[0], playerPosition[1])) {
+			//There is a player on out tile! Re-initialise player position
+			playerPosition = initialisePlayer();
+		}
+		if (playerPosition != null) {
+			connected = true;
+		}
 	}
 }
