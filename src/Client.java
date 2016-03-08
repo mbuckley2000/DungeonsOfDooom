@@ -16,7 +16,7 @@ import java.net.Socket;
  */
 public class Client {
 	private final int port = 40004;
-	private final String address = "138.38.192.221";
+	private final String address = "localhost";
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;

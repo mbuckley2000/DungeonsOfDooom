@@ -7,7 +7,7 @@ import java.util.*;
  * Connects to DoD server using the Client class
  */
 public class Bot extends PlayGame {
-	private final int sleepMax = 100;
+	private final int sleepMax = 3000;
 	private Stack<BotTask> taskStack;
 	private BotTask exploreTask;
 	private String command;
@@ -34,6 +34,7 @@ public class Bot extends PlayGame {
 	private int stepsSinceLastLook;
 	private int goldNeeded;
 	private int stepSize;
+	private boolean pathBlocked;
 
 	/**
 	 * Constructor.
@@ -49,8 +50,9 @@ public class Bot extends PlayGame {
 		taskStack = new Stack<>();
 		exploreTask = new BotExploreTask(map, this);
 		taskStack.add(exploreTask);
-		stepSize = 1;
+		stepSize = 2;
 		command = "HELLO";
+		pathBlocked = false;
 	}
 
 	/**
@@ -75,6 +77,13 @@ public class Bot extends PlayGame {
 	 */
 	public void addTask(BotTask task) {
 		taskStack.add(task);
+	}
+
+	/**
+	 * Clears all current tasks
+	 */
+	public void clearTasks() {
+		taskStack.empty();
 	}
 
 	/**
@@ -138,6 +147,9 @@ public class Bot extends PlayGame {
 			if (client.getServerMessageReaderThread().getSuccessResponse()) {
 				stepped(command.charAt(5));
 				System.out.println("Bot position: " + position[1] + ", " + position[0]);
+			} else {
+				//Movement failed. This shouldn't happen unless a player got in the way!!
+				pathBlocked = true; //This makes the needToLook method return true
 			}
 		}
 	}
@@ -168,7 +180,27 @@ public class Bot extends PlayGame {
 	 * @return True if the number of successful movements since the last LOOK call is more than the stepSize
 	 */
 	private boolean needToLook() {
-		if (stepsSinceLastLook >= stepSize) {
+		if (pathBlocked) return true;
+
+		//Never look if we're racing to the exit
+		if (goldNeeded == 0 && taskStack.peek().getClass() == BotTraverseTask.class) {
+			return false;
+		}
+
+		boolean hit = false;
+		//Check if there are any undiscovered tiles in our look window
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 5; y++) {
+				int posY = y + position[0] - 2;
+				int posX = x + position[1] - 2;
+				if (map.tileEmpty(posY, posX)) {
+					if (!((x == 0 && y == 0) || (x == 4 && y == 0) || (x == 0 && y == 4) || (x == 4 && y == 4) || (x == 2 && y == 2))) {
+						hit = true;
+					}
+				}
+			}
+		}
+		if (stepsSinceLastLook >= stepSize && hit) {
 			stepsSinceLastLook = 0;
 			return true;
 		} else {

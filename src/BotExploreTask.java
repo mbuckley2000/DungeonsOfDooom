@@ -36,6 +36,7 @@ public class BotExploreTask implements BotTask {
 			if (exitPos != null) {
 				System.out.println("We found an exit! Exit pos: " + exitPos[1] + ", " + exitPos[0]);
 				BotTraverseTask tt = new BotTraverseTask(bot, map, exitPos);
+				bot.clearTasks();
 				bot.addTask(tt);
 				return tt.getNextCommand();
 			}
