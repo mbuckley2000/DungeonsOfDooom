@@ -187,6 +187,11 @@ public class Bot extends PlayGame {
 			return false;
 		}
 
+		//Or if we are going for gold
+		if (taskStack.peek().getClass() == BotRetrieveGoldTask.class) {
+			return false;
+		}
+
 		boolean hit = false;
 		//Check if there are any undiscovered tiles in our look window
 		for (int x = 0; x < 5; x++) {
