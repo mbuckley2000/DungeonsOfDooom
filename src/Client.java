@@ -9,7 +9,7 @@ import java.net.Socket;
  * Client class implementing IGameLogic
  * Can be used in place of the old GameLogic class.
  * Connects to server, performs very basic input filtering, and sends commands
- * All output from the server is picked up in a ClientOutputThread to prevent blocking
+ * All output from the server is picked up in a ServerMessageReaderThread to prevent blocking
  *
  * @author mb2070
  * @since 24/02/2016
@@ -21,7 +21,7 @@ public class Client {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	private boolean connected;
-	private ClientOutputThread clientOutputThread;
+	private ServerMessageReaderThread serverMessageReaderThread;
 
 	public Client() {
 		int connectionAttempts = 0;
@@ -35,8 +35,8 @@ public class Client {
 				writer = new PrintWriter(socket.getOutputStream(), true);
 
 				connected = true;
-				clientOutputThread = new ClientOutputThread(reader);
-				new Thread(clientOutputThread).start();
+				serverMessageReaderThread = new ServerMessageReaderThread(reader);
+				new Thread(serverMessageReaderThread).start();
 
 				Thread.sleep(1000); //Sleep to give outputClientThread time to validate connection
 			} catch (ConnectException e) {
@@ -64,18 +64,18 @@ public class Client {
 		}
 	}
 
-	public ClientOutputThread getClientOutputThread() {
-		return clientOutputThread;
+	public ServerMessageReaderThread getServerMessageReaderThread() {
+		return serverMessageReaderThread;
 	}
 
 	public boolean gameRunning() {
-		return connected && clientOutputThread.isConnected();
+		return connected && serverMessageReaderThread.isConnected();
 	}
 
 	public void close() {
 		try {
 			writer.close();
-			clientOutputThread.stop();
+			serverMessageReaderThread.stop();
 			reader.close();
 			socket.close();
 		} catch (Exception e) {
