@@ -43,7 +43,7 @@ public class Server {
 			//Setup
 			//Load map
 			map = new Map();
-			map.readMap(new File("maps/maze.txt"));
+			map.readMap(new File("maps/example_map.txt"));
 
 		} catch (IOException e) {
 			System.err.println("Error starting server");
