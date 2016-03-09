@@ -17,9 +17,9 @@ public class BotTraverseTask implements BotTask {
 	/**
 	 * Constructor
 	 *
-	 * @param bot
-	 * @param map
-	 * @param destination
+	 * @param bot The bot the task belongs to
+	 * @param map The BotMap the bot is playing in
+	 * @param destination The destination tile on the BotMap
 	 */
 	public BotTraverseTask(Bot bot, BotMap map, int[] destination) {
 		this.bot = bot;

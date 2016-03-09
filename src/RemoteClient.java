@@ -9,6 +9,7 @@ import java.util.Random;
 /**
  * Represents a client connected to the server
  * Each client gets their own thread, so operations can happen simultaneously
+ * Only MOVE is synchronised. This ensures that only one player can be on a single tile, removing the need to synchronise other methods such as PICKUP
  *
  * @author mb2070
  * @since 07/03/2016
@@ -20,9 +21,14 @@ public class RemoteClient implements Runnable, IGameLogic {
 	private int collectedGold;
 	private InetAddress address;
 	private PrintWriter writer;
-	private BufferedReader reader;
 	private Server server;
 
+	/**
+	 * Constructs the RemoteClient given the Socket and Server it is connected to
+	 *
+	 * @param server       The Server the RemoteClient belongs to
+	 * @param clientSocket The Socket that the client is connected to
+	 */
 	RemoteClient(Server server, Socket clientSocket) {
 		this.server = server;
 		this.clientSocket = clientSocket;
@@ -32,9 +38,16 @@ public class RemoteClient implements Runnable, IGameLogic {
 		address = clientSocket.getInetAddress();
 	}
 
+	/**
+	 * Thread starts here.
+	 * Initialises the reader and writer
+	 * Sends welcome message
+	 * Loops until the game is over or the client is disconnected, receiving input from client and processing it. Calls relevant methods for each valid command
+	 * Closes everything down cleanly when the loop is done
+	 */
 	public void run() {
 		try {
-			reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
 			String input;
 
@@ -62,11 +75,26 @@ public class RemoteClient implements Runnable, IGameLogic {
 		}
 	}
 
-	//GameLogic
+
+	//GameLogic (Command processing)
+
+	/**
+	 * Processes the HELLO command
+	 *
+	 * @return String to be sent back to the Client (How much gold left they need to win)
+	 */
 	public String hello() {
 		return "GOLD: " + getGoldNeeded();
 	}
 
+	/**
+	 * Processes the MOVE command
+	 * If the desired tile to move to is walkable and no player is on it, the move is allowed, otherwise it is denied
+	 * Synchronised to prevent multiple players on the same tile
+	 *
+	 * @param direction The direction the client wants to move in
+	 * @return The response to be sent back to the client: SUCCESS or FAIL, depending on if the move was allowed.
+	 */
 	public synchronized String move(char direction) {
 		int[] newPosition = playerPosition.clone();
 		switch (direction) {
@@ -102,11 +130,13 @@ public class RemoteClient implements Runnable, IGameLogic {
 		}
 	}
 
+
 	/**
+	 * Processes the PICKUP command
 	 * If gold is on the player's tile, the player's gold count goes up and the gold is replaced with an empty tile.
 	 * No need for this to be synchronised, because movement is synchronised; two players cannot be on the same tile to pick up the same gold.
 	 *
-	 * @return The response to be sent back to the player.
+	 * @return The response to be sent back to the player
 	 */
 	public String pickup() {
 		if (server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
@@ -118,6 +148,11 @@ public class RemoteClient implements Runnable, IGameLogic {
 		return "FAIL\nThere is nothing to pick up...";
 	}
 
+	/**
+	 * Processes the LOOK command
+	 *
+	 * @return The response to be sent back to the Client: A look window into the map, based on their current position
+	 */
 	public String look() {
 		String output = "";
 		char[][] lookReply = server.getMap().lookWindow(playerPosition[0], playerPosition[1], 5);
@@ -139,14 +174,39 @@ public class RemoteClient implements Runnable, IGameLogic {
 		return output;
 	}
 
-	public boolean gameRunning() {
-		return server.isGameRunning();
+	/**
+	 * Parses the input from the Client
+	 * Checks for valid commands and then calls the relevant method to get the response
+	 *
+	 * @param input Input from the client
+	 * @return The message to be sent back to the client
+	 */
+	private String parseInput(String input) {
+		String[] command = input.trim().split(" ");
+		String answer = "FAIL";
+		switch (command[0].toUpperCase()) {
+			case "HELLO":
+				answer = hello();
+				break;
+			case "MOVE":
+				if (command.length == 2) {
+					answer = move(command[1].toUpperCase().charAt(0));
+				}
+				break;
+			case "PICKUP":
+				answer = pickup();
+				break;
+			case "LOOK":
+				answer = look();//.replaceAll(".(?!$)", "$0  ");  <-- This adds spacing to the window
+				break;
+			case "QUIT":
+				writer.println("Thanks for playing!");
+				closeConnection();
+				break;
+		}
+		return answer;
 	}
 
-	public String quitGame() {
-		closeConnection();
-		return "SUCCESS";
-	}
 
 	//Misc
 
@@ -159,6 +219,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 		return collectedGold >= server.getMap().getWin() && server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
 	}
 
+	/**
+	 * @return The player position as an int array
+	 */
 	public int[] getPlayerPosition() {
 		return playerPosition;
 	}
@@ -189,46 +252,36 @@ public class RemoteClient implements Runnable, IGameLogic {
 		}
 	}
 
+	/**
+	 * @return The PrintWriter that sends messages to the Client
+	 */
 	public PrintWriter getWriter() {
 		return writer;
 	}
 
-	private String parseInput(String input) {
-		String[] command = input.trim().split(" ");
-		String answer = "FAIL";
-		switch (command[0].toUpperCase()) {
-			case "HELLO":
-				answer = hello();
-				break;
-			case "MOVE":
-				if (command.length == 2) {
-					answer = move(command[1].toUpperCase().charAt(0));
-				}
-				break;
-			case "PICKUP":
-				answer = pickup();
-				break;
-			case "LOOK":
-				answer = look();//.replaceAll(".(?!$)", "$0  ");
-				break;
-			case "QUIT":
-				writer.println("Thanks for playing!");
-				closeConnection();
-				break;
-		}
-		return answer;
-	}
-
+	/**
+	 * @return The amount of gold extra that the client needs to win
+	 */
 	public int getGoldNeeded() {
 		return (server.getMap().getWin() - collectedGold);
 	}
 
 
 	//Connection handling
+
+	/**
+	 *
+	 */
 	public void closeConnection() {
 		connected = false;
 	}
 
+	/**
+	 * Allows a RemoteClient object to reconnect on a different clientSocket, with the same state (mapPos, gold etc)
+	 * If a player is in their position, they are re-initialised
+	 *
+	 * @param clientSocket The socket to reconnect on
+	 */
 	public void reconnect(Socket clientSocket) {
 		this.clientSocket = clientSocket;
 		if (server.playerOnTile(playerPosition[0], playerPosition[1])) {
@@ -240,10 +293,16 @@ public class RemoteClient implements Runnable, IGameLogic {
 		}
 	}
 
+	/**
+	 * @return True if the client is connected, false otherwise
+	 */
 	public boolean isConnected() {
 		return connected;
 	}
 
+	/**
+	 * @return The InetAddress of the client
+	 */
 	public InetAddress getAddress() {
 		return address;
 	}

@@ -12,6 +12,9 @@ public class Map {
 	private String mapName;
 	private int totalGoldOnMap;
 
+	/**
+	 * Constructor
+	 */
 	public Map() {
 		map = null;
 		mapName = "";
@@ -112,6 +115,12 @@ public class Map {
 		return map;
 	}
 
+	/**
+	 * Sets the amount of gold required by any player to win the game
+	 *
+	 * @param in The line of the map file that specified the win amount
+	 * @return True if the given win is valid and it has been set. False otherwise.
+	 */
 	private boolean setWin(String in) {
 		if (!in.startsWith("win "))
 			return true;
@@ -128,6 +137,12 @@ public class Map {
 		return false;
 	}
 
+	/**
+	 * Sets the name of the map. Used when reading a map file
+	 *
+	 * @param in The line of the file that specifies the name of the map
+	 * @return True if the given name is valid and the name has been set. False otherwise
+	 */
 	private boolean setName(String in) {
 		if (!in.startsWith("name ") && in.length() < 4)
 			return true;
@@ -155,7 +170,6 @@ public class Map {
 		return output;
 	}
 
-
 	/**
 	 * The method returns the Tile at a given location. The tile is not removed.
 	 *
@@ -177,7 +191,6 @@ public class Map {
 	 * @param y      Y coordinate of the location
 	 * @param x      X coordinate of the location
 	 * @param radius The radius defining the area which will be returned.
-	 *               Without the usage of a lamp the standard value is 5 units.
 	 * @return Returns a view window as a 2D char array of tiles
 	 */
 	protected char[][] lookWindow(int y, int x, int radius) {
@@ -201,18 +214,30 @@ public class Map {
 		return reply;
 	}
 
+	/**
+	 * @return The amount of gold required by a player to win the game
+	 */
 	public int getWin() {
 		return totalGoldOnMap;
 	}
 
+	/**
+	 * @return The map width
+	 */
 	protected int getMapWidth() {
 		return map[0].length;
 	}
 
+	/**
+	 * @return The map height
+	 */
 	protected int getMapHeight() {
 		return map.length;
 	}
 
+	/**
+	 * @return The total gold left on the map
+	 */
 	public int goldLeft() {
 		int goldCount = 0;
 		for (char[] y : map) {

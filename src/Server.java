@@ -1,3 +1,13 @@
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Server Class
  * Receives incoming connections and spawns a RemoteClient thread for each one
@@ -10,25 +20,20 @@
  * @author mb2070
  * @since 24/02/2016
  */
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class Server {
-	private int port = 40004;
-	private Set<RemoteClient> remoteClients = new HashSet<>();
+	private Set<RemoteClient> remoteClients;
 	private boolean gameRunning;
 	private Map map;
 	private ServerSocket serverSocket;
 
+	/**
+	 * Constructor
+	 * Starts the ServerSocket to listen from client connections
+	 * Initialises and loads the map
+	 */
 	public Server() {
+		final int port = 40004;
+		remoteClients = new HashSet<>();
 		try {
 			serverSocket = new ServerSocket(port);
 			System.out.println("Listening for remote client connections");
@@ -57,7 +62,7 @@ public class Server {
 	/**
 	 * The update loop: detects new connections, spawning a new thread for each one
 	 */
-	public void update() {
+	private void update() {
 		try {
 			while (gameRunning) {
 				Socket clientSocket = serverSocket.accept();
@@ -90,6 +95,7 @@ public class Server {
 
 	/**
 	 * Checks if game is running
+	 *
 	 * @return True if game is running, false otherwise
 	 */
 	public boolean isGameRunning() {
@@ -108,7 +114,7 @@ public class Server {
 	/**
 	 * Closes all connections on the server
 	 */
-	public void closeAllConnections() {
+	private void closeAllConnections() {
 		for (RemoteClient connection : remoteClients) {
 			if (connection.isConnected()) {
 				connection.closeConnection();
@@ -118,6 +124,7 @@ public class Server {
 
 	/**
 	 * Sends a message to everybody on the server
+	 *
 	 * @param message The message to send
 	 */
 	public void broadcastMessage(String message, RemoteClient... excludedClients) {
@@ -130,6 +137,7 @@ public class Server {
 
 	/**
 	 * Finds the client object for a given InetAddress. Used to find a client's data if they disconnect and reconnect
+	 *
 	 * @param address InetAddress of the client
 	 * @return The found client. Null if none exist
 	 */

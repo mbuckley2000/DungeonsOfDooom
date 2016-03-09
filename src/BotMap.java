@@ -208,34 +208,6 @@ public class BotMap {
 	}
 
 	/**
-	 * This method is used to retrieve a map view around a certain location.
-	 * The method should be used to get the look() around the player location.
-	 *
-	 * @param y Y coordinate of the location
-	 * @param x X coordinate of the location
-	 * @return Returns a view window as a 2D char array of tiles
-	 */
-	public char[][] getLookWindow(int y, int x) {
-		char[][] reply = new char[lookSize][lookSize];
-		for (int i = 0; i < lookSize; i++) {
-			for (int j = 0; j < lookSize; j++) {
-				int posX = x + j - lookSize / 2;
-				int posY = y + i - lookSize / 2;
-				if (tileInArrayBounds(posY, posX)) {
-					reply[j][i] = getTile(posY, posX);
-				} else {
-					reply[j][i] = '#';
-				}
-			}
-		}
-		reply[0][0] = 'X';
-		reply[lookSize - 1][0] = 'X';
-		reply[0][lookSize - 1] = 'X';
-		reply[lookSize - 1][lookSize - 1] = 'X';
-		return reply;
-	}
-
-	/**
 	 * A* pathfinding implementation to find a path from the specified start location to the specified end location
 	 *
 	 * @param start Start location

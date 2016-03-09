@@ -1,6 +1,5 @@
 import java.util.*;
 
-
 /**
  * Bot class for Dungeons of Doom
  * Runnable (has static main)

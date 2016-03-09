@@ -5,6 +5,7 @@ import java.io.BufferedReader;
  * Prints every line it receives from the given BufferedReader to STDOUT
  * Used by the Client class to print output from server in an asynchronous manner
  * Stores the last responses to each command to be publicly retrieved by the BOT
+ *
  * @author mb2070
  * @since 25/02/2016
  */
@@ -19,14 +20,13 @@ public class ServerMessageReaderThread implements Runnable {
 	private int goldResponse;
 
 	/**
-	 * Constructs the reader
-	 *
-	 * @param reader
+	 * Constructs the Reader
+	 * @param bufferedReader The buffered reader the Reader object should read from
 	 */
-	public ServerMessageReaderThread(BufferedReader reader) {
+	public ServerMessageReaderThread(BufferedReader bufferedReader) {
 		lookWindowYIndex = 0;
 		goldResponse = -1;
-		this.reader = reader;
+		this.reader = bufferedReader;
 		running = true;
 		connected = true;
 		lookResponse = new char[lookSize][lookSize];

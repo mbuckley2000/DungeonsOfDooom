@@ -31,7 +31,7 @@ public class BotExploreTask implements BotTask {
 	 * Gets a new destination when required
 	 * Spawns gold get tasks and traverse tasks to exits when needed.
 	 *
-	 * @return
+	 * @return The next movement command from the TraverseTask
 	 */
 	public String getNextCommand() {
 		System.out.println("BotExploreTask command get");

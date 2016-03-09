@@ -1,9 +1,17 @@
 import java.util.Scanner;
 
+/**
+ * Allows a human player to play the game using a Client object
+ * Has a runnable static main method
+ * Takes user input through the command line
+ */
 public class PlayGame {
 	protected Client client;
 	private Scanner userInput;
 
+	/**
+	 * Constructor
+	 */
 	public PlayGame() {
 		client = new Client();
 		if (client.gameRunning()) {
@@ -12,6 +20,11 @@ public class PlayGame {
 		}
 	}
 
+	/**
+	 * Main method. Program starts here.
+	 * PlayGame object is created and updated
+	 * No command line arguments are taken
+	 */
 	public static void main(String[] args) {
 		PlayGame game = new PlayGame();
 		game.update();
@@ -22,10 +35,13 @@ public class PlayGame {
 	 *
 	 * @return The user input
 	 */
-	public String readUserInput() {
+	private String readUserInput() {
 		return userInput.nextLine();
 	}
 
+	/**
+	 *
+	 */
 	public void update() {
 		while (client.gameRunning()) {
 			parseInput(readUserInput());
@@ -34,7 +50,9 @@ public class PlayGame {
 	}
 
 	/**
-	 * Parsing and Evaluating the User Input.
+	 * Does very basic input filtering before calling the relevant GameLogic method (Client)
+	 * Checks for null or invalid commands
+	 * Converts everything to uppercase
 	 *
 	 * @param input input the user generates
 	 */
