@@ -10,8 +10,4 @@ public interface IGameLogic {
 	String pickup();
 
 	String look();
-
-	boolean gameRunning();
-
-	String quitGame();
 }

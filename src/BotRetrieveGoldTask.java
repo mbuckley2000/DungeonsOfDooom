@@ -13,6 +13,13 @@ public class BotRetrieveGoldTask implements BotTask {
 	private Bot bot;
 	private BotTraverseTask botTraverseTask;
 
+	/**
+	 * Constructor
+	 *
+	 * @param bot     The Bot that owns the task
+	 * @param map     The BotMap that the bot is playing on
+	 * @param goldPos Position of the gold to collect on the BotMap
+	 */
 	public BotRetrieveGoldTask(Bot bot, BotMap map, int[] goldPos) {
 		this.bot = bot;
 		this.map = map;
@@ -22,6 +29,9 @@ public class BotRetrieveGoldTask implements BotTask {
 		System.out.println("Moving to gold!");
 	}
 
+	/**
+	 * @return The next command for the bot
+	 */
 	public String getNextCommand() {
 		//System.out.println("GoldTask command get");
 
@@ -42,6 +52,9 @@ public class BotRetrieveGoldTask implements BotTask {
 		}
 	}
 
+	/**
+	 * @return True if the task is still running, false otherwise
+	 */
 	public boolean hasNextCommand() {
 		return running;
 	}

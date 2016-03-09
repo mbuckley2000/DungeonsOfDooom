@@ -15,6 +15,12 @@ public class BotExploreTask implements BotTask {
 	private Bot bot;
 	private BotTraverseTask botTraverseTask;
 
+	/**
+	 * Constructor
+	 *
+	 * @param map BotMap the bot is playing on
+	 * @param bot Bot that owns the task
+	 */
 	public BotExploreTask(BotMap map, Bot bot) {
 		this.bot = bot;
 		this.map = map;
@@ -84,8 +90,8 @@ public class BotExploreTask implements BotTask {
 			}
 			if (tile[0] != bot.getPosition()[0] || tile[1] != bot.getPosition()[1]) {
 				for (BotMapTile adjTile : map.findAdjacentWalkableTiles(new BotMapTile(tile))) {
-					if (map.tileReachable(bot.getPosition(), adjTile.toIntArray())) {
-						bestTile = adjTile.toIntArray();
+					if (map.tileReachable(bot.getPosition(), adjTile.getPositionAsIntArray())) {
+						bestTile = adjTile.getPositionAsIntArray();
 						break;
 					}
 				}
@@ -106,6 +112,7 @@ public class BotExploreTask implements BotTask {
 
 	/**
 	 * Checks if a new command is available
+	 *
 	 * @return True if a new command is available
 	 */
 	public boolean hasNextCommand() {

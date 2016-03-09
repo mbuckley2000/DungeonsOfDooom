@@ -9,22 +9,26 @@ import java.net.Socket;
  * Client class implementing IGameLogic
  * Can be used in place of the old GameLogic class.
  * Connects to server, performs very basic input filtering, and sends commands
- * All output from the server is picked up in a ServerMessageReaderThread to prevent blocking
+ * All output from the server is printed and interpreted in a ServerMessageReaderThread to prevent blocking
  *
  * @author mb2070
  * @since 24/02/2016
  */
 public class Client {
-	private final int port = 40004;
-	private final String address = "localhost";
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;
 	private boolean connected;
 	private ServerMessageReaderThread serverMessageReaderThread;
 
+	/**
+	 * Constructor
+	 */
 	public Client() {
 		int connectionAttempts = 0;
+		final int port = 40004;
+		final String address = "localhost";
+
 		while (!connected && connectionAttempts < 5) {
 			connectionAttempts++;
 			try {
@@ -64,14 +68,23 @@ public class Client {
 		}
 	}
 
+	/**
+	 * @return Returns the message reader that prints and interprets all messages from the server
+	 */
 	public ServerMessageReaderThread getServerMessageReaderThread() {
 		return serverMessageReaderThread;
 	}
 
+	/**
+	 * @return True if the game is running
+	 */
 	public boolean gameRunning() {
 		return connected && serverMessageReaderThread.isConnected();
 	}
 
+	/**
+	 * Closes the socket, the ServerMessageReaderThread, and all streams.
+	 */
 	public void close() {
 		try {
 			writer.close();
@@ -83,6 +96,11 @@ public class Client {
 		}
 	}
 
+	/**
+	 * Sends a string to the server
+	 *
+	 * @param string String to send
+	 */
 	public void send(String string) {
 		writer.println(string);
 	}

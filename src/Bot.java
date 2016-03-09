@@ -7,7 +7,6 @@ import java.util.*;
  * Connects to DoD server using the Client class
  */
 public class Bot extends PlayGame {
-	private final int sleepMax = 3000;
 	private Stack<BotTask> taskStack;
 	private BotTask exploreTask;
 	private String command;
@@ -73,6 +72,7 @@ public class Bot extends PlayGame {
 
 	/**
 	 * Adds a BotTask to the task stack
+	 *
 	 * @param task The task to add
 	 */
 	public void addTask(BotTask task) {
@@ -88,6 +88,7 @@ public class Bot extends PlayGame {
 
 	/**
 	 * Gets the next command that the bot should call
+	 *
 	 * @return The next command
 	 */
 	private String botAction() {
@@ -113,6 +114,7 @@ public class Bot extends PlayGame {
 	 * Runs until the game is over
 	 */
 	public void update() {
+		final int sleepMax = 3000;
 		System.out.println("Bot is now running");
 		while (client.gameRunning()) {
 			updatePosition();
@@ -210,6 +212,7 @@ public class Bot extends PlayGame {
 
 	/**
 	 * Updates the bot's position (internal displacement from where it spawned), given the latest successful movement direction
+	 *
 	 * @param dir Latest successful movement direction
 	 */
 	private void stepped(char dir) {

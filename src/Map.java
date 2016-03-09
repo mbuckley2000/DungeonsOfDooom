@@ -57,6 +57,13 @@ public class Map {
 
 	}
 
+	/**
+	 * Loads a map from a given BufferedReader
+	 *
+	 * @param reader Buffered reader to load map from
+	 * @return The map as a char array
+	 * @throws IOException Exception reading from BufferedReader
+	 */
 	private char[][] loadMap(BufferedReader reader) throws IOException {
 
 		boolean error = false;
@@ -217,5 +224,4 @@ public class Map {
 		}
 		return goldCount;
 	}
-
 }

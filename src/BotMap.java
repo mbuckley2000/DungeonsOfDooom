@@ -145,7 +145,7 @@ public class BotMap {
 	 * @param x Tile position
 	 * @return True if the tile has been discovered, false otherwise
 	 */
-	public boolean tileDiscovered(int y, int x) {
+	private boolean tileDiscovered(int y, int x) {
 		return map[y][x] != 'G' && map[y][x] != 'E' && map[y][x] != '#' && map[y][x] != '.' && map[y][x] != 'P';
 	}
 
@@ -297,7 +297,6 @@ public class BotMap {
 		}
 	}
 
-
 	/**
 	 * Returns true if the given set contains a tile with the same co-ordinates as the given tile. Used for pathfinding
 	 *
@@ -390,7 +389,7 @@ public class BotMap {
 	 * @param x Position of tile
 	 * @return True if the tile is inside the bounds of the map array, false otherwise
 	 */
-	public boolean tileInArrayBounds(int y, int x) {
+	private boolean tileInArrayBounds(int y, int x) {
 		return (y + offset > 0 && x + offset > 0 && y + offset < map.length && x + offset < map.length);
 	}
 
