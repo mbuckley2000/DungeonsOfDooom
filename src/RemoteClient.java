@@ -200,9 +200,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 				answer = look();//.replaceAll(".(?!$)", "$0  ");  <-- This adds spacing to the window
 				break;
 			case "QUIT":
-				writer.println("Thanks for playing!");
 				closeConnection();
-				break;
+				return "Thanks for playing!";
 		}
 		return answer;
 	}
