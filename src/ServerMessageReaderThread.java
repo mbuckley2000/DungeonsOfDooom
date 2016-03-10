@@ -65,6 +65,9 @@ public class ServerMessageReaderThread implements Runnable {
 				connected = false;
 			}
 		}
+
+		System.out.flush();
+		System.exit(0);
 	}
 
 	/**
