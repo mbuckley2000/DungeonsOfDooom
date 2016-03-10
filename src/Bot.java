@@ -39,7 +39,7 @@ public class Bot extends PlayGame {
 	 * Creates the initial ExploreTask
 	 */
 	public Bot() {
-		super();
+		super(address, port);
 		position = new int[]{0, 0};
 		stepsSinceLastLook = 0;
 		goldNeeded = 10;
@@ -58,6 +58,7 @@ public class Bot extends PlayGame {
 	 * Creates a bot object and starts it off updating
 	 */
 	public static void main(String[] args) {
+		processCommandLineArguments(args);
 		Bot game = new Bot();
 		game.update();
 	}

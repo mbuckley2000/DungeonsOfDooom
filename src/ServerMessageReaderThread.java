@@ -21,6 +21,7 @@ public class ServerMessageReaderThread implements Runnable {
 
 	/**
 	 * Constructs the Reader
+	 *
 	 * @param bufferedReader The buffered reader the Reader object should read from
 	 */
 	public ServerMessageReaderThread(BufferedReader bufferedReader) {

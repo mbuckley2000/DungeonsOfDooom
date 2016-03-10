@@ -24,10 +24,8 @@ public class Client {
 	/**
 	 * Constructor
 	 */
-	public Client() {
+	public Client(String address, int port) {
 		int connectionAttempts = 0;
-		final int port = 40004;
-		final String address = "localhost";
 
 		while (!connected && connectionAttempts < 5) {
 			connectionAttempts++;
@@ -68,6 +66,33 @@ public class Client {
 		}
 	}
 
+	public static boolean isAddressValid(String address) {
+		try {
+			if (address == null) return false;
+
+			if (address.isEmpty()) return false;
+
+			if (address.equals("localhost")) return true;
+
+			String[] sections = address.split("\\.");
+			for (String section : sections) {
+				int sectionInt = Integer.parseInt(section);
+				if (sectionInt > 255 || sectionInt < 0) return false;
+			}
+
+			if (sections.length != 4) return false;
+
+			return !address.endsWith(".");
+
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+	}
+
+	public static boolean isPortValid(int port) {
+		return (port > 0 && port < 65535);
+	}
+
 	/**
 	 * @return Returns the message reader that prints and interprets all messages from the server
 	 */
@@ -91,8 +116,9 @@ public class Client {
 			serverMessageReaderThread.stop();
 			reader.close();
 			socket.close();
+			System.exit(0);
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.exit(0);
 		}
 	}
 

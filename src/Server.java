@@ -31,12 +31,11 @@ public class Server {
 	 * Starts the ServerSocket to listen from client connections
 	 * Initialises and loads the map
 	 */
-	public Server() {
-		final int port = 40004;
+	public Server(int port) {
 		remoteClients = new HashSet<>();
 		try {
 			serverSocket = new ServerSocket(port);
-			System.out.println("Listening for remote client connections");
+			System.out.println("Listening for remote client connections on port: " + serverSocket.getLocalPort());
 
 			gameRunning = true;
 
@@ -55,7 +54,19 @@ public class Server {
 	 * Initiates the server and starts the update loop
 	 */
 	public static void main(String args[]) {
-		Server server = new Server();
+		int port = 40004;
+
+		if (args.length == 1) {
+			int argInt = Integer.parseInt(args[0]);
+			if (Client.isPortValid(argInt)) {
+				port = argInt;
+			} else {
+				System.err.println("Invalid port specified");
+				System.exit(1);
+			}
+		}
+
+		Server server = new Server(port);
 		server.update();
 	}
 
