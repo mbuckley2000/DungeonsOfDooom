@@ -56,14 +56,21 @@ public class Server {
 	public static void main(String args[]) {
 		int port = 40004;
 
-		if (args.length == 1) {
-			int argInt = Integer.parseInt(args[0]);
-			if (Client.isPortValid(argInt)) {
-				port = argInt;
-			} else {
-				System.err.println("Invalid port specified");
-				System.exit(1);
+		try {
+			if (args.length == 1) {
+				int argInt = Integer.parseInt(args[0]);
+				if (Client.isPortValid(argInt)) {
+					port = argInt;
+				} else {
+					System.err.println("Invalid port specified");
+					System.err.println("Using default 40004");
+				}
 			}
+		} catch (NumberFormatException e) {
+			//Invalid port.
+			//This is resolved by setting the default port at the top of this method, don't panic
+			System.err.println("Invalid port specified");
+			System.err.println("Using default 40004");
 		}
 
 		Server server = new Server(port);
