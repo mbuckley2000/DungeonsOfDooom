@@ -121,7 +121,7 @@ public class Bot extends PlayGame {
 			updateMap();
 			updateGoldToWin();
 			command = botAction().toUpperCase();
-			parseInput(command);
+			client.send(command);
 			System.out.println(command);
 			try {
 				Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);

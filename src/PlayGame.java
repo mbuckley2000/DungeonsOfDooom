@@ -1,5 +1,3 @@
-import java.util.Scanner;
-
 /**
  * Allows a human player to play the game using a Client object
  * Has a runnable static main method
@@ -8,8 +6,9 @@ import java.util.Scanner;
 public class PlayGame {
 	protected static String address;
 	protected static int port;
+	protected static boolean guiMode;
 	protected Client client;
-	private Scanner userInput;
+	private IUserInput userInput;
 
 	/**
 	 * Constructor
@@ -17,8 +16,12 @@ public class PlayGame {
 	public PlayGame(String address, int port) {
 		client = new Client(address, port);
 		if (client.gameRunning()) {
-			System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
-			userInput = new Scanner(System.in);
+			if (guiMode) {
+				userInput = new GameWindow("DoD");
+			} else {
+				System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
+				userInput = new TextualInput();
+			}
 		}
 	}
 
@@ -29,6 +32,7 @@ public class PlayGame {
 	 * Default is localhost:40004
 	 */
 	public static void main(String[] args) {
+		guiMode = true;
 		processCommandLineArguments(args);
 		PlayGame game = new PlayGame(address, port);
 		game.update();
@@ -38,7 +42,7 @@ public class PlayGame {
 		address = "localhost";
 		port = 40004;
 
-		if (args.length < 3) {
+		if (args.length < 4) {
 			for (String string : args) {
 				if (Client.isAddressValid(string)) {
 					address = string;
@@ -52,20 +56,15 @@ public class PlayGame {
 					//Not a valid port
 					//This is handled by setting default values at the top of this method. (localhost:40004)
 				}
+
+				if (string.toLowerCase().equals("gui")) {
+					guiMode = true;
+				}
 			}
 		} else {
-			System.err.println("Too many arguments! IP Address and/or Port Number may be specified");
+			System.err.println("Too many arguments! IP Address and/or Port Number may be specified, as well as GUI mode");
 			System.exit(1);
 		}
-	}
-
-	/**
-	 * Returns the user input
-	 *
-	 * @return The user input
-	 */
-	private String readUserInput() {
-		return userInput.nextLine();
 	}
 
 	/**
@@ -73,42 +72,11 @@ public class PlayGame {
 	 */
 	public void update() {
 		while (client.gameRunning()) {
-			parseInput(readUserInput());
+			String input = userInput.getNextCommand();
+			if (input != null) {
+				client.send(input);
+			}
 		}
 		client.close();
-	}
-
-	/**
-	 * Does very basic input filtering before calling the relevant GameLogic method (Client)
-	 * Checks for null or invalid commands
-	 * Converts everything to uppercase
-	 *
-	 * @param input input the user generates
-	 */
-	protected void parseInput(String input) {
-		String[] command = input.trim().split(" ");
-
-		switch (command[0].toUpperCase()) {
-			case "HELLO":
-				client.send("HELLO");
-				break;
-			case "MOVE":
-				if (command.length == 2) {
-					client.send("MOVE " + command[1].toUpperCase().charAt(0));
-				}
-				break;
-			case "PICKUP":
-				client.send("PICKUP");
-				break;
-			case "LOOK":
-				client.send("LOOK");
-				break;
-			case "QUIT":
-				client.send("QUIT");
-				break;
-			default:
-				System.out.println("Invalid command: " + command[0]);
-				break;
-		}
 	}
 }
