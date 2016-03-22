@@ -13,23 +13,23 @@ import java.util.Stack;
  */
 public class BotMap {
 	private final int lookSize = 5;
-	private final int offset = 200; //Large array to handle any map size;
+	private int[] offset; //Large array to handle any map size;
 	private char[][] map;
 	private int[] bounds;
 	private boolean empty;
-
 	/**
 	 * Constructs the AI Map
 	 * Initialises the bounds to the middle of the map
 	 */
 	public BotMap() {
-		map = new char[offset * 2][offset * 2];
+		offset = new int[]{6, 6};
+		map = new char[offset[0] * 2][offset[1] * 2];
 		bounds = new int[4];
 		empty = true;
-		bounds[0] = offset;
-		bounds[1] = offset;
-		bounds[2] = offset;
-		bounds[3] = offset;
+		bounds[0] = offset[0];
+		bounds[1] = offset[1];
+		bounds[2] = offset[0];
+		bounds[3] = offset[0];
 	}
 
 	/**
@@ -42,6 +42,10 @@ public class BotMap {
 	 */
 	static int getManhattanDistance(int[] t1, int[] t2) {
 		return Math.abs(t1[0] - t2[0]) + Math.abs(t1[1] - t2[1]);
+	}
+
+	public int[] getOffset() {
+		return offset;
 	}
 
 	/**
@@ -78,6 +82,7 @@ public class BotMap {
 	public void update(char[][] lookWindow, int[] botPos) {
 		empty = false;
 		replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
+		print(botPos);
 	}
 
 	/**
@@ -107,7 +112,7 @@ public class BotMap {
 		for (int y = 0; y < map.length; y++) {
 			for (int x = 0; x < map[0].length; x++) {
 				if (map[y][x] == tileType) {
-					return new int[]{y - offset, x - offset};
+					return new int[]{y - offset[0], x - offset[1]};
 				}
 			}
 		}
@@ -126,11 +131,11 @@ public class BotMap {
 			for (int x = bounds[1] - 1; x < bounds[3] + 2; x++) {
 				if (tileType != ' ') {
 					if (map[y][x] == tileType) {
-						list.add(new int[]{y - offset, x - offset});
+						list.add(new int[]{y - offset[1], x - offset[0]});
 					}
 				} else {
 					if (tileDiscovered(y, x)) {
-						list.add(new int[]{y - offset, x - offset});
+						list.add(new int[]{y - offset[1], x - offset[0]});
 					}
 				}
 			}
@@ -158,8 +163,8 @@ public class BotMap {
 	 * @param tileType Given tileType
 	 */
 	public void setTile(int y, int x, char tileType) {
-		int offsetY = y + offset;
-		int offsetX = x + offset;
+		int offsetY = y + offset[0];
+		int offsetX = x + offset[1];
 
 		if (tileInArrayBounds(y, x)) {
 			map[offsetY][offsetX] = tileType;
@@ -169,7 +174,8 @@ public class BotMap {
 			if (offsetY > bounds[2]) bounds[2] = offsetY;
 			if (offsetX > bounds[3]) bounds[3] = offsetX;
 		} else {
-			System.err.println("Trying to set tile out of bounds on map");
+			increaseOffset(new int[]{2, 2});
+			setTile(y, x, tileType);
 		}
 	}
 
@@ -182,7 +188,7 @@ public class BotMap {
 	 */
 	public char getTile(int y, int x) {
 		if (tileInArrayBounds(y, x)) {
-			return (map[y + offset][x + offset]);
+			return (map[y + offset[0]][x + offset[1]]);
 		} else {
 			return 'X';
 		}
@@ -197,7 +203,7 @@ public class BotMap {
 	public void print(int[] botPosition) {
 		for (int y = bounds[0]; y < bounds[2] + 1; y++) {
 			for (int x = bounds[1]; x < bounds[3] + 1; x++) {
-				if (y == botPosition[0] + offset && x == botPosition[1] + offset) {
+				if (y == botPosition[0] + offset[0] && x == botPosition[1] + offset[1]) {
 					System.out.print("B");
 				} else {
 					System.out.print(map[y][x]);
@@ -362,7 +368,7 @@ public class BotMap {
 	 * @return True if the tile is inside the bounds of the map array, false otherwise
 	 */
 	private boolean tileInArrayBounds(int y, int x) {
-		return (y + offset > 0 && x + offset > 0 && y + offset < map.length && x + offset < map.length);
+		return (y + offset[0] > 0 && x + offset[1] > 0 && y + offset[0] < map.length && x + offset[1] < map[0].length);
 	}
 
 	/**
@@ -372,5 +378,27 @@ public class BotMap {
 	 */
 	public boolean isEmpty() {
 		return empty;
+	}
+
+	public char[][] getAsArray() {
+		char[][] filledMap = new char[bounds[2] - bounds[0]][bounds[3] - bounds[1]];
+		for (int i = bounds[0]; i < bounds[2]; i++) {
+			System.arraycopy(map[i], bounds[1], filledMap[i - bounds[0]], 0, bounds[3] - bounds[1]);
+		}
+		return filledMap;
+	}
+
+	private void increaseOffset(int[] offsetDelta) {
+		char[][] oldMap = map;
+		this.offset[0] += offsetDelta[0];
+		this.offset[1] += offsetDelta[1];
+		map = new char[offset[0] * 2][offset[1] * 2];
+		for (int i = 0; i < oldMap.length; i++) {
+			System.arraycopy(oldMap[i], 0, map[i + offsetDelta[0]], offsetDelta[1], oldMap[i].length);
+		}
+		bounds[0] += offsetDelta[0];
+		bounds[2] += offsetDelta[0];
+		bounds[1] += offsetDelta[1];
+		bounds[3] += offsetDelta[1];
 	}
 }

@@ -4,25 +4,33 @@
  * Takes user input through the command line
  */
 public class PlayGame {
-	protected static String address;
-	protected static int port;
-	protected static boolean guiMode;
+	//Command line arguments
+	private static String address;
+	private static int port;
+	private static boolean guiMode;
+	private static boolean botMode;
+
 	protected Client client;
-	private IUserInput userInput;
+	private PlayerInterface playerInterface;
 
 	/**
 	 * Constructor
 	 */
-	public PlayGame(String address, int port) {
+	public PlayGame() {
 		client = new Client(address, port);
 		if (client.gameRunning()) {
 			if (guiMode) {
-				userInput = new GameWindow("DoD");
+				playerInterface = new GUIInterface("DoD");
+			} else if (botMode) {
+				playerInterface = new Bot();
 			} else {
 				System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
-				userInput = new TextualInput();
+				playerInterface = new TextualInterface();
 			}
 		}
+
+		new Thread(new InputHandlerThread()).start();
+		new Thread(new ResponseHandlerThread()).start();
 	}
 
 	/**
@@ -32,10 +40,9 @@ public class PlayGame {
 	 * Default is localhost:40004
 	 */
 	public static void main(String[] args) {
-		guiMode = true;
+		guiMode = true; //DEBUG
 		processCommandLineArguments(args);
-		PlayGame game = new PlayGame(address, port);
-		game.update();
+		new PlayGame();
 	}
 
 	protected static void processCommandLineArguments(String[] args) {
@@ -60,6 +67,9 @@ public class PlayGame {
 				if (string.toLowerCase().equals("gui")) {
 					guiMode = true;
 				}
+				if (string.toLowerCase().equals("bot")) {
+					botMode = true;
+				}
 			}
 		} else {
 			System.err.println("Too many arguments! IP Address and/or Port Number may be specified, as well as GUI mode");
@@ -67,16 +77,43 @@ public class PlayGame {
 		}
 	}
 
-	/**
-	 *
-	 */
-	public void update() {
-		while (client.gameRunning()) {
-			String input = userInput.getNextCommand();
-			if (input != null) {
-				client.send(input);
+
+	private class InputHandlerThread implements Runnable {
+		public void run() {
+			while (client.gameRunning()) {
+				if (playerInterface.hasNextCommand()) {
+					String input = playerInterface.getNextCommand();
+					if (input != null) {
+						client.send(input);
+					} else {
+						System.err.println("FATAL: null response from user input get command");
+						System.exit(1);
+					}
+				} else {
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
 			}
 		}
-		client.close();
+	}
+
+	private class ResponseHandlerThread implements Runnable {
+		public void run() {
+			ServerListenerThread listener = client.getServerListenerThread();
+			while (client.gameRunning()) {
+				if (listener.hasSuccessResponse()) {
+					playerInterface.giveSuccessResponse(listener.getSuccessResponse());
+				}
+				if (listener.hasGoldResponse()) {
+					playerInterface.giveHelloResponse(listener.getGoldResponse());
+				}
+				if (listener.hasLookResponse()) {
+					playerInterface.giveLookResponse(listener.getLookResponse());
+				}
+			}
+		}
 	}
 }

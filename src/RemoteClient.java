@@ -22,6 +22,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	private InetAddress address;
 	private PrintWriter writer;
 	private Server server;
+	private String lastLookWindow;
 
 	/**
 	 * Constructs the RemoteClient given the Socket and Server it is connected to
@@ -46,6 +47,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * Closes everything down cleanly when the loop is done
 	 */
 	public void run() {
+		new Thread(new ViewUpdaterThread()).start();
+
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -170,7 +173,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 				output += "\n";
 			}
 		}
-
+		lastLookWindow = output;
 		return output;
 	}
 
@@ -304,5 +307,31 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 */
 	public InetAddress getAddress() {
 		return address;
+	}
+
+
+	/**
+	 * Detects changes in the look window around the player.
+	 * Sends an updated look window if changes are detected.
+	 * Runs on 500ms clock
+	 */
+	private class ViewUpdaterThread implements Runnable {
+		public void run() {
+			while (connected) {
+				try {
+					Thread.sleep(500); //run on 500ms ticks, no need to spam
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+				String oldLookWindow = lastLookWindow;
+				String newLookWindow = look();
+				if (oldLookWindow != null) {
+					if (!oldLookWindow.equals(newLookWindow)) {
+						System.out.println("Sending lookwindow");
+						writer.println(newLookWindow);
+					}
+				}
+			}
+		}
 	}
 }

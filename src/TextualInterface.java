@@ -3,10 +3,10 @@ import java.util.Scanner;
 /**
  * Created by matt on 21/03/2016.
  */
-public class TextualInput implements IUserInput {
+public class TextualInterface implements PlayerInterface {
 	private Scanner scanner;
 
-	public TextualInput() {
+	public TextualInterface() {
 		scanner = new Scanner(System.in);
 	}
 
@@ -42,5 +42,25 @@ public class TextualInput implements IUserInput {
 				break;
 		}
 		return null;
+	}
+
+	@Override
+	public void giveLookResponse(char[][] response) {
+
+	}
+
+	@Override
+	public void giveHelloResponse(int response) {
+
+	}
+
+	@Override
+	public void giveSuccessResponse(boolean response) {
+
+	}
+
+	@Override
+	public boolean hasNextCommand() {
+		return false;
 	}
 }

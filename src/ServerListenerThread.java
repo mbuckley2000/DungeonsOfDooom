@@ -1,7 +1,7 @@
 import java.io.BufferedReader;
 
 /**
- * ServerMessageReaderThread for the Client
+ * ServerListenerThread for the Client
  * Prints every line it receives from the given BufferedReader to STDOUT
  * Used by the Client class to print output from server in an asynchronous manner
  * Stores the last responses to each command to be publicly retrieved by the BOT
@@ -9,7 +9,7 @@ import java.io.BufferedReader;
  * @author mb2070
  * @since 25/02/2016
  */
-public class ServerMessageReaderThread implements Runnable {
+public class ServerListenerThread implements Runnable {
 	private final int lookSize = 5;
 	private BufferedReader reader;
 	private boolean running;
@@ -18,13 +18,17 @@ public class ServerMessageReaderThread implements Runnable {
 	private int lookWindowYIndex;
 	private boolean successResponse;
 	private int goldResponse;
+	private boolean hasSuccessResponse;
+	private boolean hasGoldResponse;
+	private boolean hasLookResponse;
+
 
 	/**
 	 * Constructs the Reader
 	 *
 	 * @param bufferedReader The buffered reader the Reader object should read from
 	 */
-	public ServerMessageReaderThread(BufferedReader bufferedReader) {
+	public ServerListenerThread(BufferedReader bufferedReader) {
 		lookWindowYIndex = 0;
 		goldResponse = -1;
 		this.reader = bufferedReader;
@@ -45,20 +49,23 @@ public class ServerMessageReaderThread implements Runnable {
 					connected = false;
 					break;
 				} else {
-					System.out.println(string);
-				}
-				if (string.length() > 0) {
-					if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
-						if (!string.contains("GOLD")) {
-							addToLookWindow(string);
-						} else {
-							goldResponse = Integer.parseInt(string.replaceFirst("GOLD: ", ""));
+					//parse the string
+					if (string.length() > 0) {
+						if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
+							if (!string.contains("GOLD")) {
+								addToLookWindow(string);
+							} else {
+								goldResponse = Integer.parseInt(string.replaceFirst("GOLD: ", ""));
+								hasGoldResponse = true;
+							}
 						}
-					}
-					if (string.toUpperCase().equals("SUCCESS")) {
-						successResponse = true;
-					} else if (string.toUpperCase().equals("FAIL")) {
-						successResponse = false;
+						if (string.toUpperCase().equals("SUCCESS")) {
+							hasSuccessResponse = true;
+							successResponse = true;
+						} else if (string.toUpperCase().equals("FAIL")) {
+							hasSuccessResponse = true;
+							successResponse = false;
+						}
 					}
 				}
 			} catch (Exception e) {
@@ -78,16 +85,20 @@ public class ServerMessageReaderThread implements Runnable {
 	 * @param line The received lookWindow line
 	 */
 	private void addToLookWindow(String line) {
-		if (lookWindowYIndex == lookSize) lookWindowYIndex = 0;
 		line = line.replaceAll(" ", "");
 		lookResponse[lookWindowYIndex] = line.toCharArray();
 		lookWindowYIndex++;
+		if (lookWindowYIndex == lookSize) {
+			lookWindowYIndex = 0;
+			hasLookResponse = true;
+		}
 	}
 
 	/**
 	 * @return The look window in its current state. Usually a full look window but not guaranteed!
 	 */
 	public char[][] getLookResponse() {
+		hasLookResponse = false;
 		return lookResponse;
 	}
 
@@ -95,6 +106,7 @@ public class ServerMessageReaderThread implements Runnable {
 	 * @return The most recently received response to HELLO
 	 */
 	public int getGoldResponse() {
+		hasGoldResponse = false;
 		return goldResponse;
 	}
 
@@ -102,7 +114,20 @@ public class ServerMessageReaderThread implements Runnable {
 	 * @return The most recently received SUCCESS / FAIL
 	 */
 	public boolean getSuccessResponse() {
+		hasSuccessResponse = false;
 		return successResponse;
+	}
+
+	public boolean hasSuccessResponse() {
+		return hasSuccessResponse;
+	}
+
+	public boolean hasLookResponse() {
+		return hasLookResponse;
+	}
+
+	public boolean hasGoldResponse() {
+		return hasGoldResponse;
 	}
 
 	/**

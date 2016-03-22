@@ -9,7 +9,7 @@ import java.net.Socket;
  * Client class implementing IGameLogic
  * Can be used in place of the old GameLogic class.
  * Connects to server, performs very basic input filtering, and sends commands
- * All output from the server is printed and interpreted in a ServerMessageReaderThread to prevent blocking
+ * All output from the server is printed and interpreted in a ServerListenerThread to prevent blocking
  *
  * @author mb2070
  * @since 24/02/2016
@@ -19,7 +19,7 @@ public class Client {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	private boolean connected;
-	private ServerMessageReaderThread serverMessageReaderThread;
+	private ServerListenerThread serverListenerThread;
 
 	/**
 	 * Constructor
@@ -37,8 +37,8 @@ public class Client {
 				writer = new PrintWriter(socket.getOutputStream(), true);
 
 				connected = true;
-				serverMessageReaderThread = new ServerMessageReaderThread(reader);
-				new Thread(serverMessageReaderThread).start();
+				serverListenerThread = new ServerListenerThread(reader);
+				new Thread(serverListenerThread).start();
 
 				Thread.sleep(1000); //Sleep to give outputClientThread time to validate connection
 			} catch (ConnectException e) {
@@ -96,24 +96,24 @@ public class Client {
 	/**
 	 * @return Returns the message reader that prints and interprets all messages from the server
 	 */
-	public ServerMessageReaderThread getServerMessageReaderThread() {
-		return serverMessageReaderThread;
+	public ServerListenerThread getServerListenerThread() {
+		return serverListenerThread;
 	}
 
 	/**
 	 * @return True if the game is running
 	 */
 	public boolean gameRunning() {
-		return connected && serverMessageReaderThread.isConnected();
+		return connected && serverListenerThread.isConnected();
 	}
 
 	/**
-	 * Closes the socket, the ServerMessageReaderThread, and all streams.
+	 * Closes the socket, the ServerListenerThread, and all streams.
 	 */
 	public void close() {
 		try {
 			writer.close();
-			serverMessageReaderThread.stop();
+			serverListenerThread.stop();
 			reader.close();
 			socket.close();
 			System.exit(0);

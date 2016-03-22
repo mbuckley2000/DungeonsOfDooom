@@ -50,11 +50,9 @@ public class DPadPanel extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("Click");
 			if (!clicked) {
 				clicked = true;
 				direction = dir;
-				System.out.println("Direction = " + dir);
 			}
 		}
 	}

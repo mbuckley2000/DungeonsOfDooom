@@ -5,21 +5,21 @@ import java.util.*;
  * Runnable (has static main)
  * Connects to DoD server using the Client class
  */
-public class Bot extends PlayGame {
+public class Bot implements PlayerInterface {
 	private Stack<BotTask> taskStack;
 	private BotTask exploreTask;
 	private String command;
 	private Random random;
 	private BotMap map;
-	private int[] position;
+	private PlayerPositionTracker positionTracker;
 	/**
 	 * Used for sorting a list of int[] map positions from closest to the bot to furthest from the bot
 	 */
 	public final Comparator<int[]> distanceFromBot =
 			new Comparator<int[]>() {
 				public int compare(int[] t1, int[] t2) {
-					int t1Dist = BotMap.getManhattanDistance(t1, position);
-					int t2Dist = BotMap.getManhattanDistance(t2, position);
+					int t1Dist = BotMap.getManhattanDistance(t1, positionTracker.getPosition());
+					int t2Dist = BotMap.getManhattanDistance(t2, positionTracker.getPosition());
 					if (t1Dist == t2Dist) {
 						return 0;
 					} else if (t1Dist > t2Dist) {
@@ -39,8 +39,7 @@ public class Bot extends PlayGame {
 	 * Creates the initial ExploreTask
 	 */
 	public Bot() {
-		super(address, port);
-		position = new int[]{0, 0};
+		positionTracker = new PlayerPositionTracker();
 		stepsSinceLastLook = 0;
 		goldNeeded = 10;
 		random = new Random();
@@ -51,16 +50,6 @@ public class Bot extends PlayGame {
 		stepSize = 2;
 		command = "HELLO";
 		pathBlocked = false;
-	}
-
-	/**
-	 * Program runs from here
-	 * Creates a bot object and starts it off updating
-	 */
-	public static void main(String[] args) {
-		processCommandLineArguments(args);
-		Bot game = new Bot();
-		game.update();
 	}
 
 	/**
@@ -91,7 +80,7 @@ public class Bot extends PlayGame {
 	 *
 	 * @return The next command
 	 */
-	private String botAction() {
+	private String getBotAction() {
 		if (needToLook()) {
 			return "LOOK";
 		}
@@ -105,37 +94,16 @@ public class Bot extends PlayGame {
 			return taskStack.peek().getNextCommand();
 		} else {
 			taskStack.pop();
-			return botAction();
+			return getBotAction();
 		}
 	}
 
-	/**
-	 * Update loop for the bot
-	 * Runs until the game is over
-	 */
-	public void update() {
-		final int sleepMax = 3000;
-		System.out.println("Bot is now running");
-		while (client.gameRunning()) {
-			updatePosition();
-			updateMap();
-			updateGoldToWin();
-			command = botAction().toUpperCase();
-			client.send(command);
-			System.out.println(command);
-			try {
-				Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	/**
 	 * @return Current position of the bot
 	 */
 	public int[] getPosition() {
-		return position;
+		return positionTracker.getPosition();
 	}
 
 	/**
@@ -144,38 +112,8 @@ public class Bot extends PlayGame {
 	 * If so, updates the bot's local position (relative to it's start position)
 	 */
 	private void updatePosition() {
-		if (command.contains("MOVE")) {
-			stepsSinceLastLook++;
-			if (client.getServerMessageReaderThread().getSuccessResponse()) {
-				stepped(command.charAt(5));
-				System.out.println("Bot position: " + position[1] + ", " + position[0]);
-			} else {
-				//Movement failed. This shouldn't happen unless a player got in the way!!
-				pathBlocked = true; //This makes the needToLook method return true
-			}
-		}
-	}
-
-	/**
-	 * If the last command was LOOK:
-	 * Updates the bot's internal BotMap with the received look window
-	 */
-	private void updateMap() {
-		if (command.equals("LOOK")) {
-			map.update(client.getServerMessageReaderThread().getLookResponse(), position);
-			System.out.println("Updated internal map: ");
-			map.print(position);
-		}
-	}
-
-	/**
-	 * If the last command was HELLO:
-	 * Updates the goldToWin with the latest number from the Server
-	 */
-	private void updateGoldToWin() {
-		if (command.equals("HELLO")) {
-			goldNeeded = client.getServerMessageReaderThread().getGoldResponse();
-		}
+		stepsSinceLastLook++;
+		positionTracker.step(command.charAt(5));
 	}
 
 	/**
@@ -195,6 +133,7 @@ public class Bot extends PlayGame {
 		}
 
 		boolean hit = false;
+		int[] position = positionTracker.getPosition();
 		//Check if there are any undiscovered tiles in our look window
 		for (int x = 0; x < 5; x++) {
 			for (int y = 0; y < 5; y++) {
@@ -215,27 +154,7 @@ public class Bot extends PlayGame {
 		}
 	}
 
-	/**
-	 * Updates the bot's position (internal displacement from where it spawned), given the latest successful movement direction
-	 *
-	 * @param dir Latest successful movement direction
-	 */
-	private void stepped(char dir) {
-		switch (dir) {
-			case 'N':
-				position[0] -= 1; //North
-				break;
-			case 'E':
-				position[1] += 1; //East
-				break;
-			case 'S':
-				position[0] += 1; //South
-				break;
-			case 'W':
-				position[1] -= 1; //West
-				break;
-		}
-	}
+
 
 	/**
 	 * @param tileType Tile type to find
@@ -245,10 +164,52 @@ public class Bot extends PlayGame {
 		ArrayList<int[]> tiles = map.findAllTiles(tileType);
 		Collections.sort(tiles, distanceFromBot);
 		for (int[] tile : tiles) {
-			if (map.tileReachable(position, tile)) {
+			if (map.tileReachable(positionTracker.getPosition(), tile)) {
 				return tile;
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void giveLookResponse(char[][] response) {
+		map.update(response, positionTracker.getPosition());
+	}
+
+	@Override
+	public void giveHelloResponse(int response) {
+		goldNeeded = response;
+	}
+
+	@Override
+	public void giveSuccessResponse(boolean response) {
+		if (response) {
+			if (command.contains("MOVE")) {
+				updatePosition();
+			}
+		} else {
+			if (command.contains("MOVE")) {
+				//Movement failed. This shouldn't happen unless a player got in the way!!
+				pathBlocked = true; //This makes the needToLook method return true
+			}
+		}
+	}
+
+	@Override
+	public boolean hasNextCommand() {
+		return true;
+	}
+
+	@Override
+	public String getNextCommand() {
+		final int sleepMax = 3000;
+		try {
+			Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		command = getBotAction().toUpperCase();
+		System.out.println(command);
+		return command;
 	}
 }
