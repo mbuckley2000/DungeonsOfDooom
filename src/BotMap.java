@@ -82,7 +82,6 @@ public class BotMap {
 	public void update(char[][] lookWindow, int[] botPos) {
 		empty = false;
 		replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
-		print(botPos);
 	}
 
 	/**

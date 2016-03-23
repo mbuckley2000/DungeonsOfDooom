@@ -3,9 +3,15 @@
  */
 public class PlayerPositionTracker {
 	private int[] position;
+	private char direction;
 
 	public PlayerPositionTracker() {
 		position = new int[2];
+		direction = 'N';
+	}
+
+	public char getDirection() {
+		return direction;
 	}
 
 	/**
@@ -14,6 +20,7 @@ public class PlayerPositionTracker {
 	 * @param dir Latest successful movement direction
 	 */
 	public void step(char dir) {
+		direction = dir;
 		switch (dir) {
 			case 'N':
 				position[0] -= 1; //North
@@ -28,7 +35,6 @@ public class PlayerPositionTracker {
 				position[1] -= 1; //West
 				break;
 		}
-		System.out.println("Position: " + position[1] + ", " + position[0]);
 	}
 
 	public int[] getPosition() {

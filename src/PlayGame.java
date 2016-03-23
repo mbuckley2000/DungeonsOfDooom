@@ -105,7 +105,12 @@ public class PlayGame {
 			ServerListenerThread listener = client.getServerListenerThread();
 			while (client.gameRunning()) {
 				if (listener.hasSuccessResponse()) {
-					playerInterface.giveSuccessResponse(listener.getSuccessResponse());
+					boolean response = listener.getSuccessResponse();
+					playerInterface.giveSuccessResponse(response);
+					if (response)
+						playerInterface.giveMessage("Success");
+					else
+						playerInterface.giveMessage("Fail");
 				}
 				if (listener.hasGoldResponse()) {
 					playerInterface.giveHelloResponse(listener.getGoldResponse());

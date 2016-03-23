@@ -16,6 +16,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private BotMap map;
 	private PlayerPositionTracker positionTracker;
 	private String lastCommand;
+	private ChatPanel chatPanel;
 
 	public GUIInterface(String title) {
 		super(title);
@@ -42,7 +43,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		getContentPane().add(headerPanel, BorderLayout.PAGE_START);
 
 		//Setup Chat Footer
-		ChatPanel chatPanel = new ChatPanel();
+		chatPanel = new ChatPanel();
 		getContentPane().add(chatPanel, BorderLayout.PAGE_END);
 
 		//Setup Controls
@@ -57,6 +58,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		controlsPanel.add(dPadPanel);
 		getContentPane().add(controlsPanel, BorderLayout.LINE_END);
 
+		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
 		setVisible(true);
@@ -92,7 +94,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 	@Override
 	public void giveHelloResponse(int response) {
-
 	}
 
 	@Override
@@ -102,6 +103,11 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 				positionTracker.step(lastCommand.charAt(5));
 			}
 		}
+	}
+
+	@Override
+	public void giveMessage(String message) {
+		chatPanel.println(message);
 	}
 
 	@Override

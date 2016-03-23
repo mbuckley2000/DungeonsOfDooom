@@ -7,11 +7,16 @@ import java.awt.*;
 public class ChatPanel extends JPanel {
 	private JTextField messageEntry;
 	private JButton sendButton;
+	private JList<String> messageList;
+	private DefaultListModel<String> listModel;
 
 	public ChatPanel() {
-
-		//Receive panel
-		ServerListenerPanel receivePanel = new ServerListenerPanel();
+		//Receive panel inside a scroll pane
+		JScrollPane receivePanel = new JScrollPane();
+		listModel = new DefaultListModel<>();
+		messageList = new JList<>(listModel);
+		receivePanel.add(messageList);
+		receivePanel.setPreferredSize(new Dimension(getWidth(), 150));
 
 		//Send panel
 		JPanel sendPanel = new JPanel(new FlowLayout());
@@ -24,11 +29,14 @@ public class ChatPanel extends JPanel {
 		sendPanel.add(messageEntry);
 		sendPanel.add(sendButton);
 
-
 		//And it all comes together!
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		add(receivePanel);
 		add(sendPanel);
 	}
 
+	public void println(String string) {
+		listModel.addElement(string);
+		repaint();
+	}
 }

@@ -27,6 +27,8 @@ public class DPadPanel extends JPanel {
 		moveSouth.addActionListener(new MovementButtonListener('S'));
 		moveEast.addActionListener(new MovementButtonListener('E'));
 		moveWest.addActionListener(new MovementButtonListener('W'));
+
+		setPreferredSize(new Dimension(150, 150));
 	}
 
 	public boolean isClicked() {

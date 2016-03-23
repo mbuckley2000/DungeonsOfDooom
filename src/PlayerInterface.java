@@ -9,6 +9,8 @@ public interface PlayerInterface {
 
 	void giveSuccessResponse(boolean response);
 
+	void giveMessage(String message);
+
 	//Input
 	boolean hasNextCommand();
 

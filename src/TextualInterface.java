@@ -60,6 +60,11 @@ public class TextualInterface implements PlayerInterface {
 	}
 
 	@Override
+	public void giveMessage(String message) {
+		System.out.println(message);
+	}
+
+	@Override
 	public boolean hasNextCommand() {
 		return false;
 	}
