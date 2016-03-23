@@ -118,6 +118,9 @@ public class PlayGame {
 				if (listener.hasLookResponse()) {
 					playerInterface.giveLookResponse(listener.getLookResponse());
 				}
+				if (listener.hasMessage()) {
+					playerInterface.giveMessage(listener.getMessage());
+				}
 			}
 		}
 	}

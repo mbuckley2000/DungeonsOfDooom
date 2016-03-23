@@ -31,7 +31,17 @@ public class Client {
 			connectionAttempts++;
 			try {
 				System.out.println("Attempting to connect to " + address + ":" + port);
-				socket = new Socket(address, port);
+				//socket = new Socket(address, port);
+
+				ConnectDialog connectDialog = new ConnectDialog();
+				while (!connectDialog.isConnected()) {
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+				socket = connectDialog.getSocket();
 
 				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				writer = new PrintWriter(socket.getOutputStream(), true);

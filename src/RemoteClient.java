@@ -23,6 +23,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	private PrintWriter writer;
 	private Server server;
 	private String lastLookWindow;
+	private String name;
 
 	/**
 	 * Constructs the RemoteClient given the Socket and Server it is connected to
@@ -201,6 +202,12 @@ public class RemoteClient implements Runnable, IGameLogic {
 				break;
 			case "LOOK":
 				answer = look();//.replaceAll(".(?!$)", "$0  ");  <-- This adds spacing to the window
+				break;
+			case "NAME":
+				name = command[1];
+				break;
+			case "SAY":
+				server.broadcastMessage("MESSAGE" + name + ": " + input.replaceFirst("SAY ", ""));
 				break;
 			case "QUIT":
 				closeConnection();

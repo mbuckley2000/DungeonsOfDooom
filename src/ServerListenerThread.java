@@ -21,6 +21,8 @@ public class ServerListenerThread implements Runnable {
 	private boolean hasSuccessResponse;
 	private boolean hasGoldResponse;
 	private boolean hasLookResponse;
+	private boolean hasMessage;
+	private String message;
 
 
 	/**
@@ -65,6 +67,10 @@ public class ServerListenerThread implements Runnable {
 						} else if (string.toUpperCase().equals("FAIL")) {
 							hasSuccessResponse = true;
 							successResponse = false;
+						}
+						if (string.contains("MESSAGE")) {
+							hasMessage = true;
+							message = string.replaceFirst("MESSAGE", "");
 						}
 					}
 				}
@@ -118,6 +124,11 @@ public class ServerListenerThread implements Runnable {
 		return successResponse;
 	}
 
+	public String getMessage() {
+		hasMessage = false;
+		return message;
+	}
+
 	public boolean hasSuccessResponse() {
 		return hasSuccessResponse;
 	}
@@ -128,6 +139,10 @@ public class ServerListenerThread implements Runnable {
 
 	public boolean hasGoldResponse() {
 		return hasGoldResponse;
+	}
+
+	public boolean hasMessage() {
+		return hasMessage;
 	}
 
 	/**

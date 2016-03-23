@@ -11,7 +11,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private JButton quitButton;
 	private boolean quitButtonPressed;
 	private boolean pickupButtonPressed;
-	private boolean lookButtonPressed;
 	private NamePanel namePanel;
 	private BotMap map;
 	private PlayerPositionTracker positionTracker;
@@ -28,35 +27,47 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		BorderLayout gameWindowLayout = new BorderLayout();
 		getContentPane().setLayout(gameWindowLayout);
 
-		//Setup Map View
-		MapPanel mapPanel = new MapPanel(map, positionTracker);
-		getContentPane().add(mapPanel, BorderLayout.CENTER);
-
-		//Setup Header
-		JPanel headerPanel = new JPanel();
-		quitButton = new JButton("Quit");
-		quitButton.setAlignmentX(JButton.LEFT_ALIGNMENT);
-		namePanel = new NamePanel();
-		namePanel.setAlignmentX(NamePanel.RIGHT_ALIGNMENT);
-		headerPanel.add(quitButton);
-		headerPanel.add(namePanel);
-		getContentPane().add(headerPanel, BorderLayout.PAGE_START);
 
 		//Setup Chat Footer
 		chatPanel = new ChatPanel();
 		getContentPane().add(chatPanel, BorderLayout.PAGE_END);
 
+		//Setup Map View
+		MapPanel mapPanel = new MapPanel(map, positionTracker);
+		getContentPane().add(mapPanel, BorderLayout.LINE_START);
+
 		//Setup Controls
-		JPanel controlsPanel = new JPanel();
-		BoxLayout controlsLayout = new BoxLayout(controlsPanel, BoxLayout.PAGE_AXIS);
-		controlsPanel.setLayout(controlsLayout);
+		JPanel controlsPanel = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+
 		JButton pickupButton = new JButton("Pickup");
-		JButton lookButton = new JButton("Look");
-		controlsPanel.add(pickupButton);
-		controlsPanel.add(lookButton);
 		dPadPanel = new DPadPanel();
-		controlsPanel.add(dPadPanel);
-		getContentPane().add(controlsPanel, BorderLayout.LINE_END);
+		quitButton = new JButton("Quit");
+		namePanel = new NamePanel();
+
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		//controlsPanel.add(namePanel, c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.ipady = 25;
+
+		c.fill = GridBagConstraints.HORIZONTAL;
+		controlsPanel.add(pickupButton, c);
+		c.gridx = 0;
+		c.gridy = 2;
+		c.ipady = 25;
+
+		c.fill = GridBagConstraints.HORIZONTAL;
+		controlsPanel.add(quitButton, c);
+		c.gridx = 0;
+		c.gridy = 3;
+		c.ipady = 50;
+		c.fill = GridBagConstraints.NONE;
+		c.insets = new Insets(5, 5, 5, 5);
+		controlsPanel.add(dPadPanel, c);
+		getContentPane().add(controlsPanel, BorderLayout.CENTER);
 
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -69,13 +80,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				quitButtonPressed = true;
-			}
-		});
-
-		lookButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				lookButtonPressed = true;
 			}
 		});
 
@@ -135,14 +139,13 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 					quitButtonPressed = false;
 					break;
 				}
-				if (lookButtonPressed) {
-					command = "LOOK";
-					lookButtonPressed = false;
-					break;
-				}
 				if (pickupButtonPressed) {
 					command = "PICKUP";
 					pickupButtonPressed = false;
+					break;
+				}
+				if (chatPanel.hasMessage()) {
+					command = "SAY " + chatPanel.getMessage();
 					break;
 				}
 			} catch (InterruptedException e) {

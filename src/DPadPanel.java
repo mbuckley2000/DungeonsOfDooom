@@ -12,15 +12,24 @@ public class DPadPanel extends JPanel {
 
 	public DPadPanel() {
 		super();
-		setLayout(new BorderLayout());
+		setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
 		JButton moveNorth = new JButton("N");
 		JButton moveSouth = new JButton("S");
 		JButton moveEast = new JButton("E");
 		JButton moveWest = new JButton("W");
-		add(moveNorth, BorderLayout.PAGE_START);
-		add(moveSouth, BorderLayout.PAGE_END);
-		add(moveEast, BorderLayout.LINE_END);
-		add(moveWest, BorderLayout.LINE_START);
+		c.gridx = 1;
+		c.gridy = 0;
+		add(moveNorth, c);
+		c.gridx = 1;
+		c.gridy = 2;
+		add(moveSouth, c);
+		c.gridx = 2;
+		c.gridy = 1;
+		add(moveEast, c);
+		c.gridx = 0;
+		c.gridy = 1;
+		add(moveWest, c);
 
 		//Button listeners
 		moveNorth.addActionListener(new MovementButtonListener('N'));

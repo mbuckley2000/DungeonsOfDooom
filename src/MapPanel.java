@@ -34,6 +34,12 @@ public class MapPanel extends JPanel {
 	}
 
 	@Override
+	public void update(Graphics g) {
+		g.clearRect(0, 0, getWidth(), getHeight());
+		paintComponent(g);
+	}
+
+	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		int tileSize = 32; //px
