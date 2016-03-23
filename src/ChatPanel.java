@@ -11,26 +11,30 @@ import java.awt.event.KeyListener;
 public class ChatPanel extends JPanel {
 	private JTextField messageEntry;
 	private JButton sendButton;
-	private JList<String> messageList;
-	private DefaultListModel<String> listModel;
 	private boolean sendButtonPressed;
+	private JScrollPane receivePanel;
+	private JList<String> messageList;
+	private DefaultListModel messageListModel;
 
 	public ChatPanel() {
 		//Receive panel inside a scroll pane
-		JScrollPane receivePanel = new JScrollPane();
-		listModel = new DefaultListModel<>();
-		messageList = new JList<>(listModel);
-		receivePanel.add(messageList);
+		receivePanel = new JScrollPane();
+		messageListModel = new DefaultListModel();
+		messageList = new JList(messageListModel);
+		receivePanel.setViewportView(messageList);
 		receivePanel.setPreferredSize(new Dimension(getWidth(), 150));
+		receivePanel.setFocusable(false);
 
 		//Send panel
 		JPanel sendPanel = new JPanel(new FlowLayout());
 
-		messageEntry = new JTextField("Enter your message");
+		JLabel sendLabel = new JLabel("Enter your message: ");
+		messageEntry = new JTextField();
 		messageEntry.setPreferredSize(new Dimension(300, 25));
 
 		sendButton = new JButton("Send");
 
+		sendPanel.add(sendLabel);
 		sendPanel.add(messageEntry);
 		sendPanel.add(sendButton);
 
@@ -80,8 +84,9 @@ public class ChatPanel extends JPanel {
 	}
 
 	public void println(String string) {
-		listModel.addElement(string);
-		System.out.println(string);
-		repaint();
+		messageListModel.addElement(string);
+		receivePanel.revalidate();
+		JScrollBar sb = receivePanel.getVerticalScrollBar();
+		sb.setValue(sb.getMaximum());
 	}
 }

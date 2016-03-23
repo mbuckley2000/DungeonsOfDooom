@@ -107,10 +107,6 @@ public class PlayGame {
 				if (listener.hasSuccessResponse()) {
 					boolean response = listener.getSuccessResponse();
 					playerInterface.giveSuccessResponse(response);
-					if (response)
-						playerInterface.giveMessage("Success");
-					else
-						playerInterface.giveMessage("Fail");
 				}
 				if (listener.hasGoldResponse()) {
 					playerInterface.giveHelloResponse(listener.getGoldResponse());

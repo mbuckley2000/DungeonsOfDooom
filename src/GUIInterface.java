@@ -11,11 +11,11 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private JButton quitButton;
 	private boolean quitButtonPressed;
 	private boolean pickupButtonPressed;
-	private NamePanel namePanel;
 	private BotMap map;
 	private PlayerPositionTracker positionTracker;
 	private String lastCommand;
 	private ChatPanel chatPanel;
+	private MapPanel mapPanel;
 
 	public GUIInterface(String title) {
 		super(title);
@@ -33,7 +33,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		getContentPane().add(chatPanel, BorderLayout.PAGE_END);
 
 		//Setup Map View
-		MapPanel mapPanel = new MapPanel(map, positionTracker);
+		mapPanel = new MapPanel(map, positionTracker);
 		getContentPane().add(mapPanel, BorderLayout.LINE_START);
 
 		//Setup Controls
@@ -43,7 +43,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		JButton pickupButton = new JButton("Pickup");
 		dPadPanel = new DPadPanel();
 		quitButton = new JButton("Quit");
-		namePanel = new NamePanel();
 
 		c.gridx = 0;
 		c.gridy = 0;
@@ -132,6 +131,11 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 				if (dPadPanel.isClicked()) {
 					dPadPanel.reset();
 					command = "MOVE " + dPadPanel.getDirection();
+					break;
+				}
+				char move = mapPanel.getMove();
+				if (move != '.') {
+					command = "MOVE " + move;
 					break;
 				}
 				if (quitButtonPressed) {

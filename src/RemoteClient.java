@@ -205,10 +205,10 @@ public class RemoteClient implements Runnable, IGameLogic {
 				break;
 			case "NAME":
 				name = command[1];
-				break;
+				return "SUCCESS";
 			case "SAY":
 				server.broadcastMessage("MESSAGE" + name + ": " + input.replaceFirst("SAY ", ""));
-				break;
+				return "SUCCESS";
 			case "QUIT":
 				closeConnection();
 				return "Thanks for playing!";

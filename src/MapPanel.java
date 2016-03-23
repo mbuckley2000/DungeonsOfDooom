@@ -1,6 +1,10 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
@@ -16,6 +20,7 @@ public class MapPanel extends JPanel {
 	private Image tileSet;
 	private Image playerSpriteSheet;
 	private PlayerPositionTracker positionTracker;
+	private char move;
 
 	public MapPanel(BotMap map, PlayerPositionTracker positionTracker) {
 		super();
@@ -29,8 +34,50 @@ public class MapPanel extends JPanel {
 			System.exit(0);
 		}
 
+		setFocusable(true);
+		requestFocusInWindow();
+
 		setBackground(Color.BLACK);
 		setPreferredSize(new Dimension(650, 500));
+
+		//Key Listener
+		addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_UP) {
+					move = 'N';
+				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					move = 'S';
+				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					move = 'E';
+				} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					move = 'W';
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+		});
+
+		//Focus Listener
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				super.mouseClicked(e);
+				requestFocusInWindow();
+			}
+		});
+	}
+
+	public char getMove() {
+		char movement = move;
+		move = '.';
+		return movement;
 	}
 
 	@Override

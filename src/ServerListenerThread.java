@@ -1,4 +1,6 @@
 import java.io.BufferedReader;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
  * ServerListenerThread for the Client
@@ -22,7 +24,7 @@ public class ServerListenerThread implements Runnable {
 	private boolean hasGoldResponse;
 	private boolean hasLookResponse;
 	private boolean hasMessage;
-	private String message;
+	private Queue<String> messages;
 
 
 	/**
@@ -37,6 +39,7 @@ public class ServerListenerThread implements Runnable {
 		running = true;
 		connected = true;
 		lookResponse = new char[lookSize][lookSize];
+		messages = new PriorityQueue<>();
 	}
 
 	/**
@@ -68,9 +71,9 @@ public class ServerListenerThread implements Runnable {
 							hasSuccessResponse = true;
 							successResponse = false;
 						}
-						if (string.contains("MESSAGE")) {
+						if (string.startsWith("MESSAGE")) {
 							hasMessage = true;
-							message = string.replaceFirst("MESSAGE", "");
+							messages.add(string.replaceFirst("MESSAGE", ""));
 						}
 					}
 				}
@@ -126,7 +129,7 @@ public class ServerListenerThread implements Runnable {
 
 	public String getMessage() {
 		hasMessage = false;
-		return message;
+		return messages.remove();
 	}
 
 	public boolean hasSuccessResponse() {
@@ -142,7 +145,7 @@ public class ServerListenerThread implements Runnable {
 	}
 
 	public boolean hasMessage() {
-		return hasMessage;
+		return !messages.isEmpty();
 	}
 
 	/**

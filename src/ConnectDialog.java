@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.net.Socket;
 
 /**
@@ -10,10 +12,12 @@ import java.net.Socket;
 public class ConnectDialog extends JFrame {
 	private JTextField addressEntry;
 	private JTextField portEntry;
+	private JTextField nameEntry;
 	private boolean connectButtonPressed;
 	private boolean connected;
 	private JLabel unableToConnectLabel;
 	private Socket socket;
+	private String name;
 
 	public ConnectDialog() {
 		super("Connect to server");
@@ -28,6 +32,10 @@ public class ConnectDialog extends JFrame {
 		portEntry = new JTextField("40004");
 		portEntry.setPreferredSize(new Dimension(200, 25));
 
+		JLabel nameLabel = new JLabel("Display Name: ");
+		nameEntry = new JTextField("Unnamed");
+		nameEntry.setPreferredSize(new Dimension(200, 25));
+
 		JButton connectButton = new JButton("Connect");
 		JButton quitButton = new JButton("Quit");
 
@@ -37,6 +45,8 @@ public class ConnectDialog extends JFrame {
 		add(addressEntry);
 		add(portLabel);
 		add(portEntry);
+		add(nameLabel);
+		add(nameEntry);
 		add(connectButton);
 		add(unableToConnectLabel);
 
@@ -62,6 +72,10 @@ public class ConnectDialog extends JFrame {
 			}
 		});
 
+		//Key Listeners
+		addressEntry.addKeyListener(new SubmitOnEnter());
+		portEntry.addKeyListener(new SubmitOnEnter());
+		nameEntry.addKeyListener(new SubmitOnEnter());
 
 		//Start the thread
 		new Thread(new ConnectThread()).start();
@@ -75,12 +89,20 @@ public class ConnectDialog extends JFrame {
 		return socket;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	private boolean isPortValid(int port) {
 		return Client.isPortValid(port);
 	}
 
 	private boolean isAddressValid(String address) {
 		return Client.isAddressValid(address);
+	}
+
+	private boolean isNameValid(String name) {
+		return name.length() >= 3 && name.length() <= 10;
 	}
 
 	public class ConnectThread implements Runnable {
@@ -93,20 +115,53 @@ public class ConnectDialog extends JFrame {
 				}
 				if (connectButtonPressed) {
 					String address = addressEntry.getText();
-					int port = Integer.parseInt(portEntry.getText());
-					if (isAddressValid(address) && isPortValid(port)) {
+					name = nameEntry.getText();
+					int port = -1;
+					if (!portEntry.getText().isEmpty()) {
+						port = Integer.parseInt(portEntry.getText());
+					}
+					if (isAddressValid(address) && isPortValid(port) && isNameValid(name)) {
 						try {
 							socket = new Socket(address, port);
 							connected = true;
 							dispose();
 						} catch (Exception e) {
 							connected = false;
+							unableToConnectLabel.setText("Unable to connect to server");
+							unableToConnectLabel.setVisible(true);
+						}
+					} else {
+						if (!isNameValid(name)) {
+							unableToConnectLabel.setText("Invalid name");
+							unableToConnectLabel.setVisible(true);
+						} else if (!isAddressValid(address)) {
+							unableToConnectLabel.setText("Invalid address");
+							unableToConnectLabel.setVisible(true);
+						} else if (!isPortValid(port)) {
+							unableToConnectLabel.setText("Invalid port");
 							unableToConnectLabel.setVisible(true);
 						}
 					}
 					connectButtonPressed = false;
 				}
 			}
+		}
+	}
+
+	private class SubmitOnEnter implements KeyListener {
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				connectButtonPressed = true;
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
 		}
 	}
 }
