@@ -22,7 +22,7 @@ public class BotMap {
 	 * Initialises the bounds to the middle of the map
 	 */
 	public BotMap() {
-		offset = new int[]{6, 6};
+		offset = new int[]{50, 50};
 		map = new char[offset[0] * 2][offset[1] * 2];
 		bounds = new int[4];
 		empty = true;
@@ -173,7 +173,7 @@ public class BotMap {
 			if (offsetY > bounds[2]) bounds[2] = offsetY;
 			if (offsetX > bounds[3]) bounds[3] = offsetX;
 		} else {
-			increaseOffset(new int[]{2, 2});
+			expandMapArray(new int[]{2, 2});
 			setTile(y, x, tileType);
 		}
 	}
@@ -387,7 +387,8 @@ public class BotMap {
 		return filledMap;
 	}
 
-	private void increaseOffset(int[] offsetDelta) {
+	private void expandMapArray(int[] offsetDelta) {
+		System.out.println("Expanding map array");
 		char[][] oldMap = map;
 		this.offset[0] += offsetDelta[0];
 		this.offset[1] += offsetDelta[1];

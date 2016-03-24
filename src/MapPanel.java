@@ -21,11 +21,16 @@ public class MapPanel extends JPanel {
 	private Image playerSpriteSheet;
 	private PlayerPositionTracker positionTracker;
 	private char move;
+	private int screenOffsetX;
+	private int screenOffsetY;
+	private Stopwatch vSyncTimer;
+
 
 	public MapPanel(BotMap map, PlayerPositionTracker positionTracker) {
 		super();
 		this.map = map;
 		this.positionTracker = positionTracker;
+		vSyncTimer = new Stopwatch();
 		try {
 			tileSet = ImageIO.read(new File("img/spritesheet.png"));
 			playerSpriteSheet = ImageIO.read(new File("img/player.png"));
@@ -33,6 +38,21 @@ public class MapPanel extends JPanel {
 			System.err.println("Couldn't load images");
 			System.exit(0);
 		}
+
+		//Filter player image to be transparent
+		ImageFilter filter = new RGBImageFilter() {
+			int transparentColor = Color.white.getRGB() | 0xFF000000;
+
+			public final int filterRGB(int x, int y, int rgb) {
+				if ((rgb | 0xFF000000) == transparentColor) {
+					return 0x00FFFFFF & rgb;
+				} else {
+					return rgb;
+				}
+			}
+		};
+		ImageProducer filteredImgProd = new FilteredImageSource(playerSpriteSheet.getSource(), filter);
+		playerSpriteSheet = Toolkit.getDefaultToolkit().createImage(filteredImgProd);
 
 		setFocusable(true);
 		requestFocusInWindow();
@@ -90,50 +110,45 @@ public class MapPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		int tileSize = 32; //px
-		int screenOffsetX = 300 - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]) * tileSize;
-		int screenOffsetY = 220 - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]) * tileSize;
+		int targetScreenOffsetX = (650 - tileSize) / 2 - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]) * tileSize;
+		int targetScreenOffsetY = (500 - tileSize) / 2 - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]) * tileSize;
+		if (screenOffsetX < targetScreenOffsetX) screenOffsetX += tileSize / 8;
+		if (screenOffsetX > targetScreenOffsetX) screenOffsetX -= tileSize / 8;
+		if (screenOffsetY < targetScreenOffsetY) screenOffsetY += tileSize / 8;
+		if (screenOffsetY > targetScreenOffsetY) screenOffsetY -= tileSize / 8;
 		int[] playerSpritePos = getPlayerSprite(positionTracker.getDirection());
-
-
-		ImageFilter filter = new RGBImageFilter() {
-			int transparentColor = Color.white.getRGB() | 0xFF000000;
-
-			public final int filterRGB(int x, int y, int rgb) {
-				if ((rgb | 0xFF000000) == transparentColor) {
-					return 0x00FFFFFF & rgb;
-				} else {
-					return rgb;
-				}
-			}
-		};
-
-		ImageProducer filteredImgProd = new FilteredImageSource(playerSpriteSheet.getSource(), filter);
-		Image transparentImg = Toolkit.getDefaultToolkit().createImage(filteredImgProd);
-
-
 
 		char[][] knownMap = map.getAsArray();
 		for (int y = 0; y < knownMap.length; y++) {
 			for (int x = 0; x < knownMap[0].length; x++) {
 				int screenX = x * tileSize + screenOffsetX;
 				int screenY = y * tileSize + screenOffsetY;
-				if (screenX > 0 && screenX < 650 && screenY > 0 && screenY < 500) {
+				if (screenX >= -tileSize && screenX < 650 && screenY >= -tileSize && screenY < 500) {
 					if (knownMap[y][x] == '.') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, 32, 32, null);
+						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
 					} else if (knownMap[y][x] == 'G') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 32, 9 * 32, 2 * 32, 10 * 32, null);
+						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, tileSize, 9 * tileSize, 2 * tileSize, 10 * tileSize, null);
 					} else if (knownMap[y][x] == '#') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 5 * 32, 0, 6 * 32, 32, null);
+						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 5 * tileSize, 0, 6 * tileSize, tileSize, null);
 					} else if (knownMap[y][x] == 'E') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 3 * 32, 32, 4 * 32, null);
+						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 3 * tileSize, tileSize, 4 * tileSize, null);
 					}
-					if (y == positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0] && x == positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]) {
-						g.drawImage(transparentImg, screenX, screenY, screenX + tileSize, screenY + tileSize, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + 32, playerSpritePos[1] + 32, null);
-					}
+					//Draw player
+					g.drawImage(playerSpriteSheet, (650 - tileSize) / 2, (500 - tileSize) / 2, (650 + tileSize) / 2, (500 + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
 				}
 			}
 		}
 
+		//VSYNC @ 60fps
+		long frameTime = vSyncTimer.getElapsedTimeMillis();
+		if (frameTime < 16) {
+			try {
+				Thread.sleep(16 - frameTime);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
+		vSyncTimer.restart();
 		setVisible(true);
 		validate();
 		repaint();

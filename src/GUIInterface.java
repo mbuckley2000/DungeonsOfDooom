@@ -1,32 +1,35 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by matt on 21/03/2016.
  */
 public class GUIInterface extends JFrame implements PlayerInterface {
-	private DPadPanel dPadPanel;
-	private JButton quitButton;
-	private boolean quitButtonPressed;
-	private boolean pickupButtonPressed;
 	private BotMap map;
 	private PlayerPositionTracker positionTracker;
 	private String lastCommand;
 	private ChatPanel chatPanel;
 	private MapPanel mapPanel;
+	private Controller controller;
 
 	public GUIInterface(String title) {
 		super(title);
 		map = new BotMap();
 		positionTracker = new PlayerPositionTracker();
+		controller = new KeyboardController(150);
 		lastCommand = "";
 
 		//Setup GUIInterface
 		BorderLayout gameWindowLayout = new BorderLayout();
 		getContentPane().setLayout(gameWindowLayout);
 
+		//Setup instructions label
+		JLabel instructionsLabel = new JLabel("Keyboard Controls:    Move: Arrow Keys    Pickup: Space    Quit: Escape");
+		add(instructionsLabel, BorderLayout.PAGE_START);
+
+		//Setup controls panel
+		ControlPanel controlPanel = new ControlPanel(controller);
+		add(controlPanel, BorderLayout.LINE_END);
 
 		//Setup Chat Footer
 		chatPanel = new ChatPanel();
@@ -34,62 +37,18 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 		//Setup Map View
 		mapPanel = new MapPanel(map, positionTracker);
-		getContentPane().add(mapPanel, BorderLayout.LINE_START);
-
-		//Setup Controls
-		JPanel controlsPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-
-		JButton pickupButton = new JButton("Pickup");
-		dPadPanel = new DPadPanel();
-		quitButton = new JButton("Quit");
-
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		//controlsPanel.add(namePanel, c);
-		c.gridx = 0;
-		c.gridy = 1;
-		c.ipady = 25;
-
-		c.fill = GridBagConstraints.HORIZONTAL;
-		controlsPanel.add(pickupButton, c);
-		c.gridx = 0;
-		c.gridy = 2;
-		c.ipady = 25;
-
-		c.fill = GridBagConstraints.HORIZONTAL;
-		controlsPanel.add(quitButton, c);
-		c.gridx = 0;
-		c.gridy = 3;
-		c.ipady = 50;
-		c.fill = GridBagConstraints.NONE;
-		c.insets = new Insets(5, 5, 5, 5);
-		controlsPanel.add(dPadPanel, c);
-		getContentPane().add(controlsPanel, BorderLayout.CENTER);
+		getContentPane().add(mapPanel, BorderLayout.CENTER);
 
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
 		setVisible(true);
-
-
-		//Create button listeners
-		quitButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				quitButtonPressed = true;
-			}
-		});
-
-		pickupButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				pickupButtonPressed = true;
-			}
-		});
 	}
 
+
+	/*
+	///Messages from the server are given to the interface here
+	 */
 	@Override
 	public void giveLookResponse(char[][] response) {
 		map.update(response, positionTracker.getPosition());
@@ -113,6 +72,10 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		chatPanel.println(message);
 	}
 
+
+	/*
+	///Messages to the server are picked up from here
+	 */
 	@Override
 	public boolean hasNextCommand() {
 		return true;
@@ -120,32 +83,31 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 	public String getNextCommand() {
 		String command = null;
-
 		while (command == null) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(20);
 				if (lastCommand.contains("MOVE")) {
 					command = "LOOK";
 					break;
 				}
-				if (dPadPanel.isClicked()) {
-					dPadPanel.reset();
-					command = "MOVE " + dPadPanel.getDirection();
+				if (controller.isMovePressed()) {
+					command = "MOVE " + controller.getMoveDirection();
 					break;
 				}
-				char move = mapPanel.getMove();
-				if (move != '.') {
-					command = "MOVE " + move;
-					break;
-				}
-				if (quitButtonPressed) {
+				if (controller.isQuitPressed()) {
 					command = "QUIT";
-					quitButtonPressed = false;
 					break;
 				}
-				if (pickupButtonPressed) {
+				if (controller.isPickupPressed()) {
 					command = "PICKUP";
-					pickupButtonPressed = false;
+					break;
+				}
+				if (controller.isLookPressed()) {
+					command = "LOOK";
+					break;
+				}
+				if (controller.isHelloPressed()) {
+					command = "HELLO";
 					break;
 				}
 				if (chatPanel.hasMessage()) {
