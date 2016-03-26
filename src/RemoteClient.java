@@ -326,7 +326,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 		public void run() {
 			while (connected) {
 				try {
-					Thread.sleep(500); //run on 500ms ticks, no need to spam
+					Thread.sleep(200); //run on 200ms ticks, no need to spam. This is only for if a player moves in their lookWindow
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}

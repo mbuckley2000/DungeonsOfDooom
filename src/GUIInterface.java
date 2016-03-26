@@ -11,6 +11,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private ChatPanel chatPanel;
 	private MapPanel mapPanel;
 	private Controller controller;
+	private boolean needToLook;
 
 	public GUIInterface(String title) {
 		super(title);
@@ -63,6 +64,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		if (response) {
 			if (lastCommand.contains("MOVE")) {
 				positionTracker.step(lastCommand.charAt(5));
+				needToLook = true;
 			}
 		}
 	}
@@ -84,42 +86,36 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	public String getNextCommand() {
 		String command = null;
 		while (command == null) {
-			try {
-				Thread.sleep(20);
-				if (lastCommand.contains("MOVE")) {
-					command = "LOOK";
-					break;
-				}
-				if (controller.isMovePressed()) {
-					command = "MOVE " + controller.getMoveDirection();
-					break;
-				}
-				if (controller.isQuitPressed()) {
-					command = "QUIT";
-					break;
-				}
-				if (controller.isPickupPressed()) {
-					command = "PICKUP";
-					break;
-				}
-				if (controller.isLookPressed()) {
-					command = "LOOK";
-					break;
-				}
-				if (controller.isHelloPressed()) {
-					command = "HELLO";
-					break;
-				}
-				if (chatPanel.hasMessage()) {
-					command = "SAY " + chatPanel.getMessage();
-					break;
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				System.err.println("Unable to obtain new command from GUI");
+			if (needToLook) {
+				command = "LOOK";
+				needToLook = false;
+				break;
+			}
+			if (controller.isMovePressed()) {
+				command = "MOVE " + controller.getMoveDirection();
+				break;
+			}
+			if (controller.isQuitPressed()) {
+				command = "QUIT";
+				break;
+			}
+			if (controller.isPickupPressed()) {
+				command = "PICKUP";
+				break;
+			}
+			if (controller.isLookPressed()) {
+				command = "LOOK";
+				break;
+			}
+			if (controller.isHelloPressed()) {
+				command = "HELLO";
+				break;
+			}
+			if (chatPanel.hasMessage()) {
+				command = "SAY " + chatPanel.getMessage();
+				break;
 			}
 		}
-
 		lastCommand = command;
 		return command;
 	}

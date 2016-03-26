@@ -89,12 +89,6 @@ public class PlayGame {
 						System.err.println("FATAL: null response from user input get command");
 						System.exit(1);
 					}
-				} else {
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
 				}
 			}
 		}
