@@ -40,7 +40,7 @@ public class ControlPanel extends JPanel {
 		cd.gridx = 0;
 		cd.gridy = 1;
 		dPadPanel.add(moveWest, cd);
-		dPadPanel.setPreferredSize(new Dimension(150, 150));
+		//dPadPanel.setPreferredSize(new Dimension(150, 150));
 
 
 		//Put it all together

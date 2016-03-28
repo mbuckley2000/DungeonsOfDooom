@@ -15,47 +15,87 @@ public class ConnectDialog extends JFrame {
 	private JTextField nameEntry;
 	private boolean connectButtonPressed;
 	private boolean connected;
-	private JLabel unableToConnectLabel;
+	private JLabel instructionLabel;
 	private Socket socket;
 	private String name;
+	private double scale;
 
 	public ConnectDialog() {
 		super("Connect to server");
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+			System.err.println("Couldn't use system default look and feel");
+		}
 
-		unableToConnectLabel = new JLabel("Unable to connect... Please try again");
+		scale = 1.0;//DPI scaling
+		double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+		if (screenWidth > 1600) {
+			scale = screenWidth / 1600;
+		}
+
+		instructionLabel = new JLabel("Please enter server details");
 
 		JLabel addressLabel = new JLabel("Address: ");
-		addressEntry = new JTextField("localhost");
-		addressEntry.setPreferredSize(new Dimension(200, 25));
+		addressEntry = new JTextField("localhost", 20);
 
 		JLabel portLabel = new JLabel("Port: ");
-		portEntry = new JTextField("40004");
-		portEntry.setPreferredSize(new Dimension(200, 25));
+		portEntry = new JTextField("40004", 20);
 
 		JLabel nameLabel = new JLabel("Display Name: ");
-		nameEntry = new JTextField("Unnamed");
-		nameEntry.setPreferredSize(new Dimension(200, 25));
+		nameEntry = new JTextField("Unnamed", 20);
 
 		JButton connectButton = new JButton("Connect");
 		JButton quitButton = new JButton("Quit");
 
+		int border = (int) (25 * scale); //From the edge of the window
+		int spacing = (int) (5 * scale); //between each component
+
 		//Build the gui
-		setLayout(new FlowLayout());
-		add(addressLabel);
-		add(addressEntry);
-		add(portLabel);
-		add(portEntry);
-		add(nameLabel);
-		add(nameEntry);
-		add(connectButton);
-		add(unableToConnectLabel);
+		setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(border, border, spacing, spacing);
+		c.anchor = GridBagConstraints.EAST;
+		add(nameLabel, c);
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new Insets(border, spacing, spacing, border);
+		add(nameEntry, c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.insets = new Insets(spacing, border, spacing, spacing);
+		add(addressLabel, c);
+		c.gridx = 1;
+		c.gridy = 1;
+		c.insets = new Insets(spacing, spacing, spacing, border);
+		add(addressEntry, c);
+		c.gridx = 0;
+		c.gridy = 2;
+		c.insets = new Insets(spacing, border, spacing, spacing);
+		add(portLabel, c);
+		c.gridx = 1;
+		c.gridy = 2;
+		c.insets = new Insets(spacing, spacing, spacing, border);
+		add(portEntry, c);
+		c.gridx = 0;
+		c.gridy = 3;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(spacing, border, spacing, border);
+		add(connectButton, c);
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridwidth = 2;
+		c.insets = new Insets(spacing, border, border, border);
+		c.anchor = GridBagConstraints.WEST;
+		add(instructionLabel, c);
 
 		pack();
 		setVisible(true);
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-		unableToConnectLabel.setVisible(false);
 
 		//Button Listeners
 		connectButton.addActionListener(new ActionListener() {
@@ -93,6 +133,10 @@ public class ConnectDialog extends JFrame {
 		return name;
 	}
 
+	public boolean getBotMode() {
+		return true;
+	}
+
 	private boolean isPortValid(int port) {
 		return Client.isPortValid(port);
 	}
@@ -127,19 +171,15 @@ public class ConnectDialog extends JFrame {
 							dispose();
 						} catch (Exception e) {
 							connected = false;
-							unableToConnectLabel.setText("Unable to connect to server");
-							unableToConnectLabel.setVisible(true);
+							instructionLabel.setText("Unable to connect to server");
 						}
 					} else {
 						if (!isNameValid(name)) {
-							unableToConnectLabel.setText("Invalid name");
-							unableToConnectLabel.setVisible(true);
+							instructionLabel.setText("Invalid name");
 						} else if (!isAddressValid(address)) {
-							unableToConnectLabel.setText("Invalid address");
-							unableToConnectLabel.setVisible(true);
+							instructionLabel.setText("Invalid address");
 						} else if (!isPortValid(port)) {
-							unableToConnectLabel.setText("Invalid port");
-							unableToConnectLabel.setVisible(true);
+							instructionLabel.setText("Invalid port");
 						}
 					}
 					connectButtonPressed = false;

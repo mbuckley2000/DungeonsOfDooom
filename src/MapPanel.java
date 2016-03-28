@@ -1,8 +1,6 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.FilteredImageSource;
@@ -16,18 +14,25 @@ import java.io.IOException;
  * Created by matt on 21/03/2016.
  */
 public class MapPanel extends JPanel {
-	private BotMap map;
+	private final int targetFramerate = 60;
+	private ClientMap map;
 	private Image tileSet;
 	private Image playerSpriteSheet;
 	private PlayerPositionTracker positionTracker;
-	private char move;
 	private int screenOffsetX;
 	private int screenOffsetY;
 	private Stopwatch vSyncTimer;
+	private double scale;
 
 
-	public MapPanel(BotMap map, PlayerPositionTracker positionTracker) {
+	public MapPanel(ClientMap map, PlayerPositionTracker positionTracker) {
 		super();
+
+		scale = 1.0;//DPI scaling
+		double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+		if (screenWidth > 1600) {
+			scale = screenWidth / 1600;
+		}
 		this.map = map;
 		this.positionTracker = positionTracker;
 		vSyncTimer = new Stopwatch();
@@ -58,31 +63,7 @@ public class MapPanel extends JPanel {
 		requestFocusInWindow();
 
 		setBackground(Color.BLACK);
-		setPreferredSize(new Dimension(650, 500));
-
-		//Key Listener
-		addKeyListener(new KeyListener() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_UP) {
-					move = 'N';
-				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-					move = 'S';
-				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-					move = 'E';
-				} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-					move = 'W';
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-		});
+		setPreferredSize(new Dimension((int) (650 * scale), (int) (500 * scale)));
 
 		//Focus Listener
 		addMouseListener(new MouseAdapter() {
@@ -94,12 +75,6 @@ public class MapPanel extends JPanel {
 		});
 	}
 
-	public char getMove() {
-		char movement = move;
-		move = '.';
-		return movement;
-	}
-
 	@Override
 	public void update(Graphics g) {
 		g.clearRect(0, 0, getWidth(), getHeight());
@@ -108,8 +83,11 @@ public class MapPanel extends JPanel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		int tileSize = 32; //px
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.scale(scale, scale);
+
+		super.paintComponent(g2);
+		int tileSize = 32; //px unscaled
 		int targetScreenOffsetX = (650 - tileSize) / 2 - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]) * tileSize;
 		int targetScreenOffsetY = (500 - tileSize) / 2 - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]) * tileSize;
 		if (screenOffsetX < targetScreenOffsetX) screenOffsetX += tileSize / 8;
@@ -125,19 +103,19 @@ public class MapPanel extends JPanel {
 				int screenY = y * tileSize + screenOffsetY;
 				if (screenX >= -tileSize && screenX < 650 && screenY >= -tileSize && screenY < 500) {
 					if (knownMap[y][x] == '.') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
+						g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
 					} else if (knownMap[y][x] == 'G') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, tileSize, 9 * tileSize, 2 * tileSize, 10 * tileSize, null);
+						g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, tileSize, 9 * tileSize, 2 * tileSize, 10 * tileSize, null);
 					} else if (knownMap[y][x] == '#') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 5 * tileSize, 0, 6 * tileSize, tileSize, null);
+						g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 5 * tileSize, 0, 6 * tileSize, tileSize, null);
 					} else if (knownMap[y][x] == 'E') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 3 * tileSize, tileSize, 4 * tileSize, null);
+						g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 3 * tileSize, tileSize, 4 * tileSize, null);
 					}
 					//Drawing other players
 					if (knownMap[y][x] == 'P') {
-						g.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
+						g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
 						if (Math.sqrt(Math.pow(y - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]), 2) + Math.pow(x - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]), 2)) < 3) { //If they are close
-							g.drawImage(playerSpriteSheet, screenX, screenY, screenX + tileSize, screenY + tileSize, 7 * 32, 4 * 32, 7 * 32 + tileSize, 4 * 32 + tileSize, null);
+							g2.drawImage(playerSpriteSheet, screenX, screenY, screenX + tileSize, screenY + tileSize, 7 * 32, 4 * 32, 7 * 32 + tileSize, 4 * 32 + tileSize, null);
 						}
 					}
 				}
@@ -145,22 +123,25 @@ public class MapPanel extends JPanel {
 		}
 
 		//Draw player
-		g.drawImage(playerSpriteSheet, (650 - tileSize) / 2, (500 - tileSize) / 2, (650 + tileSize) / 2, (500 + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
+		g2.drawImage(playerSpriteSheet, (650 - tileSize) / 2, (500 - tileSize) / 2, (650 + tileSize) / 2, (500 + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
 
+		setVisible(true);
+		validate();
+		repaint();
 
 		//VSYNC @ 60fps
 		long frameTime = vSyncTimer.getElapsedTimeMillis();
-		if (frameTime < 16) {
+		int targetFrameTime = 1000 / targetFramerate;
+		if (frameTime < targetFrameTime) {
 			try {
-				Thread.sleep(16 - frameTime);
+				//System.out.println("Frametime: " + frameTime + ", sleeping for " + (targetFrameTime-frameTime) + "ms");
+				Thread.sleep(targetFrameTime - frameTime);
 			} catch (InterruptedException e) {
+				System.exit(1);
 				Thread.currentThread().interrupt();
 			}
 		}
 		vSyncTimer.restart();
-		setVisible(true);
-		validate();
-		repaint();
 	}
 
 	private int[] getPlayerSprite(char dir) {

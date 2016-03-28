@@ -15,7 +15,7 @@ public class NamePanel extends JPanel {
 		setLayout(new FlowLayout());
 
 		nameTextField = new JTextField("Enter your name");
-		nameTextField.setPreferredSize(new Dimension(200, 25));
+		//nameTextField.setPreferredSize(new Dimension(200, 25));
 
 		JButton setNameButton = new JButton("Set Name");
 

@@ -22,15 +22,13 @@ public class ChatPanel extends JPanel {
 		messageListModel = new DefaultListModel();
 		messageList = new JList(messageListModel);
 		receivePanel.setViewportView(messageList);
-		receivePanel.setPreferredSize(new Dimension(getWidth(), 150));
 		receivePanel.setFocusable(false);
 
 		//Send panel
 		JPanel sendPanel = new JPanel(new FlowLayout());
 
 		JLabel sendLabel = new JLabel("Enter your message: ");
-		messageEntry = new JTextField();
-		messageEntry.setPreferredSize(new Dimension(300, 25));
+		messageEntry = new JTextField("", 40);
 
 		sendButton = new JButton("Send");
 

@@ -23,13 +23,13 @@ import java.util.Set;
 public class Server {
 	private Set<RemoteClient> remoteClients;
 	private boolean gameRunning;
-	private Map map;
+	private ServerMap serverMap;
 	private ServerSocket serverSocket;
 
 	/**
 	 * Constructor
 	 * Starts the ServerSocket to listen from client connections
-	 * Initialises and loads the map
+	 * Initialises and loads the serverMap
 	 */
 	public Server(int port) {
 		remoteClients = new HashSet<>();
@@ -40,9 +40,9 @@ public class Server {
 			gameRunning = true;
 
 			//Setup
-			//Load map
-			map = new Map();
-			map.readMap(new File("maps/example_map.txt"));
+			//Load serverMap
+			serverMap = new ServerMap();
+			serverMap.readMap(new File("maps/example_map.txt"));
 
 		} catch (IOException e) {
 			System.err.println("Error starting server");
@@ -121,12 +121,12 @@ public class Server {
 	}
 
 	/**
-	 * Returns the game map
+	 * Returns the game serverMap
 	 *
-	 * @return The game map
+	 * @return The game serverMap
 	 */
-	public Map getMap() {
-		return map;
+	public ServerMap getServerMap() {
+		return serverMap;
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class Server {
 		boolean hit = false;
 		for (RemoteClient client : remoteClients) {
 			if (client.isConnected()) {
-				if ((client.getGoldNeeded() <= map.goldLeft()) || client.getGoldNeeded() == 0) {
+				if ((client.getGoldNeeded() <= serverMap.goldLeft()) || client.getGoldNeeded() == 0) {
 					hit = true;
 				}
 			}

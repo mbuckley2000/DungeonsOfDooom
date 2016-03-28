@@ -118,7 +118,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 				return ("FAIL");
 		}
 
-		if (server.getMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
+		if (server.getServerMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
 			playerPosition = newPosition;
 			if (checkWin()) {
 				server.broadcastMessage("Somebody else just won the game", this);
@@ -143,9 +143,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return The response to be sent back to the player
 	 */
 	public String pickup() {
-		if (server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
+		if (server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
 			collectedGold++;
-			server.getMap().replaceTile(playerPosition[0], playerPosition[1], '.');
+			server.getServerMap().replaceTile(playerPosition[0], playerPosition[1], '.');
 			return "SUCCESS, GOLD COINS: " + collectedGold;
 		}
 
@@ -159,7 +159,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 */
 	public String look() {
 		String output = "";
-		char[][] lookReply = server.getMap().lookWindow(playerPosition[0], playerPosition[1], 5);
+		char[][] lookReply = server.getServerMap().lookWindow(playerPosition[0], playerPosition[1], 5);
 		lookReply[2][2] = 'P';
 
 		for (int i = 0; i < lookReply.length; i++) {
@@ -225,7 +225,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return True if all conditions are met, false otherwise
 	 */
 	private boolean checkWin() {
-		return collectedGold >= server.getMap().getWin() && server.getMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
+		return collectedGold >= server.getServerMap().getWin() && server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
 	}
 
 	/**
@@ -244,15 +244,15 @@ public class RemoteClient implements Runnable, IGameLogic {
 		int[] pos = new int[2];
 		Random rand = new Random();
 
-		pos[0] = rand.nextInt(server.getMap().getMapHeight() - 1);
-		pos[1] = rand.nextInt(server.getMap().getMapWidth() - 1);
+		pos[0] = rand.nextInt(server.getServerMap().getMapHeight() - 1);
+		pos[1] = rand.nextInt(server.getServerMap().getMapWidth() - 1);
 		int counter = 1;
-		while (server.getMap().lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < server.getMap().getMapHeight() * server.getMap().getMapWidth()) {
+		while (server.getServerMap().lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < server.getServerMap().getMapHeight() * server.getServerMap().getMapWidth()) {
 			pos[1] = (int) (counter * Math.cos(counter));
 			pos[0] = (int) (counter * Math.sin(counter));
 			counter++;
 		}
-		if (server.getMap().lookAtTile(pos[0], pos[1]) == '#') {
+		if (server.getServerMap().lookAtTile(pos[0], pos[1]) == '#') {
 			System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
 			closeConnection();
 			return null;
@@ -272,7 +272,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return The amount of gold extra that the client needs to win
 	 */
 	public int getGoldNeeded() {
-		return (server.getMap().getWin() - collectedGold);
+		return (server.getServerMap().getWin() - collectedGold);
 	}
 
 

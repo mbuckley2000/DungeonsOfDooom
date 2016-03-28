@@ -4,25 +4,25 @@ import java.util.Set;
 import java.util.Stack;
 
 /**
- * A discoverable map class used by the Bot to keep track of the map structure as well as gold and exit positions
- * Can be updated by being given the bot position and a look window received at that positions
+ * A discoverable map class used by the Client to keep track of the map structure as well as gold and exit positions
+ * Can be updated given the current client position and a look window received at that position
  * Includes tile searching and pathfinding functionality
  *
  * @author mb2070
  * @since 29/02/2016
  */
-public class BotMap {
+public class ClientMap {
 	private final int lookSize = 5;
 	private int[] offset; //Large array to handle any map size;
 	private char[][] map;
 	private int[] bounds;
 	private boolean empty;
 	/**
-	 * Constructs the AI Map
+	 * Constructs the AI ServerMap
 	 * Initialises the bounds to the middle of the map
 	 */
-	public BotMap() {
-		offset = new int[]{50, 50};
+	public ClientMap() {
+		offset = new int[]{20, 20};
 		map = new char[offset[0] * 2][offset[1] * 2];
 		bounds = new int[4];
 		empty = true;
@@ -80,8 +80,10 @@ public class BotMap {
 	 * @param botPos     The bot's position when the look window was received
 	 */
 	public void update(char[][] lookWindow, int[] botPos) {
-		empty = false;
-		replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
+		synchronized (map) {
+			empty = false;
+			replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
+		}
 	}
 
 	/**
@@ -380,25 +382,28 @@ public class BotMap {
 	}
 
 	public char[][] getAsArray() {
-		char[][] filledMap = new char[bounds[2] - bounds[0]][bounds[3] - bounds[1]];
-		for (int i = bounds[0]; i < bounds[2]; i++) {
-			System.arraycopy(map[i], bounds[1], filledMap[i - bounds[0]], 0, bounds[3] - bounds[1]);
+		synchronized (map) {
+			char[][] filledMap = new char[bounds[2] - bounds[0]][bounds[3] - bounds[1]];
+			for (int i = bounds[0]; i < bounds[2]; i++) {
+				System.arraycopy(map[i], bounds[1], filledMap[i - bounds[0]], 0, bounds[3] - bounds[1]);
+			}
+			return filledMap;
 		}
-		return filledMap;
 	}
 
 	private void expandMapArray(int[] offsetDelta) {
-		System.out.println("Expanding map array");
-		char[][] oldMap = map;
-		this.offset[0] += offsetDelta[0];
-		this.offset[1] += offsetDelta[1];
-		map = new char[offset[0] * 2][offset[1] * 2];
-		for (int i = 0; i < oldMap.length; i++) {
-			System.arraycopy(oldMap[i], 0, map[i + offsetDelta[0]], offsetDelta[1], oldMap[i].length);
+		synchronized (map) {
+			char[][] oldMap = map;
+			this.offset[0] += offsetDelta[0];
+			this.offset[1] += offsetDelta[1];
+			map = new char[offset[0] * 2][offset[1] * 2];
+			for (int i = 0; i < oldMap.length; i++) {
+				System.arraycopy(oldMap[i], 0, map[i + offsetDelta[0]], offsetDelta[1], oldMap[i].length);
+			}
+			bounds[0] += offsetDelta[0];
+			bounds[2] += offsetDelta[0];
+			bounds[1] += offsetDelta[1];
+			bounds[3] += offsetDelta[1];
 		}
-		bounds[0] += offsetDelta[0];
-		bounds[2] += offsetDelta[0];
-		bounds[1] += offsetDelta[1];
-		bounds[3] += offsetDelta[1];
 	}
 }

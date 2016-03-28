@@ -24,26 +24,17 @@ public class Client {
 	/**
 	 * Constructor
 	 */
-	public Client(String address, int port) {
+	public Client(Socket socket, String name) {
 		int connectionAttempts = 0;
 
 		while (!connected && connectionAttempts < 5) {
 			connectionAttempts++;
 			try {
-				ConnectDialog connectDialog = new ConnectDialog();
-				while (!connectDialog.isConnected()) {
-					try {
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
-				}
-				socket = connectDialog.getSocket();
-
+				this.socket = socket;
 				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				writer = new PrintWriter(socket.getOutputStream(), true);
 
-				writer.println("NAME " + connectDialog.getName());
+				writer.println("NAME " + name);
 
 				connected = true;
 				serverListenerThread = new ServerListenerThread(reader);

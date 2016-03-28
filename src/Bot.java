@@ -10,16 +10,17 @@ public class Bot implements PlayerInterface {
 	private BotTask exploreTask;
 	private String command;
 	private Random random;
-	private BotMap map;
+	private ClientMap map;
 	private PlayerPositionTracker positionTracker;
+
 	/**
 	 * Used for sorting a list of int[] map positions from closest to the bot to furthest from the bot
 	 */
 	public final Comparator<int[]> distanceFromBot =
 			new Comparator<int[]>() {
 				public int compare(int[] t1, int[] t2) {
-					int t1Dist = BotMap.getManhattanDistance(t1, positionTracker.getPosition());
-					int t2Dist = BotMap.getManhattanDistance(t2, positionTracker.getPosition());
+					int t1Dist = ClientMap.getManhattanDistance(t1, positionTracker.getPosition());
+					int t2Dist = ClientMap.getManhattanDistance(t2, positionTracker.getPosition());
 					if (t1Dist == t2Dist) {
 						return 0;
 					} else if (t1Dist > t2Dist) {
@@ -43,13 +44,22 @@ public class Bot implements PlayerInterface {
 		stepsSinceLastLook = 0;
 		goldNeeded = 10;
 		random = new Random();
-		map = new BotMap();
+		map = new ClientMap();
 		taskStack = new Stack<>();
 		exploreTask = new BotExploreTask(map, this);
 		taskStack.add(exploreTask);
 		stepSize = 2;
 		command = "HELLO";
 		pathBlocked = false;
+		new BotWindow(this);
+	}
+
+	public PlayerPositionTracker getPositionTracker() {
+		return positionTracker;
+	}
+
+	public ClientMap getMap() {
+		return map;
 	}
 
 	/**
@@ -154,8 +164,6 @@ public class Bot implements PlayerInterface {
 		}
 	}
 
-
-
 	/**
 	 * @param tileType Tile type to find
 	 * @return The closest reachable tile of the given type
@@ -183,12 +191,10 @@ public class Bot implements PlayerInterface {
 
 	@Override
 	public void giveSuccessResponse(boolean response) {
-		if (response) {
-			if (command.contains("MOVE")) {
+		if (command.contains("MOVE")) {
+			if (response) {
 				updatePosition();
-			}
-		} else {
-			if (command.contains("MOVE")) {
+			} else {
 				//Movement failed. This shouldn't happen unless a player got in the way!!
 				pathBlocked = true; //This makes the needToLook method return true
 			}
@@ -207,7 +213,7 @@ public class Bot implements PlayerInterface {
 
 	@Override
 	public String getNextCommand() {
-		final int sleepMax = 3000;
+		final int sleepMax = 500;
 		try {
 			Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
 		} catch (InterruptedException e) {

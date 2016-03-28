@@ -8,7 +8,7 @@
  */
 public class BotRetrieveGoldTask implements BotTask {
 	private boolean running;
-	private BotMap map;
+	private ClientMap map;
 	private int[] goldPos;
 	private Bot bot;
 	private BotTraverseTask botTraverseTask;
@@ -17,10 +17,10 @@ public class BotRetrieveGoldTask implements BotTask {
 	 * Constructor
 	 *
 	 * @param bot     The Bot that owns the task
-	 * @param map     The BotMap that the bot is playing on
-	 * @param goldPos Position of the gold to collect on the BotMap
+	 * @param map     The ClientMap that the bot is playing on
+	 * @param goldPos Position of the gold to collect on the ClientMap
 	 */
-	public BotRetrieveGoldTask(Bot bot, BotMap map, int[] goldPos) {
+	public BotRetrieveGoldTask(Bot bot, ClientMap map, int[] goldPos) {
 		this.bot = bot;
 		this.map = map;
 		this.goldPos = goldPos;

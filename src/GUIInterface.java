@@ -5,7 +5,7 @@ import java.awt.*;
  * Created by matt on 21/03/2016.
  */
 public class GUIInterface extends JFrame implements PlayerInterface {
-	private BotMap map;
+	private ClientMap map;
 	private PlayerPositionTracker positionTracker;
 	private String lastCommand;
 	private ChatPanel chatPanel;
@@ -15,7 +15,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 	public GUIInterface(String title) {
 		super(title);
-		map = new BotMap();
+		map = new ClientMap();
 		positionTracker = new PlayerPositionTracker();
 		controller = new KeyboardController(150);
 		lastCommand = "";
@@ -36,7 +36,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		chatPanel = new ChatPanel();
 		getContentPane().add(chatPanel, BorderLayout.PAGE_END);
 
-		//Setup Map View
+		//Setup ServerMap View
 		mapPanel = new MapPanel(map, positionTracker);
 		getContentPane().add(mapPanel, BorderLayout.CENTER);
 

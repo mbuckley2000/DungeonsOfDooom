@@ -17,20 +17,34 @@ public class PlayGame {
 	 * Constructor
 	 */
 	public PlayGame() {
-		client = new Client(address, port);
+		if (guiMode) {
+			ConnectDialog connectDialog = new ConnectDialog();
+			while (!connectDialog.isConnected()) {
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			client = new Client(connectDialog.getSocket(), connectDialog.getName());
+			botMode = connectDialog.getBotMode();
+		}
+
 		if (client.gameRunning()) {
-			if (guiMode) {
-				playerInterface = new GUIInterface("DoD");
-			} else if (botMode) {
+			if (botMode) {
 				playerInterface = new Bot();
+			} else if (guiMode) {
+				playerInterface = new GUIInterface("DoD");
 			} else {
 				System.out.println("You may now use MOVE, LOOK, QUIT and any other legal commands");
 				playerInterface = new TextualInterface();
 			}
+			new Thread(new InputHandlerThread()).start();
+			new Thread(new ResponseHandlerThread()).start();
+		} else {
+			System.err.print("Client not running. Exiting");
+			System.exit(1);
 		}
-
-		new Thread(new InputHandlerThread()).start();
-		new Thread(new ResponseHandlerThread()).start();
 	}
 
 	/**

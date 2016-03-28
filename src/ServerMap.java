@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Stores level information
  * Can be loaded from txt files
  */
-public class Map {
+public class ServerMap {
 
 	private char[][] map;
 	private String mapName;
@@ -15,7 +15,7 @@ public class Map {
 	/**
 	 * Constructor
 	 */
-	public Map() {
+	public ServerMap() {
 		map = null;
 		mapName = "";
 		totalGoldOnMap = -1;

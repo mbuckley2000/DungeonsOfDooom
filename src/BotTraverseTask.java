@@ -1,7 +1,7 @@
 import java.util.Stack;
 
 /**
- * Bot task for travelling to a destination tile on the BotMap
+ * Bot task for travelling to a destination tile on the ClientMap
  * Terminates if tile is unreachable, unwalkable, or if tile has been reached
  * Generates a new path after every move, to account for newly discovered map areas or obstacles
  *
@@ -10,7 +10,7 @@ import java.util.Stack;
  */
 public class BotTraverseTask implements BotTask {
 	private Bot bot;
-	private BotMap map;
+	private ClientMap map;
 	private int[] destination;
 	private boolean running;
 
@@ -18,10 +18,10 @@ public class BotTraverseTask implements BotTask {
 	 * Constructor
 	 *
 	 * @param bot         The bot the task belongs to
-	 * @param map         The BotMap the bot is playing in
-	 * @param destination The destination tile on the BotMap
+	 * @param map         The ClientMap the bot is playing in
+	 * @param destination The destination tile on the ClientMap
 	 */
-	public BotTraverseTask(Bot bot, BotMap map, int[] destination) {
+	public BotTraverseTask(Bot bot, ClientMap map, int[] destination) {
 		this.bot = bot;
 		this.map = map;
 		this.destination = destination;

@@ -11,17 +11,17 @@ import java.util.Collections;
  * @since 03/03/2016
  */
 public class BotExploreTask implements BotTask {
-	private BotMap map;
+	private ClientMap map;
 	private Bot bot;
 	private BotTraverseTask botTraverseTask;
 
 	/**
 	 * Constructor
 	 *
-	 * @param map BotMap the bot is playing on
+	 * @param map ClientMap the bot is playing on
 	 * @param bot Bot that owns the task
 	 */
-	public BotExploreTask(BotMap map, Bot bot) {
+	public BotExploreTask(ClientMap map, Bot bot) {
 		this.bot = bot;
 		this.map = map;
 	}
