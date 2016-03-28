@@ -65,6 +65,16 @@ public class TextualInterface implements PlayerInterface {
 	}
 
 	@Override
+	public void giveWin() {
+		System.out.println("You have escaped my dungeon! Well played...");
+	}
+
+	@Override
+	public void giveLose() {
+		System.out.println("Somebody else has escaped my dungeon! Get OUT!");
+	}
+
+	@Override
 	public boolean hasNextCommand() {
 		return false;
 	}

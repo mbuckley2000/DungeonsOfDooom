@@ -122,26 +122,40 @@ public class ClientMap {
 
 	/**
 	 * Finds all occurrences of the given tileType in the map
+	 * ' ' (space) represents an empty tile
 	 *
 	 * @param tileType The type of tile to find
 	 * @return A list of all occurrences of the tile
 	 */
 	public ArrayList<int[]> findAllTiles(char tileType) {
+		if (bounds[0] - 2 < 0 || bounds[1] - 2 < 0 || bounds[2] + 2 > map.length || bounds[3] + 2 > map[0].length) {
+			expandMapArray(new int[]{6, 6});
+		}
 		ArrayList<int[]> list = new ArrayList<>();
-		for (int y = bounds[0] - 1; y < bounds[2] + 2; y++) {
-			for (int x = bounds[1] - 1; x < bounds[3] + 2; x++) {
+		for (int y = bounds[0] - 2; y < bounds[2] + 2; y++) {
+			for (int x = bounds[1] - 2; x < bounds[3] + 2; x++) {
 				if (tileType != ' ') {
 					if (map[y][x] == tileType) {
 						list.add(new int[]{y - offset[1], x - offset[0]});
 					}
 				} else {
-					if (tileDiscovered(y, x)) {
+					if (!tileDiscovered(y, x)) {
 						list.add(new int[]{y - offset[1], x - offset[0]});
 					}
 				}
 			}
 		}
 		return list;
+	}
+
+	public void clearFloor() {
+		for (int y = 0; y < map.length; y++) {
+			for (int x = 0; x < map[0].length; x++) {
+				if (map[y][x] == '.') {
+					map[y][x] = ' ';
+				}
+			}
+		}
 	}
 
 	/**
@@ -152,7 +166,7 @@ public class ClientMap {
 	 * @return True if the tile has been discovered, false otherwise
 	 */
 	private boolean tileDiscovered(int y, int x) {
-		return map[y][x] != 'G' && map[y][x] != 'E' && map[y][x] != '#' && map[y][x] != '.' && map[y][x] != 'P';
+		return map[y][x] == 'G' || map[y][x] == 'E' || map[y][x] == '#' || map[y][x] == '.' || map[y][x] == 'P';
 	}
 
 	/**
@@ -175,7 +189,7 @@ public class ClientMap {
 			if (offsetY > bounds[2]) bounds[2] = offsetY;
 			if (offsetX > bounds[3]) bounds[3] = offsetX;
 		} else {
-			expandMapArray(new int[]{2, 2});
+			expandMapArray(new int[]{5, 5});
 			setTile(y, x, tileType);
 		}
 	}
@@ -355,10 +369,6 @@ public class ClientMap {
 	 */
 	public boolean tileWalkable(int y, int x) {
 		return tileInArrayBounds(y, x) && (getTile(y, x) == 'E' || getTile(y, x) == 'G' || getTile(y, x) == '.');
-	}
-
-	public boolean tileEmpty(int y, int x) {
-		return (getTile(y, x) != 'P' && getTile(y, x) != '#' && getTile(y, x) != '.' && getTile(y, x) != 'G' && getTile(y, x) != 'E');
 	}
 
 	/**

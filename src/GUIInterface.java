@@ -11,7 +11,9 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private ChatPanel chatPanel;
 	private MapPanel mapPanel;
 	private Controller controller;
-	private boolean needToLook;
+	private boolean lookNeeded;
+	private JLabel progressLabel;
+	private boolean helloNeeded;
 
 	public GUIInterface(String title) {
 		super(title);
@@ -19,6 +21,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		positionTracker = new PlayerPositionTracker();
 		controller = new KeyboardController(150);
 		lastCommand = "";
+		helloNeeded = true;
 
 		//Setup GUIInterface
 		BorderLayout gameWindowLayout = new BorderLayout();
@@ -26,7 +29,12 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 		//Setup instructions label
 		JLabel instructionsLabel = new JLabel("Keyboard Controls:    Move: Arrow Keys    Pickup: Space    Quit: Escape");
-		add(instructionsLabel, BorderLayout.PAGE_START);
+		progressLabel = new JLabel("Gold left to win: ");
+		JPanel labels = new JPanel(new FlowLayout());
+		labels.add(instructionsLabel);
+		labels.add(progressLabel);
+		add(labels, BorderLayout.PAGE_START);
+
 
 		//Setup controls panel
 		ControlPanel controlPanel = new ControlPanel(controller);
@@ -37,7 +45,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		getContentPane().add(chatPanel, BorderLayout.PAGE_END);
 
 		//Setup ServerMap View
-		mapPanel = new MapPanel(map, positionTracker);
+		mapPanel = new MapPanel(map, positionTracker, 4);
 		getContentPane().add(mapPanel, BorderLayout.CENTER);
 
 		setResizable(false);
@@ -46,6 +54,19 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		setVisible(true);
 	}
 
+	@Override
+	public void giveWin() {
+		JDialog winDialog = new JDialog();
+		winDialog.add(new JLabel("You have won!"));
+		winDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+
+	@Override
+	public void giveLose() {
+		JDialog loseDialog = new JDialog();
+		loseDialog.add(new JLabel("Another player has won!"));
+		loseDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
 
 	/*
 	///Messages from the server are given to the interface here
@@ -57,6 +78,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 	@Override
 	public void giveHelloResponse(int response) {
+		progressLabel.setText("Gold left to win: " + response);
 	}
 
 	@Override
@@ -64,7 +86,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		if (response) {
 			if (lastCommand.contains("MOVE")) {
 				positionTracker.step(lastCommand.charAt(5));
-				needToLook = true;
+				lookNeeded = true;
 			}
 		}
 	}
@@ -86,9 +108,14 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	public String getNextCommand() {
 		String command = null;
 		while (command == null) {
-			if (needToLook) {
+			if (lookNeeded) {
 				command = "LOOK";
-				needToLook = false;
+				lookNeeded = false;
+				break;
+			}
+			if (helloNeeded) {
+				command = "HELLO";
+				helloNeeded = false;
 				break;
 			}
 			if (controller.isMovePressed()) {
@@ -101,6 +128,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 			}
 			if (controller.isPickupPressed()) {
 				command = "PICKUP";
+				helloNeeded = true;
 				break;
 			}
 			if (controller.isLookPressed()) {

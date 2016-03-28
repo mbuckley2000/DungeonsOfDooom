@@ -11,6 +11,10 @@ public interface PlayerInterface {
 
 	void giveMessage(String message);
 
+	void giveWin();
+
+	void giveLose();
+
 	//Input
 	boolean hasNextCommand();
 

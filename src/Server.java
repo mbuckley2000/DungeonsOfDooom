@@ -1,3 +1,5 @@
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -42,8 +44,23 @@ public class Server {
 			//Setup
 			//Load serverMap
 			serverMap = new ServerMap();
-			serverMap.readMap(new File("maps/example_map.txt"));
 
+			File mapFile;
+			JFileChooser chooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("DoD Map File", "txt");
+			chooser.setFileFilter(filter);
+			chooser.setCurrentDirectory(new File("maps"));
+			int returnVal = chooser.showOpenDialog(null);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				mapFile = chooser.getSelectedFile();
+			} else {
+				System.out.println("Using default map");
+				mapFile = new File("maps/example_map.txt");
+			}
+
+			serverMap.readMap(mapFile);
+
+			new Thread(new StalemateCheckingThread()).start();
 		} catch (IOException e) {
 			System.err.println("Error starting server");
 			System.exit(0);
@@ -201,20 +218,38 @@ public class Server {
 	 * Checks if a stalemate has occurred (i.e. not enough gold for any connected player to finish)
 	 * If it has occurred, the game ends
 	 */
-	public void checkStalemate() {
+	private boolean isItAStalemate() {
 		boolean hit = false;
+		boolean clientConnected = false;
 		for (RemoteClient client : remoteClients) {
 			if (client.isConnected()) {
 				if ((client.getGoldNeeded() <= serverMap.goldLeft()) || client.getGoldNeeded() == 0) {
 					hit = true;
 				}
+				clientConnected = true;
 			}
 		}
-		if (!hit) {
-			//Not enough gold left for any connected player to win.
-			broadcastMessage("Not enough gold left for any connected player to win. Game over");
-			System.out.println("Not enough gold left for any connected player to win. Shutting down");
-			shutDown();
+		return !hit && clientConnected;
+	}
+
+	private void spawnGold(int amount) {
+		for (int i = 0; i < amount; i++) {
+			int[] freeTile = serverMap.getFreeTile(this);
+			if (freeTile != null) {
+				serverMap.replaceTile(freeTile[0], freeTile[1], 'G');
+				System.out.println("Adding gold piece at " + freeTile[1] + ", " + freeTile[0]);
+			}
+		}
+	}
+
+	private class StalemateCheckingThread implements Runnable {
+		@Override
+		public void run() {
+			while (gameRunning) {
+				if (isItAStalemate()) {
+					spawnGold(1);
+				}
+			}
 		}
 	}
 }

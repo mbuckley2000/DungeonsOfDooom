@@ -125,6 +125,12 @@ public class PlayGame {
 				if (listener.hasMessage()) {
 					playerInterface.giveMessage(listener.getMessage());
 				}
+				if (listener.isWinReceived()) {
+					playerInterface.giveWin();
+				}
+				if (listener.isWinReceived()) {
+					playerInterface.giveLose();
+				}
 			}
 		}
 	}

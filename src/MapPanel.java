@@ -1,8 +1,6 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
@@ -23,11 +21,12 @@ public class MapPanel extends JPanel {
 	private int screenOffsetY;
 	private Stopwatch vSyncTimer;
 	private double scale;
+	private int smoothness;
 
 
-	public MapPanel(ClientMap map, PlayerPositionTracker positionTracker) {
+	public MapPanel(ClientMap map, PlayerPositionTracker positionTracker, int smoothness) {
 		super();
-
+		this.smoothness = smoothness;
 		scale = 1.0;//DPI scaling
 		double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 		if (screenWidth > 1600) {
@@ -64,15 +63,6 @@ public class MapPanel extends JPanel {
 
 		setBackground(Color.BLACK);
 		setPreferredSize(new Dimension((int) (650 * scale), (int) (500 * scale)));
-
-		//Focus Listener
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				super.mouseClicked(e);
-				requestFocusInWindow();
-			}
-		});
 	}
 
 	@Override
@@ -87,13 +77,15 @@ public class MapPanel extends JPanel {
 		g2.scale(scale, scale);
 
 		super.paintComponent(g2);
+		int width = (int) (getWidth() / scale);
+		int height = (int) (getHeight() / scale);
 		int tileSize = 32; //px unscaled
-		int targetScreenOffsetX = (650 - tileSize) / 2 - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]) * tileSize;
-		int targetScreenOffsetY = (500 - tileSize) / 2 - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]) * tileSize;
-		if (screenOffsetX < targetScreenOffsetX) screenOffsetX += tileSize / 8;
-		if (screenOffsetX > targetScreenOffsetX) screenOffsetX -= tileSize / 8;
-		if (screenOffsetY < targetScreenOffsetY) screenOffsetY += tileSize / 8;
-		if (screenOffsetY > targetScreenOffsetY) screenOffsetY -= tileSize / 8;
+		int targetScreenOffsetX = (width - tileSize) / 2 - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]) * tileSize;
+		int targetScreenOffsetY = (height - tileSize) / 2 - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]) * tileSize;
+		if (screenOffsetX < targetScreenOffsetX) screenOffsetX += smoothness;
+		if (screenOffsetX > targetScreenOffsetX) screenOffsetX -= smoothness;
+		if (screenOffsetY < targetScreenOffsetY) screenOffsetY += smoothness;
+		if (screenOffsetY > targetScreenOffsetY) screenOffsetY -= smoothness;
 		int[] playerSpritePos = getPlayerSprite(positionTracker.getDirection());
 
 		char[][] knownMap = map.getAsArray();
@@ -101,7 +93,7 @@ public class MapPanel extends JPanel {
 			for (int x = 0; x < knownMap[0].length; x++) {
 				int screenX = x * tileSize + screenOffsetX;
 				int screenY = y * tileSize + screenOffsetY;
-				if (screenX >= -tileSize && screenX < 650 && screenY >= -tileSize && screenY < 500) {
+				if (screenX >= -tileSize && screenX < width && screenY >= -tileSize && screenY < height) {
 					if (knownMap[y][x] == '.') {
 						g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
 					} else if (knownMap[y][x] == 'G') {
@@ -123,7 +115,7 @@ public class MapPanel extends JPanel {
 		}
 
 		//Draw player
-		g2.drawImage(playerSpriteSheet, (650 - tileSize) / 2, (500 - tileSize) / 2, (650 + tileSize) / 2, (500 + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
+		g2.drawImage(playerSpriteSheet, (width - tileSize) / 2, (height - tileSize) / 2, (width + tileSize) / 2, (height + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
 
 		setVisible(true);
 		validate();

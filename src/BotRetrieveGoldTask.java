@@ -33,23 +33,27 @@ public class BotRetrieveGoldTask implements BotTask {
 	 * @return The next command for the bot
 	 */
 	public String getNextCommand() {
-		//System.out.println("GoldTask command get");
+		System.out.println("GoldTask command get");
 
-		if (map.getTile(goldPos[0], goldPos[1]) != 'G') {
+		if (map.getTile(goldPos[0], goldPos[1]) != 'G' && !arrived()) {
 			running = false;
-			return "HELLO";
 		}
 
 		if (botTraverseTask.hasNextCommand()) {
 			return botTraverseTask.getNextCommand();
 		} else {
-			if (bot.getPosition()[0] == goldPos[0] && bot.getPosition()[1] == goldPos[1]) {
-				map.setTile(goldPos[0], goldPos[1], '.');
+			if (arrived()) {
+				map.setTile(bot.getPosition()[0], bot.getPosition()[1], '.');
+				running = false;
 				return "PICKUP";
 			} else {
 				return null;
 			}
 		}
+	}
+
+	private boolean arrived() {
+		return bot.getPosition()[0] == goldPos[0] && bot.getPosition()[1] == goldPos[1];
 	}
 
 	/**

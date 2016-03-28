@@ -48,7 +48,7 @@ public class Bot implements PlayerInterface {
 		taskStack = new Stack<>();
 		exploreTask = new BotExploreTask(map, this);
 		taskStack.add(exploreTask);
-		stepSize = 2;
+		stepSize = 1;
 		command = "HELLO";
 		pathBlocked = false;
 		new BotWindow(this);
@@ -91,8 +91,16 @@ public class Bot implements PlayerInterface {
 	 * @return The next command
 	 */
 	private String getBotAction() {
+		final int sleepMax = 100;
+
 		if (needToLook()) {
 			return "LOOK";
+		}
+
+		try {
+			Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 
 		if (taskStack.isEmpty()) {
@@ -107,7 +115,6 @@ public class Bot implements PlayerInterface {
 			return getBotAction();
 		}
 	}
-
 
 	/**
 	 * @return Current position of the bot
@@ -130,33 +137,7 @@ public class Bot implements PlayerInterface {
 	 * @return True if the number of successful movements since the last LOOK call is more than the stepSize
 	 */
 	private boolean needToLook() {
-		if (pathBlocked) return true;
-
-		//Never look if we're racing to the exit
-		if (goldNeeded == 0 && taskStack.peek().getClass() == BotTraverseTask.class) {
-			return false;
-		}
-
-		//Or if we are going for gold
-		if (taskStack.peek().getClass() == BotRetrieveGoldTask.class) {
-			return false;
-		}
-
-		boolean hit = false;
-		int[] position = positionTracker.getPosition();
-		//Check if there are any undiscovered tiles in our look window
-		for (int x = 0; x < 5; x++) {
-			for (int y = 0; y < 5; y++) {
-				int posY = y + position[0] - 2;
-				int posX = x + position[1] - 2;
-				if (map.tileEmpty(posY, posX)) {
-					if (!((x == 0 && y == 0) || (x == 4 && y == 0) || (x == 0 && y == 4) || (x == 4 && y == 4) || (x == 2 && y == 2))) {
-						hit = true;
-					}
-				}
-			}
-		}
-		if (stepsSinceLastLook >= stepSize && hit) {
+		if (stepsSinceLastLook >= stepSize || pathBlocked) {
 			stepsSinceLastLook = 0;
 			return true;
 		} else {
@@ -207,20 +188,33 @@ public class Bot implements PlayerInterface {
 	}
 
 	@Override
+	public void giveWin() {
+
+	}
+
+	@Override
+	public void giveLose() {
+
+	}
+
+	@Override
 	public boolean hasNextCommand() {
 		return true;
 	}
 
 	@Override
 	public String getNextCommand() {
-		final int sleepMax = 500;
 		try {
-			Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
+			Thread.sleep(10);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Thread.currentThread().interrupt();
 		}
-		command = getBotAction().toUpperCase();
-		System.out.println(command);
-		return command;
+		command = getBotAction();
+		if (command != null) {
+			System.out.println("Bot Command: " + command);
+			return command;
+		} else {
+			return "HELLO";
+		}
 	}
 }

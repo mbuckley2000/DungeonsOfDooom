@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Random;
 
 /**
  * Represents a client connected to the server
@@ -36,7 +35,13 @@ public class RemoteClient implements Runnable, IGameLogic {
 		this.clientSocket = clientSocket;
 		connected = true;
 		collectedGold = 0;
-		playerPosition = initialisePlayer();
+		int[] freePos = server.getServerMap().getFreeTile(server);
+		if (freePos == null) {
+			System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
+			closeConnection();
+		} else {
+			playerPosition = freePos;
+		}
 		address = clientSocket.getInetAddress();
 	}
 
@@ -59,7 +64,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 			writer.println("Welcome to the dungeon! Mwuahaha");
 
 			while (connected && server.isGameRunning()) {
-				server.checkStalemate();
 				input = reader.readLine();
 				System.out.println(address + "\t\t" + input);
 				if (input != null) {
@@ -121,9 +125,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 		if (server.getServerMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
 			playerPosition = newPosition;
 			if (checkWin()) {
-				server.broadcastMessage("Somebody else just won the game", this);
-				server.broadcastMessage("Get out of my dungeon.", this);
-				writer.println("Congratulations!!! \n You have escaped the Dungeon of Dooom!!!!!! \nThank you for playing!");
+				server.broadcastMessage("LOSE", this);
+				writer.println("WIN");
 				closeConnection();
 				server.shutDown();
 				return null;
@@ -236,32 +239,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 	}
 
 	/**
-	 * finds a random position for the player in the map.
-	 *
-	 * @return Return null; if no position is found or a position vector [y,x]
-	 */
-	private int[] initialisePlayer() {
-		int[] pos = new int[2];
-		Random rand = new Random();
-
-		pos[0] = rand.nextInt(server.getServerMap().getMapHeight() - 1);
-		pos[1] = rand.nextInt(server.getServerMap().getMapWidth() - 1);
-		int counter = 1;
-		while (server.getServerMap().lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < server.getServerMap().getMapHeight() * server.getServerMap().getMapWidth()) {
-			pos[1] = (int) (counter * Math.cos(counter));
-			pos[0] = (int) (counter * Math.sin(counter));
-			counter++;
-		}
-		if (server.getServerMap().lookAtTile(pos[0], pos[1]) == '#') {
-			System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
-			closeConnection();
-			return null;
-		} else {
-			return pos;
-		}
-	}
-
-	/**
 	 * @return The PrintWriter that sends messages to the Client
 	 */
 	public PrintWriter getWriter() {
@@ -295,7 +272,13 @@ public class RemoteClient implements Runnable, IGameLogic {
 		this.clientSocket = clientSocket;
 		if (server.playerOnTile(playerPosition[0], playerPosition[1])) {
 			//There is a player on out tile! Re-initialise player position
-			playerPosition = initialisePlayer();
+			int[] freePos = server.getServerMap().getFreeTile(server);
+			if (freePos == null) {
+				System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
+				closeConnection();
+			} else {
+				playerPosition = freePos;
+			}
 		}
 		if (playerPosition != null) {
 			connected = true;

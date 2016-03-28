@@ -59,16 +59,14 @@ public class BotExploreTask implements BotTask {
 			}
 		}
 
-		if (map.isEmpty()) {
-			return "LOOK";
-		}
-
 		if (botTraverseTask == null) {
 			getNewDestination();
+			return "LOOK";
 		}
 
 		if (!botTraverseTask.hasNextCommand()) {
 			getNewDestination();
+			return "LOOK";
 		}
 
 		return botTraverseTask.getNextCommand();
@@ -82,7 +80,6 @@ public class BotExploreTask implements BotTask {
 
 		ArrayList<int[]> potentialDestinations = map.findAllTiles(' ');
 		Collections.sort(potentialDestinations, bot.distanceFromBot);
-
 
 		for (int[] tile : potentialDestinations) {
 			if (bestTile != null) {
@@ -105,8 +102,8 @@ public class BotExploreTask implements BotTask {
 			botTraverseTask = new BotTraverseTask(bot, map, bestTile);
 		} else {
 			//No good tile was found.
-			System.err.println("FATAL: Couldn't find new dest in explore task");
-			System.exit(0);
+			System.out.println("No unexplored areas. Starting again");
+			bot.getMap().clearFloor();
 		}
 	}
 
@@ -116,13 +113,6 @@ public class BotExploreTask implements BotTask {
 	 * @return True if a new command is available
 	 */
 	public boolean hasNextCommand() {
-		int[] mapSize = new int[2];
-		mapSize[0] = map.getBounds()[3] - map.getBounds()[1];
-		mapSize[1] = map.getBounds()[2] - map.getBounds()[0];
-		if (mapSize[0] > 18 && mapSize[1] > 8) {
-			return true; //Should be false
-		} else {
-			return true;
-		}
+		return true; //Aways return true. This is the base task
 	}
 }

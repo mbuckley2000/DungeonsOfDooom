@@ -19,6 +19,7 @@ public class ConnectDialog extends JFrame {
 	private Socket socket;
 	private String name;
 	private double scale;
+	private JCheckBox botCheckBox;
 
 	public ConnectDialog() {
 		super("Connect to server");
@@ -44,6 +45,8 @@ public class ConnectDialog extends JFrame {
 
 		JLabel nameLabel = new JLabel("Display Name: ");
 		nameEntry = new JTextField("Unnamed", 20);
+
+		botCheckBox = new JCheckBox("Bot");
 
 		JButton connectButton = new JButton("Connect");
 		JButton quitButton = new JButton("Quit");
@@ -87,10 +90,15 @@ public class ConnectDialog extends JFrame {
 		add(connectButton, c);
 		c.gridx = 0;
 		c.gridy = 4;
-		c.gridwidth = 2;
-		c.insets = new Insets(spacing, border, border, border);
+		c.gridwidth = 1;
+		c.insets = new Insets(spacing, border, border, spacing);
 		c.anchor = GridBagConstraints.WEST;
 		add(instructionLabel, c);
+		c.gridx = 1;
+		c.gridy = 4;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(spacing, spacing, border, border);
+		add(botCheckBox, c);
 
 		pack();
 		setVisible(true);
@@ -134,7 +142,7 @@ public class ConnectDialog extends JFrame {
 	}
 
 	public boolean getBotMode() {
-		return true;
+		return botCheckBox.isSelected();
 	}
 
 	private boolean isPortValid(int port) {

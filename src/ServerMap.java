@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Game map
@@ -155,6 +156,32 @@ public class ServerMap {
 
 		return false;
 	}
+
+
+	/**
+	 * finds a random position for the player in the map.
+	 *
+	 * @return Return null; if no position is found or a position vector [y,x]
+	 */
+	public int[] getFreeTile(Server server) {
+		int[] pos = new int[2];
+		Random rand = new Random();
+
+		pos[0] = rand.nextInt(getMapHeight() - 1);
+		pos[1] = rand.nextInt(getMapWidth() - 1);
+		int counter = 1;
+		while (lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < getMapHeight() * getMapWidth()) {
+			pos[1] = (int) (counter * Math.cos(counter));
+			pos[0] = (int) (counter * Math.sin(counter));
+			counter++;
+		}
+		if (lookAtTile(pos[0], pos[1]) == '#') {
+			return null;
+		} else {
+			return pos;
+		}
+	}
+
 
 	/**
 	 * The method replaces a char at a given position of the map with a new char

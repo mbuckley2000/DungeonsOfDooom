@@ -23,8 +23,9 @@ public class ServerListenerThread implements Runnable {
 	private boolean hasSuccessResponse;
 	private boolean hasGoldResponse;
 	private boolean hasLookResponse;
-	private boolean hasMessage;
 	private Queue<String> messages;
+	private boolean winReceived;
+	private boolean loseReceived;
 
 
 	/**
@@ -40,6 +41,14 @@ public class ServerListenerThread implements Runnable {
 		connected = true;
 		lookResponse = new char[lookSize][lookSize];
 		messages = new PriorityQueue<>();
+	}
+
+	public boolean isLoseReceived() {
+		return loseReceived;
+	}
+
+	public boolean isWinReceived() {
+		return winReceived;
 	}
 
 	/**
@@ -72,8 +81,13 @@ public class ServerListenerThread implements Runnable {
 							successResponse = false;
 						}
 						if (string.startsWith("MESSAGE")) {
-							hasMessage = true;
 							messages.add(string.replaceFirst("MESSAGE", ""));
+						}
+						if (string.equals("WIN")) {
+							winReceived = true;
+						}
+						if (string.equals("LOSE")) {
+							loseReceived = true;
 						}
 					}
 				}
@@ -128,7 +142,6 @@ public class ServerListenerThread implements Runnable {
 	}
 
 	public String getMessage() {
-		hasMessage = false;
 		return messages.remove();
 	}
 
