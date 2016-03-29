@@ -23,6 +23,7 @@ import java.util.Set;
  * @since 24/02/2016
  */
 public class Server {
+	private static boolean guiDisabled;
 	private Set<RemoteClient> remoteClients;
 	private boolean gameRunning;
 	private ServerMap serverMap;
@@ -44,18 +45,20 @@ public class Server {
 			//Setup
 			//Load serverMap
 			serverMap = new ServerMap();
+			File mapFile = new File("maps/example_map.txt");
 
-			File mapFile;
-			JFileChooser chooser = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("DoD Map File", "txt");
-			chooser.setFileFilter(filter);
-			chooser.setCurrentDirectory(new File("maps"));
-			int returnVal = chooser.showOpenDialog(null);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				mapFile = chooser.getSelectedFile();
-			} else {
-				System.out.println("Using default map");
-				mapFile = new File("maps/example_map.txt");
+			if (!guiDisabled) {
+				JFileChooser chooser = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("DoD Map File", "txt");
+				chooser.setFileFilter(filter);
+				chooser.setCurrentDirectory(new File("maps"));
+				int returnVal = chooser.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					mapFile = chooser.getSelectedFile();
+				} else {
+					System.out.println("Using default map");
+
+				}
 			}
 
 			serverMap.readMap(mapFile);
@@ -73,21 +76,17 @@ public class Server {
 	public static void main(String args[]) {
 		int port = 40004;
 
-		try {
-			if (args.length == 1) {
-				int argInt = Integer.parseInt(args[0]);
+		for (String s : args) {
+			try {
+				int argInt = Integer.parseInt(s);
 				if (Client.isPortValid(argInt)) {
 					port = argInt;
-				} else {
-					System.err.println("Invalid port specified");
-					System.err.println("Using default 40004");
+				}
+			} catch (NumberFormatException e) {
+				if (s.equals("nogui")) {
+					guiDisabled = true;
 				}
 			}
-		} catch (NumberFormatException e) {
-			//Invalid port.
-			//This is resolved by setting the default port at the top of this method, don't panic
-			System.err.println("Invalid port specified");
-			System.err.println("Using default 40004");
 		}
 
 		Server server = new Server(port);
