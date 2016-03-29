@@ -12,7 +12,6 @@ public class Bot implements PlayerInterface {
 	private Random random;
 	private ClientMap map;
 	private PlayerPositionTracker positionTracker;
-
 	/**
 	 * Used for sorting a list of int[] map positions from closest to the bot to furthest from the bot
 	 */
@@ -30,10 +29,8 @@ public class Bot implements PlayerInterface {
 					}
 				}
 			};
-	private int stepsSinceLastLook;
+	private boolean needToLook;
 	private int goldNeeded;
-	private int stepSize;
-	private boolean pathBlocked;
 
 	/**
 	 * Constructor.
@@ -41,16 +38,13 @@ public class Bot implements PlayerInterface {
 	 */
 	public Bot() {
 		positionTracker = new PlayerPositionTracker();
-		stepsSinceLastLook = 0;
 		goldNeeded = 10;
 		random = new Random();
 		map = new ClientMap();
 		taskStack = new Stack<>();
 		exploreTask = new BotExploreTask(map, this);
 		taskStack.add(exploreTask);
-		stepSize = 1;
 		command = "HELLO";
-		pathBlocked = false;
 		new BotWindow(this);
 	}
 
@@ -93,14 +87,15 @@ public class Bot implements PlayerInterface {
 	private String getBotAction() {
 		final int sleepMax = 100;
 
-		if (needToLook()) {
-			return "LOOK";
-		}
-
 		try {
 			Thread.currentThread().sleep(random.nextInt(sleepMax / 2) + sleepMax / 2);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+
+		if (needToLook) {
+			needToLook = false;
+			return "LOOK";
 		}
 
 		if (taskStack.isEmpty()) {
@@ -123,27 +118,6 @@ public class Bot implements PlayerInterface {
 		return positionTracker.getPosition();
 	}
 
-	/**
-	 * If the last command was MOVE:
-	 * Checks whether the last move command was successful
-	 * If so, updates the bot's local position (relative to it's start position)
-	 */
-	private void updatePosition() {
-		stepsSinceLastLook++;
-		positionTracker.step(command.charAt(5));
-	}
-
-	/**
-	 * @return True if the number of successful movements since the last LOOK call is more than the stepSize
-	 */
-	private boolean needToLook() {
-		if (stepsSinceLastLook >= stepSize || pathBlocked) {
-			stepsSinceLastLook = 0;
-			return true;
-		} else {
-			return false;
-		}
-	}
 
 	/**
 	 * @param tileType Tile type to find
@@ -171,14 +145,15 @@ public class Bot implements PlayerInterface {
 	}
 
 	@Override
-	public void giveSuccessResponse(boolean response) {
-		if (command.contains("MOVE")) {
-			if (response) {
-				updatePosition();
-			} else {
-				//Movement failed. This shouldn't happen unless a player got in the way!!
-				pathBlocked = true; //This makes the needToLook method return true
-			}
+	public void givePickupResponse(boolean response) {
+
+	}
+
+	@Override
+	public void giveMoveResponse(boolean response) {
+		needToLook = true;
+		if (response) {
+			positionTracker.step();
 		}
 	}
 
@@ -204,14 +179,12 @@ public class Bot implements PlayerInterface {
 
 	@Override
 	public String getNextCommand() {
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
 		command = getBotAction();
 		if (command != null) {
 			System.out.println("Bot Command: " + command);
+			if (command.contains("MOVE")) {
+				positionTracker.setDirection(command.charAt(5));
+			}
 			return command;
 		} else {
 			return "HELLO";

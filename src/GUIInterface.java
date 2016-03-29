@@ -82,12 +82,15 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	}
 
 	@Override
-	public void giveSuccessResponse(boolean response) {
+	public void givePickupResponse(boolean response) {
+
+	}
+
+	@Override
+	public void giveMoveResponse(boolean response) {
 		if (response) {
-			if (lastCommand.contains("MOVE")) {
-				positionTracker.step(lastCommand.charAt(5));
-				lookNeeded = true;
-			}
+			positionTracker.step();
+			lookNeeded = true;
 		}
 	}
 
@@ -119,7 +122,9 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 				break;
 			}
 			if (controller.isMovePressed()) {
-				command = "MOVE " + controller.getMoveDirection();
+				char dir = controller.getMoveDirection();
+				positionTracker.setDirection(dir);
+				command = "MOVE " + dir;
 				break;
 			}
 			if (controller.isQuitPressed()) {

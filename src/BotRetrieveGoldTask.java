@@ -39,6 +39,10 @@ public class BotRetrieveGoldTask implements BotTask {
 			running = false;
 		}
 
+		if (!map.tileReachable(bot.getPosition(), goldPos)) {
+			running = false;
+		}
+
 		if (botTraverseTask.hasNextCommand()) {
 			return botTraverseTask.getNextCommand();
 		} else {

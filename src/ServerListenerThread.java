@@ -12,35 +12,61 @@ import java.util.Queue;
  * @since 25/02/2016
  */
 public class ServerListenerThread implements Runnable {
-	private final int lookSize = 5;
 	private BufferedReader reader;
 	private boolean running;
 	private boolean connected;
+
+	private boolean holdingLookResponse;
 	private char[][] lookResponse;
 	private int lookWindowYIndex;
-	private boolean successResponse;
-	private int goldResponse;
-	private boolean hasSuccessResponse;
-	private boolean hasGoldResponse;
-	private boolean hasLookResponse;
+	private int lookSize;
+
+	private boolean holdingHelloResponse;
+	private int helloResponse;
+
 	private Queue<String> messages;
+
 	private boolean winReceived;
 	private boolean loseReceived;
 
+	private boolean holdingMoveResponse;
+	private boolean moveSuccessful;
+
+	private boolean holdingPickupResponse;
+	private boolean pickupSuccessful;
 
 	/**
 	 * Constructs the Reader
+
 	 *
 	 * @param bufferedReader The buffered reader the Reader object should read from
 	 */
 	public ServerListenerThread(BufferedReader bufferedReader) {
 		lookWindowYIndex = 0;
-		goldResponse = -1;
+		helloResponse = -1;
 		this.reader = bufferedReader;
 		running = true;
 		connected = true;
 		lookResponse = new char[lookSize][lookSize];
 		messages = new PriorityQueue<>();
+	}
+
+	public boolean isPickupSuccessful() {
+		holdingPickupResponse = false;
+		return pickupSuccessful;
+	}
+
+	public boolean isHoldingPickupResponse() {
+		return holdingPickupResponse;
+	}
+
+	public boolean isMoveSuccessful() {
+		holdingMoveResponse = false;
+		return moveSuccessful;
+	}
+
+	public boolean isHoldingMoveResponse() {
+		return holdingMoveResponse;
 	}
 
 	public boolean isLoseReceived() {
@@ -63,35 +89,10 @@ public class ServerListenerThread implements Runnable {
 					connected = false;
 					break;
 				} else {
-					//parse the string
-					if (string.length() > 0) {
-						if (string.charAt(0) == '#' || string.charAt(0) == '.' || string.charAt(0) == 'G' || string.charAt(0) == 'E' || string.charAt(0) == 'X' || string.charAt(0) == 'P') {
-							if (!string.contains("GOLD")) {
-								addToLookWindow(string);
-							} else {
-								goldResponse = Integer.parseInt(string.replaceFirst("GOLD: ", ""));
-								hasGoldResponse = true;
-							}
-						}
-						if (string.toUpperCase().equals("SUCCESS")) {
-							hasSuccessResponse = true;
-							successResponse = true;
-						} else if (string.toUpperCase().equals("FAIL")) {
-							hasSuccessResponse = true;
-							successResponse = false;
-						}
-						if (string.startsWith("MESSAGE")) {
-							messages.add(string.replaceFirst("MESSAGE", ""));
-						}
-						if (string.equals("WIN")) {
-							winReceived = true;
-						}
-						if (string.equals("LOSE")) {
-							loseReceived = true;
-						}
-					}
+					parseResponse(string);
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				connected = false;
 			}
 		}
@@ -100,20 +101,64 @@ public class ServerListenerThread implements Runnable {
 		System.exit(0);
 	}
 
+	private void parseResponse(String response) {
+		System.out.println(response);
+
+		if (response.equals("WIN")) {
+			winReceived = true;
+			return;
+		}
+		if (response.equals("LOSE")) {
+			loseReceived = true;
+			return;
+		}
+		switch (response.charAt(0)) {
+			case 'M':
+				//Move response
+				holdingMoveResponse = true;
+				moveSuccessful = response.charAt(1) == 'S';
+				break;
+			case 'P':
+				//Pickup response
+				holdingPickupResponse = true;
+				pickupSuccessful = response.charAt(1) == 'S';
+				break;
+			case 'H':
+				//Hello response
+				holdingHelloResponse = true;
+				helloResponse = Integer.parseInt(response.substring(1));
+				break;
+			case 'L':
+				//Look response
+				int size = Character.getNumericValue(response.charAt(1));
+				if (lookSize != size) lookSize = size;
+				addToLookWindow(response.substring(2));
+				break;
+			case 'C':
+				//Chat response
+				messages.add(response.substring(1));
+				break;
+		}
+	}
+
 	/**
 	 * Adds a new line to the last look window
 	 * Used because the look window is sent line by line
 	 * When the window is full, it overwrites the first line and starts again
 	 *
-	 * @param line The received lookWindow line
+	 * @param line The received getLookWindow line
 	 */
 	private void addToLookWindow(String line) {
-		line = line.replaceAll(" ", "");
-		lookResponse[lookWindowYIndex] = line.toCharArray();
-		lookWindowYIndex++;
-		if (lookWindowYIndex == lookSize) {
-			lookWindowYIndex = 0;
-			hasLookResponse = true;
+		if (!holdingLookResponse) {
+			if (lookResponse.length != lookSize) {
+				lookResponse = new char[lookSize][lookSize];
+			}
+			lookResponse[lookWindowYIndex] = line.toCharArray();
+			lookWindowYIndex++;
+			if (lookWindowYIndex == lookSize) {
+				lookWindowYIndex = 0;
+				holdingLookResponse = true;
+			}
 		}
 	}
 
@@ -121,43 +166,32 @@ public class ServerListenerThread implements Runnable {
 	 * @return The look window in its current state. Usually a full look window but not guaranteed!
 	 */
 	public char[][] getLookResponse() {
-		hasLookResponse = false;
+		holdingLookResponse = false;
 		return lookResponse;
 	}
 
 	/**
 	 * @return The most recently received response to HELLO
 	 */
-	public int getGoldResponse() {
-		hasGoldResponse = false;
-		return goldResponse;
+	public int getHelloResponse() {
+		holdingHelloResponse = false;
+		return helloResponse;
 	}
 
-	/**
-	 * @return The most recently received SUCCESS / FAIL
-	 */
-	public boolean getSuccessResponse() {
-		hasSuccessResponse = false;
-		return successResponse;
+	public boolean isHoldingLookResponse() {
+		return holdingLookResponse;
+	}
+
+	public boolean isHoldingHelloResponse() {
+		return holdingHelloResponse;
 	}
 
 	public String getMessage() {
 		return messages.remove();
 	}
 
-	public boolean hasSuccessResponse() {
-		return hasSuccessResponse;
-	}
 
-	public boolean hasLookResponse() {
-		return hasLookResponse;
-	}
-
-	public boolean hasGoldResponse() {
-		return hasGoldResponse;
-	}
-
-	public boolean hasMessage() {
+	public boolean isHoldingMessage() {
 		return !messages.isEmpty();
 	}
 

@@ -55,8 +55,12 @@ public class TextualInterface implements PlayerInterface {
 	}
 
 	@Override
-	public void giveSuccessResponse(boolean response) {
+	public void givePickupResponse(boolean response) {
 
+	}
+
+	@Override
+	public void giveMoveResponse(boolean response) {
 	}
 
 	@Override

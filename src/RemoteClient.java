@@ -23,6 +23,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	private Server server;
 	private String lastLookWindow;
 	private String name;
+	private int lookSize;
 
 	/**
 	 * Constructs the RemoteClient given the Socket and Server it is connected to
@@ -35,6 +36,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 		this.clientSocket = clientSocket;
 		connected = true;
 		collectedGold = 0;
+		lookSize = 5;
 		int[] freePos = server.getServerMap().getFreeTile(server);
 		if (freePos == null) {
 			System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
@@ -61,13 +63,16 @@ public class RemoteClient implements Runnable, IGameLogic {
 			String input;
 
 			System.out.println(address + "\t\tConnected");
-			writer.println("Welcome to the dungeon! Mwuahaha");
+			sendChat("Welcome to the dungeon! Mwuahaha");
 
 			while (connected && server.isGameRunning()) {
 				input = reader.readLine();
-				System.out.println(address + "\t\t" + input);
 				if (input != null) {
-					writer.println(parseInput(input));
+					String response = parseInput(input);
+					if (response != null) {
+						writer.println(parseInput(input));
+						System.out.println(address + "\t\t" + input + "\t\t" + response);
+					}
 				} else {
 					closeConnection();
 				}
@@ -92,7 +97,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return String to be sent back to the Client (How much gold left they need to win)
 	 */
 	public String hello() {
-		return "GOLD: " + getGoldNeeded();
+		return "H" + getGoldNeeded();
 	}
 
 	/**
@@ -119,7 +124,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 				newPosition[1] -= 1;
 				break;
 			default:
-				return ("FAIL");
+				return ("MF");
 		}
 
 		if (server.getServerMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
@@ -131,12 +136,11 @@ public class RemoteClient implements Runnable, IGameLogic {
 				server.shutDown();
 				return null;
 			}
-			return "SUCCESS";
+			return "MS";
 		} else {
-			return "FAIL";
+			return "MF";
 		}
 	}
-
 
 	/**
 	 * Processes the PICKUP command
@@ -149,10 +153,10 @@ public class RemoteClient implements Runnable, IGameLogic {
 		if (server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
 			collectedGold++;
 			server.getServerMap().replaceTile(playerPosition[0], playerPosition[1], '.');
-			return "SUCCESS, GOLD COINS: " + collectedGold;
+			return "PS" + collectedGold;
 		}
 
-		return "FAIL\nThere is nothing to pick up...";
+		return "PF";
 	}
 
 	/**
@@ -161,20 +165,19 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * @return The response to be sent back to the Client: A look window into the map, based on their current position
 	 */
 	public String look() {
-		String output = "";
-		char[][] lookReply = server.getServerMap().lookWindow(playerPosition[0], playerPosition[1], 5);
-		lookReply[2][2] = 'P';
+		String output = "L" + lookSize;
+		char[][] lookReply = server.getServerMap().getLookWindow(playerPosition[0], playerPosition[1], lookSize);
 
-		for (int i = 0; i < lookReply.length; i++) {
-			for (int j = 0; j < lookReply[0].length; j++) {
-				if (server.playerOnTile(playerPosition[0] - 2 + i, playerPosition[1] - 2 + j)) {
+		for (int i = 0; i < lookSize; i++) {
+			for (int j = 0; j < lookSize; j++) {
+				if (server.playerOnTile(playerPosition[0] - (lookSize / 2) + i, playerPosition[1] - (lookSize / 2) + j)) {
 					output += 'P';
 				} else {
 					output += lookReply[j][i];
 				}
 			}
-			if (i != lookReply.length - 1) {
-				output += "\n";
+			if (i != lookSize - 1) {
+				output += "\nL" + lookSize;
 			}
 		}
 		lastLookWindow = output;
@@ -190,7 +193,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 */
 	private String parseInput(String input) {
 		String[] command = input.trim().split(" ");
-		String answer = "FAIL";
+		String answer = null;
 		switch (command[0].toUpperCase()) {
 			case "HELLO":
 				answer = hello();
@@ -208,10 +211,10 @@ public class RemoteClient implements Runnable, IGameLogic {
 				break;
 			case "NAME":
 				name = command[1];
-				return "SUCCESS";
+				return null;
 			case "SAY":
-				server.broadcastMessage("MESSAGE" + name + ": " + input.replaceFirst("SAY ", ""));
-				return "SUCCESS";
+				server.broadcastMessage(name + ": " + input.substring(4));
+				return null;
 			case "QUIT":
 				closeConnection();
 				return "Thanks for playing!";
@@ -219,6 +222,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 		return answer;
 	}
 
+	public void sendChat(String message) {
+		writer.println("C" + message);
+	}
 
 	//Misc
 
@@ -236,13 +242,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 */
 	public int[] getPlayerPosition() {
 		return playerPosition;
-	}
-
-	/**
-	 * @return The PrintWriter that sends messages to the Client
-	 */
-	public PrintWriter getWriter() {
-		return writer;
 	}
 
 	/**
@@ -299,7 +298,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 		return address;
 	}
 
-
 	/**
 	 * Detects changes in the look window around the player.
 	 * Sends an updated look window if changes are detected.
@@ -309,7 +307,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 		public void run() {
 			while (connected) {
 				try {
-					Thread.sleep(200); //run on 200ms ticks, no need to spam. This is only for if a player moves in their lookWindow
+					Thread.sleep(200); //run on 200ms ticks, no need to spam. This is only for if a player moves in their getLookWindow
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}

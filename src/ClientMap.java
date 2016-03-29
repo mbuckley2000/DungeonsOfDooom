@@ -12,7 +12,6 @@ import java.util.Stack;
  * @since 29/02/2016
  */
 public class ClientMap {
-	private final int lookSize = 5;
 	private int[] offset; //Large array to handle any map size;
 	private char[][] map;
 	private int[] bounds;
@@ -74,7 +73,7 @@ public class ClientMap {
 	}
 
 	/**
-	 * Updates the map with a given lookWindow and bot position
+	 * Updates the map with a given getLookWindow and bot position
 	 *
 	 * @param lookWindow The look window to use
 	 * @param botPos     The bot's position when the look window was received
@@ -82,21 +81,21 @@ public class ClientMap {
 	public void update(char[][] lookWindow, int[] botPos) {
 		synchronized (map) {
 			empty = false;
-			replace(botPos[0] - lookSize / 2, botPos[1] - lookSize / 2, lookWindow);
+			replace(botPos[0] - lookWindow.length / 2, botPos[1] - lookWindow.length / 2, lookWindow);
 		}
 	}
 
 	/**
-	 * Replaces a section of the map with a given lookWindow at a given position
+	 * Replaces a section of the map with a given getLookWindow at a given position
 	 *
 	 * @param posY       Given position
 	 * @param posX       Given position
-	 * @param lookWindow Given lookWindow
+	 * @param lookWindow Given getLookWindow
 	 */
 	private void replace(int posY, int posX, char[][] lookWindow) {
-		for (int x = 0; x < lookSize; x++) {
-			for (int y = 0; y < lookSize; y++) {
-				if (lookWindow[y][x] != 'X' && !(x == lookSize / 2 && y == lookSize / 2)) {
+		for (int x = 0; x < lookWindow.length; x++) {
+			for (int y = 0; y < lookWindow.length; y++) {
+				if (lookWindow[y][x] != 'X' && !(x == lookWindow.length / 2 && y == lookWindow.length / 2)) {
 					setTile(posY + y, posX + x, lookWindow[y][x]);
 				}
 			}

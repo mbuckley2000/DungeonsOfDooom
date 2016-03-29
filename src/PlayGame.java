@@ -112,23 +112,25 @@ public class PlayGame {
 		public void run() {
 			ServerListenerThread listener = client.getServerListenerThread();
 			while (client.gameRunning()) {
-				if (listener.hasSuccessResponse()) {
-					boolean response = listener.getSuccessResponse();
-					playerInterface.giveSuccessResponse(response);
+				if (listener.isHoldingHelloResponse()) {
+					playerInterface.giveHelloResponse(listener.getHelloResponse());
 				}
-				if (listener.hasGoldResponse()) {
-					playerInterface.giveHelloResponse(listener.getGoldResponse());
+				if (listener.isHoldingPickupResponse()) {
+					playerInterface.givePickupResponse(listener.isPickupSuccessful());
 				}
-				if (listener.hasLookResponse()) {
+				if (listener.isHoldingMoveResponse()) {
+					playerInterface.giveMoveResponse(listener.isMoveSuccessful());
+				}
+				if (listener.isHoldingLookResponse()) {
 					playerInterface.giveLookResponse(listener.getLookResponse());
 				}
-				if (listener.hasMessage()) {
+				if (listener.isHoldingMessage()) {
 					playerInterface.giveMessage(listener.getMessage());
 				}
 				if (listener.isWinReceived()) {
 					playerInterface.giveWin();
 				}
-				if (listener.isWinReceived()) {
+				if (listener.isLoseReceived()) {
 					playerInterface.giveLose();
 				}
 			}

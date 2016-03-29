@@ -14,14 +14,16 @@ public class PlayerPositionTracker {
 		return direction;
 	}
 
+	public void setDirection(char direction) {
+		this.direction = direction;
+	}
+
 	/**
 	 * Updates the bot's position (internal displacement from where it spawned), given the latest successful movement direction
 	 *
-	 * @param dir Latest successful movement direction
 	 */
-	public void step(char dir) {
-		direction = dir;
-		switch (dir) {
+	public void step() {
+		switch (direction) {
 			case 'N':
 				position[0] -= 1; //North
 				break;

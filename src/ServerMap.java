@@ -164,21 +164,23 @@ public class ServerMap {
 	 * @return Return null; if no position is found or a position vector [y,x]
 	 */
 	public int[] getFreeTile(Server server) {
-		int[] pos = new int[2];
-		Random rand = new Random();
+		synchronized (map) {
+			int[] pos = new int[2];
+			Random rand = new Random();
 
-		pos[0] = rand.nextInt(getMapHeight() - 1);
-		pos[1] = rand.nextInt(getMapWidth() - 1);
-		int counter = 1;
-		while (lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < getMapHeight() * getMapWidth()) {
-			pos[1] = (int) (counter * Math.cos(counter));
-			pos[0] = (int) (counter * Math.sin(counter));
-			counter++;
-		}
-		if (lookAtTile(pos[0], pos[1]) == '#') {
-			return null;
-		} else {
-			return pos;
+			pos[0] = rand.nextInt(getMapHeight() - 1);
+			pos[1] = rand.nextInt(getMapWidth() - 1);
+			int counter = 1;
+			while (lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < getMapHeight() * getMapWidth()) {
+				pos[1] = (int) (counter * Math.cos(counter));
+				pos[0] = (int) (counter * Math.sin(counter));
+				counter++;
+			}
+			if (lookAtTile(pos[0], pos[1]) == '#') {
+				return null;
+			} else {
+				return pos;
+			}
 		}
 	}
 
@@ -192,9 +194,11 @@ public class ServerMap {
 	 * @return The old character which was replaced will be returned.
 	 */
 	protected char replaceTile(int y, int x, char tile) {
-		char output = map[y][x];
-		map[y][x] = tile;
-		return output;
+		synchronized (map) {
+			char output = map[y][x];
+			map[y][x] = tile;
+			return output;
+		}
 	}
 
 	/**
@@ -217,27 +221,25 @@ public class ServerMap {
 	 *
 	 * @param y      Y coordinate of the location
 	 * @param x      X coordinate of the location
-	 * @param radius The radius defining the area which will be returned.
+	 * @param lookSize The lookSize defining the area which will be returned.
 	 * @return Returns a view window as a 2D char array of tiles
 	 */
-	protected char[][] lookWindow(int y, int x, int radius) {
-		char[][] reply = new char[radius][radius];
-		for (int i = 0; i < radius; i++) {
-			for (int j = 0; j < radius; j++) {
-				int posX = x + j - radius / 2;
-				int posY = y + i - radius / 2;
-				if (posX >= 0 && posX < getMapWidth() &&
-						posY >= 0 && posY < getMapHeight())
+	protected char[][] getLookWindow(int y, int x, int lookSize) {
+		char[][] reply = new char[lookSize][lookSize];
+		for (int i = 0; i < lookSize; i++) {
+			for (int j = 0; j < lookSize; j++) {
+				int posX = x + j - lookSize / 2;
+				int posY = y + i - lookSize / 2;
+				if (posX >= 0 && posX < getMapWidth() && posY >= 0 && posY < getMapHeight())
 					reply[j][i] = map[posY][posX];
 				else
 					reply[j][i] = '#';
 			}
 		}
 		reply[0][0] = 'X';
-		reply[radius - 1][0] = 'X';
-		reply[0][radius - 1] = 'X';
-		reply[radius - 1][radius - 1] = 'X';
-
+		reply[lookSize - 1][0] = 'X';
+		reply[0][lookSize - 1] = 'X';
+		reply[lookSize - 1][lookSize - 1] = 'X';
 		return reply;
 	}
 

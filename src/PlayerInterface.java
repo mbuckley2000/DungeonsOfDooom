@@ -7,7 +7,9 @@ public interface PlayerInterface {
 
 	void giveHelloResponse(int response);
 
-	void giveSuccessResponse(boolean response);
+	void givePickupResponse(boolean response);
+
+	void giveMoveResponse(boolean response);
 
 	void giveMessage(String message);
 

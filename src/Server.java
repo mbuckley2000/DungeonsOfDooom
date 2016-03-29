@@ -34,7 +34,7 @@ public class Server {
 	 * Starts the ServerSocket to listen from client connections
 	 * Initialises and loads the serverMap
 	 */
-	public Server(int port) {
+	public Server(int port, File mapFile) {
 		remoteClients = new HashSet<>();
 		try {
 			serverSocket = new ServerSocket(port);
@@ -45,7 +45,6 @@ public class Server {
 			//Setup
 			//Load serverMap
 			serverMap = new ServerMap();
-			File mapFile = new File("maps/example_map.txt");
 
 			if (!guiDisabled) {
 				JFileChooser chooser = new JFileChooser();
@@ -75,6 +74,7 @@ public class Server {
 	 */
 	public static void main(String args[]) {
 		int port = 40004;
+		File mapFile = new File("maps/default_map.txt");
 
 		for (String s : args) {
 			try {
@@ -86,10 +86,16 @@ public class Server {
 				if (s.equals("nogui")) {
 					guiDisabled = true;
 				}
+				if (s.contains(".txt")) {
+					File f = new File(s);
+					if (f.exists() && !f.isDirectory()) {
+						mapFile = new File(s);
+					}
+				}
 			}
 		}
 
-		Server server = new Server(port);
+		Server server = new Server(port, mapFile);
 		server.update();
 	}
 
@@ -164,7 +170,7 @@ public class Server {
 	public void broadcastMessage(String message, RemoteClient... excludedClients) {
 		for (RemoteClient client : remoteClients) {
 			if (client.isConnected() && !Arrays.asList(excludedClients).contains(client)) {
-				client.getWriter().println(message);
+				client.sendChat(message);
 			}
 		}
 	}
