@@ -55,7 +55,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 * Closes everything down cleanly when the loop is done
 	 */
 	public void run() {
-		new Thread(new ViewUpdaterThread()).start();
+		//new Thread(new ViewUpdaterThread()).start();
 
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -70,8 +70,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 				if (input != null) {
 					String response = parseInput(input);
 					if (response != null) {
-						writer.println(parseInput(input));
-						System.out.println(address + "\t\t" + input + "\t\t" + response);
+						writer.println(response);
+						System.out.println(address + "\t\t" + input);
 					}
 				} else {
 					closeConnection();
@@ -181,6 +181,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 			}
 		}
 		lastLookWindow = output;
+		//System.out.println(output);
 		return output;
 	}
 

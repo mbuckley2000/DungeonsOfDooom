@@ -78,6 +78,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 	@Override
 	public void giveHelloResponse(int response) {
+		System.err.println("GOT HRESPONSE IN GUI: " + response);
 		progressLabel.setText("Gold left to win: " + response);
 	}
 
@@ -90,8 +91,8 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	public void giveMoveResponse(boolean response) {
 		if (response) {
 			positionTracker.step();
-			lookNeeded = true;
 		}
+		lookNeeded = true;
 	}
 
 	@Override
@@ -105,51 +106,48 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	 */
 	@Override
 	public boolean hasNextCommand() {
-		return true;
+		if (controller.hasAction()) System.out.println("GOT CONTROLLER ACTION");
+		return controller.hasAction() || lookNeeded || helloNeeded;
 	}
 
 	public String getNextCommand() {
-		String command = null;
-		while (command == null) {
-			if (lookNeeded) {
-				command = "LOOK";
-				lookNeeded = false;
-				break;
-			}
-			if (helloNeeded) {
-				command = "HELLO";
-				helloNeeded = false;
-				break;
-			}
-			if (controller.isMovePressed()) {
-				char dir = controller.getMoveDirection();
-				positionTracker.setDirection(dir);
-				command = "MOVE " + dir;
-				break;
-			}
-			if (controller.isQuitPressed()) {
-				command = "QUIT";
-				break;
-			}
-			if (controller.isPickupPressed()) {
-				command = "PICKUP";
-				helloNeeded = true;
-				break;
-			}
-			if (controller.isLookPressed()) {
-				command = "LOOK";
-				break;
-			}
-			if (controller.isHelloPressed()) {
-				command = "HELLO";
-				break;
-			}
-			if (chatPanel.hasMessage()) {
-				command = "SAY " + chatPanel.getMessage();
-				break;
-			}
+		if (lookNeeded) {
+			lookNeeded = false;
+			lastCommand = "LOOK";
+			return lastCommand;
 		}
-		lastCommand = command;
-		return command;
+		if (helloNeeded) {
+			lastCommand = "HELLO";
+			helloNeeded = false;
+			return lastCommand;
+		}
+		if (controller.isMovePressed()) {
+			char dir = controller.getMoveDirection();
+			positionTracker.setDirection(dir);
+			lastCommand = "MOVE " + dir;
+			return lastCommand;
+		}
+		if (controller.isQuitPressed()) {
+			lastCommand = "QUIT";
+			return lastCommand;
+		}
+		if (controller.isPickupPressed()) {
+			lastCommand = "PICKUP";
+			helloNeeded = true;
+			return lastCommand;
+		}
+		if (controller.isLookPressed()) {
+			lastCommand = "LOOK";
+			return lastCommand;
+		}
+		if (controller.isHelloPressed()) {
+			lastCommand = "HELLO";
+			return lastCommand;
+		}
+		if (chatPanel.hasMessage()) {
+			lastCommand = "SAY " + chatPanel.getMessage();
+			return lastCommand;
+		}
+		return null;
 	}
 }

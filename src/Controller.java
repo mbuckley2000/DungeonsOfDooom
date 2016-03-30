@@ -9,6 +9,10 @@ public abstract class Controller {
 	protected boolean movePressed;
 	protected char moveDirection;
 
+	public boolean hasAction() {
+		return quitPressed || pickupPressed || lookPressed || helloPressed || movePressed;
+	}
+
 	public boolean isQuitPressed() {
 		if (quitPressed) {
 			quitPressed = false;

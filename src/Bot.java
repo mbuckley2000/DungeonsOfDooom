@@ -29,7 +29,8 @@ public class Bot implements PlayerInterface {
 					}
 				}
 			};
-	private boolean needToLook;
+	private boolean helloNeeded;
+	private boolean lookNeeded;
 	private int goldNeeded;
 
 	/**
@@ -38,7 +39,7 @@ public class Bot implements PlayerInterface {
 	 */
 	public Bot() {
 		positionTracker = new PlayerPositionTracker();
-		goldNeeded = 10;
+		goldNeeded = -1;
 		random = new Random();
 		map = new ClientMap();
 		taskStack = new Stack<>();
@@ -60,6 +61,7 @@ public class Bot implements PlayerInterface {
 	 * @return The gold needed for the bot to win the game, from the last 'HELLO' call
 	 */
 	public int getGoldNeeded() {
+		System.out.println("Gold Needed: " + goldNeeded);
 		return goldNeeded;
 	}
 
@@ -93,9 +95,14 @@ public class Bot implements PlayerInterface {
 			e.printStackTrace();
 		}
 
-		if (needToLook) {
-			needToLook = false;
+		if (lookNeeded) {
+			lookNeeded = false;
 			return "LOOK";
+		}
+
+		if (helloNeeded) {
+			helloNeeded = false;
+			return "HELLO";
 		}
 
 		if (taskStack.isEmpty()) {
@@ -146,12 +153,12 @@ public class Bot implements PlayerInterface {
 
 	@Override
 	public void givePickupResponse(boolean response) {
-
+		helloNeeded = true;
 	}
 
 	@Override
 	public void giveMoveResponse(boolean response) {
-		needToLook = true;
+		lookNeeded = true;
 		if (response) {
 			positionTracker.step();
 		}

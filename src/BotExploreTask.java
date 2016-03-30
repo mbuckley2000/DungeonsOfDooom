@@ -36,6 +36,11 @@ public class BotExploreTask implements BotTask {
 	public String getNextCommand() {
 		System.out.println("BotExploreTask command get");
 
+		if (bot.getGoldNeeded() == 0) {
+			System.err.println("We need no more gold.");
+			System.exit(1);
+		}
+
 		if (bot.getGoldNeeded() == 0 && map.findTile('E') != null) {
 			//Moving to exit
 			int[] exitPos = bot.getClosestReachableTile('E');

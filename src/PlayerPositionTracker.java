@@ -37,6 +37,7 @@ public class PlayerPositionTracker {
 				position[1] -= 1; //West
 				break;
 		}
+		System.out.println("New position: " + position[1] + ", " + position[0]);
 	}
 
 	public int[] getPosition() {

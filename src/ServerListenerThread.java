@@ -51,32 +51,6 @@ public class ServerListenerThread implements Runnable {
 		messages = new PriorityQueue<>();
 	}
 
-	public boolean isPickupSuccessful() {
-		holdingPickupResponse = false;
-		return pickupSuccessful;
-	}
-
-	public boolean isHoldingPickupResponse() {
-		return holdingPickupResponse;
-	}
-
-	public boolean isMoveSuccessful() {
-		holdingMoveResponse = false;
-		return moveSuccessful;
-	}
-
-	public boolean isHoldingMoveResponse() {
-		return holdingMoveResponse;
-	}
-
-	public boolean isLoseReceived() {
-		return loseReceived;
-	}
-
-	public boolean isWinReceived() {
-		return winReceived;
-	}
-
 	/**
 	 * Runs the reader thread
 	 */
@@ -102,8 +76,6 @@ public class ServerListenerThread implements Runnable {
 	}
 
 	private void parseResponse(String response) {
-		System.out.println(response);
-
 		if (response.equals("WIN")) {
 			winReceived = true;
 			return;
@@ -127,6 +99,7 @@ public class ServerListenerThread implements Runnable {
 				//Hello response
 				holdingHelloResponse = true;
 				helloResponse = Integer.parseInt(response.substring(1));
+				System.out.println("GOT HRESPONSE IN LISTENER: " + helloResponse);
 				break;
 			case 'L':
 				//Look response
@@ -139,6 +112,46 @@ public class ServerListenerThread implements Runnable {
 				messages.add(response.substring(1));
 				break;
 		}
+	}
+
+	public boolean isPickupSuccessful() {
+		return pickupSuccessful;
+	}
+
+	public boolean isHoldingPickupResponse() {
+		if (holdingPickupResponse) {
+			holdingPickupResponse = false;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isMoveSuccessful() {
+		return moveSuccessful;
+	}
+
+	public boolean isHoldingMoveResponse() {
+		if (holdingMoveResponse) {
+			holdingMoveResponse = false;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isLoseReceived() {
+		if (loseReceived) {
+			loseReceived = false;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isWinReceived() {
+		if (winReceived) {
+			winReceived = false;
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -166,7 +179,6 @@ public class ServerListenerThread implements Runnable {
 	 * @return The look window in its current state. Usually a full look window but not guaranteed!
 	 */
 	public char[][] getLookResponse() {
-		holdingLookResponse = false;
 		return lookResponse;
 	}
 
@@ -174,22 +186,28 @@ public class ServerListenerThread implements Runnable {
 	 * @return The most recently received response to HELLO
 	 */
 	public int getHelloResponse() {
-		holdingHelloResponse = false;
 		return helloResponse;
 	}
 
 	public boolean isHoldingLookResponse() {
-		return holdingLookResponse;
+		if (holdingLookResponse) {
+			holdingLookResponse = false;
+			return true;
+		}
+		return false;
 	}
 
 	public boolean isHoldingHelloResponse() {
-		return holdingHelloResponse;
+		if (holdingHelloResponse) {
+			holdingHelloResponse = false;
+			return true;
+		}
+		return false;
 	}
 
 	public String getMessage() {
 		return messages.remove();
 	}
-
 
 	public boolean isHoldingMessage() {
 		return !messages.isEmpty();
