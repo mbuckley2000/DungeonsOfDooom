@@ -14,6 +14,11 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private boolean lookNeeded;
 	private JLabel progressLabel;
 	private boolean helloNeeded;
+	private boolean lookResponseReceived;
+	private boolean helloResponseReceived;
+	private boolean pickupResponseReceived;
+	private boolean moveResponseReceived;
+
 
 	public GUIInterface(String title) {
 		super(title);
@@ -22,6 +27,10 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		controller = new KeyboardController(150);
 		lastCommand = "";
 		helloNeeded = true;
+		lookResponseReceived = true;
+		helloResponseReceived = true;
+		pickupResponseReceived = true;
+		moveResponseReceived = true;
 
 		//Setup GUIInterface
 		BorderLayout gameWindowLayout = new BorderLayout();
@@ -74,29 +83,35 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	@Override
 	public void giveLookResponse(char[][] response) {
 		map.update(response, positionTracker.getPosition());
+		lookResponseReceived = true;
 	}
 
 	@Override
 	public void giveHelloResponse(int response) {
-		System.err.println("GOT HRESPONSE IN GUI: " + response);
+		System.out.println("GUI: Received hello response: " + response);
 		progressLabel.setText("Gold left to win: " + response);
+		helloResponseReceived = true;
 	}
 
 	@Override
 	public void givePickupResponse(boolean response) {
-
+		System.out.println("GUI: Received pickup response: " + response);
+		pickupResponseReceived = true;
 	}
 
 	@Override
 	public void giveMoveResponse(boolean response) {
+		System.out.println("GUI: Received move response: " + response);
 		if (response) {
 			positionTracker.step();
 		}
 		lookNeeded = true;
+		moveResponseReceived = true;
 	}
 
 	@Override
 	public void giveMessage(String message) {
+		System.out.println("GUI: Received message: " + message);
 		chatPanel.println(message);
 	}
 
@@ -111,43 +126,54 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	}
 
 	public String getNextCommand() {
-		if (lookNeeded) {
+		if (lookNeeded && lookResponseReceived) {
 			lookNeeded = false;
 			lastCommand = "LOOK";
+			lookResponseReceived = false;
 			return lastCommand;
 		}
-		if (helloNeeded) {
+		if (helloNeeded && helloResponseReceived) {
 			lastCommand = "HELLO";
 			helloNeeded = false;
+			helloResponseReceived = false;
 			return lastCommand;
 		}
-		if (controller.isMovePressed()) {
+		if (controller.isMovePressed() && moveResponseReceived) {
 			char dir = controller.getMoveDirection();
 			positionTracker.setDirection(dir);
 			lastCommand = "MOVE " + dir;
+			moveResponseReceived = false;
 			return lastCommand;
 		}
 		if (controller.isQuitPressed()) {
 			lastCommand = "QUIT";
 			return lastCommand;
 		}
-		if (controller.isPickupPressed()) {
+		if (controller.isPickupPressed() && pickupResponseReceived) {
 			lastCommand = "PICKUP";
 			helloNeeded = true;
+			pickupResponseReceived = false;
 			return lastCommand;
 		}
-		if (controller.isLookPressed()) {
+		if (controller.isLookPressed() && lookResponseReceived) {
 			lastCommand = "LOOK";
+			lookResponseReceived = false;
 			return lastCommand;
 		}
-		if (controller.isHelloPressed()) {
+		if (controller.isHelloPressed() && helloResponseReceived) {
 			lastCommand = "HELLO";
+			helloResponseReceived = false;
 			return lastCommand;
 		}
 		if (chatPanel.hasMessage()) {
 			lastCommand = "SAY " + chatPanel.getMessage();
 			return lastCommand;
 		}
-		return null;
+		try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		return getNextCommand();
 	}
 }

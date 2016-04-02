@@ -95,6 +95,12 @@ public class PlayGame {
 	private class InputHandlerThread implements Runnable {
 		public void run() {
 			while (client.gameRunning()) {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+
 				if (playerInterface.hasNextCommand()) {
 					String input = playerInterface.getNextCommand();
 					if (input != null) {
@@ -113,6 +119,11 @@ public class PlayGame {
 		public void run() {
 			ServerListenerThread listener = client.getServerListenerThread();
 			while (client.gameRunning()) {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
 				if (listener.isHoldingHelloResponse()) {
 					playerInterface.giveHelloResponse(listener.getHelloResponse());
 				}

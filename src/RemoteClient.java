@@ -66,12 +66,16 @@ public class RemoteClient implements Runnable, IGameLogic {
 			sendChat("Welcome to the dungeon! Mwuahaha");
 
 			while (connected && server.isGameRunning()) {
-				input = reader.readLine();
+				input = reader.readLine().toUpperCase();
 				if (input != null) {
 					String response = parseInput(input);
 					if (response != null) {
 						writer.println(response);
-						System.out.println(address + "\t\t" + input);
+						if (!input.equals("LOOK")) {
+							System.out.println(address + "\t\t" + input + "\t\t" + response);
+						} else {
+							System.out.println(address + "\t\t" + input + "\t\tSent look window");
+						}
 					}
 				} else {
 					closeConnection();
@@ -202,6 +206,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 			case "MOVE":
 				if (command.length == 2) {
 					answer = move(command[1].toUpperCase().charAt(0));
+					System.out.println("RESPONSEL " + answer);
 				}
 				break;
 			case "PICKUP":

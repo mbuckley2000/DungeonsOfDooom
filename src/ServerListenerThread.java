@@ -89,6 +89,7 @@ public class ServerListenerThread implements Runnable {
 				//Move response
 				holdingMoveResponse = true;
 				moveSuccessful = response.charAt(1) == 'S';
+				System.out.println("LISTENER RECEIVED MOVE RESPONSE: " + moveSuccessful);
 				break;
 			case 'P':
 				//Pickup response
@@ -99,7 +100,6 @@ public class ServerListenerThread implements Runnable {
 				//Hello response
 				holdingHelloResponse = true;
 				helloResponse = Integer.parseInt(response.substring(1));
-				System.out.println("GOT HRESPONSE IN LISTENER: " + helloResponse);
 				break;
 			case 'L':
 				//Look response
