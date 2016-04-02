@@ -185,7 +185,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 			}
 		}
 		lastLookWindow = output;
-		//System.out.println(output);
 		return output;
 	}
 
@@ -206,7 +205,6 @@ public class RemoteClient implements Runnable, IGameLogic {
 			case "MOVE":
 				if (command.length == 2) {
 					answer = move(command[1].toUpperCase().charAt(0));
-					System.out.println("RESPONSEL " + answer);
 				}
 				break;
 			case "PICKUP":
