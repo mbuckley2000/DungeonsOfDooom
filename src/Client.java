@@ -18,7 +18,6 @@ public class Client {
 	private Socket socket;
 	private PrintWriter writer;
 	private BufferedReader reader;
-	private boolean connected;
 	private ServerListenerThread serverListenerThread;
 
 	/**
@@ -26,6 +25,7 @@ public class Client {
 	 */
 	public Client(Socket socket, String name) {
 		int connectionAttempts = 0;
+		boolean connected = false;
 
 		while (!connected && connectionAttempts < 5) {
 			connectionAttempts++;
@@ -36,9 +36,10 @@ public class Client {
 
 				writer.println("NAME " + name);
 
-				connected = true;
 				serverListenerThread = new ServerListenerThread(reader);
 				new Thread(serverListenerThread).start();
+
+				connected = true;
 
 				Thread.sleep(1000); //Sleep to give outputClientThread time to validate connection
 			} catch (ConnectException e) {
@@ -103,8 +104,8 @@ public class Client {
 	/**
 	 * @return True if the game is running
 	 */
-	public boolean gameRunning() {
-		return connected && serverListenerThread.isConnected();
+	public boolean isGameRunning() {
+		return serverListenerThread.isConnected();
 	}
 
 	/**

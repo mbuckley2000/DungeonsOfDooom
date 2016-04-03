@@ -66,13 +66,9 @@ public class ServerListenerThread implements Runnable {
 					parseResponse(string);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				connected = false;
 			}
 		}
-
-		System.out.flush();
-		System.exit(0);
 	}
 
 	private void parseResponse(String response) {
@@ -89,7 +85,6 @@ public class ServerListenerThread implements Runnable {
 				//Move response
 				holdingMoveResponse = true;
 				moveSuccessful = response.charAt(1) == 'S';
-				System.out.println("LISTENER RECEIVED MOVE RESPONSE: " + moveSuccessful);
 				break;
 			case 'P':
 				//Pickup response

@@ -11,6 +11,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	private ChatPanel chatPanel;
 	private MapPanel mapPanel;
 	private Controller controller;
+	private boolean finished;
 	private boolean lookNeeded;
 	private JLabel progressLabel;
 	private boolean helloNeeded;
@@ -64,10 +65,16 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 	}
 
 	@Override
+	public boolean isFinished() {
+		return finished;
+	}
+
+	@Override
 	public void giveWin() {
 		JDialog winDialog = new JDialog();
 		winDialog.add(new JLabel("You have won!"));
 		winDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		finished = true;
 	}
 
 	@Override
@@ -75,6 +82,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 		JDialog loseDialog = new JDialog();
 		loseDialog.add(new JLabel("Another player has won!"));
 		loseDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		finished = true;
 	}
 
 	/*

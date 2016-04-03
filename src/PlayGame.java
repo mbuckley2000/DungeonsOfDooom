@@ -30,7 +30,7 @@ public class PlayGame {
 			botMode = connectDialog.getBotMode();
 		}
 
-		if (client.gameRunning()) {
+		if (client.isGameRunning()) {
 			if (botMode) {
 				playerInterface = new Bot();
 			} else if (guiMode) {
@@ -94,7 +94,7 @@ public class PlayGame {
 
 	private class InputHandlerThread implements Runnable {
 		public void run() {
-			while (client.gameRunning()) {
+			while (client.isGameRunning()) {
 				try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
@@ -118,7 +118,7 @@ public class PlayGame {
 	private class ResponseHandlerThread implements Runnable {
 		public void run() {
 			ServerListenerThread listener = client.getServerListenerThread();
-			while (client.gameRunning()) {
+			while (client.isGameRunning()) {
 				try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
@@ -146,6 +146,9 @@ public class PlayGame {
 					playerInterface.giveLose();
 				}
 			}
+			while (!playerInterface.isFinished()) {
+			}
+			System.exit(0);
 		}
 	}
 }

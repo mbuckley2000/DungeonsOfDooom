@@ -21,4 +21,6 @@ public interface PlayerInterface {
 	boolean hasNextCommand();
 
 	String getNextCommand();
+
+	boolean isFinished();
 }

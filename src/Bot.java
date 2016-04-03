@@ -164,6 +164,12 @@ public class Bot implements PlayerInterface {
 		}
 	}
 
+
+	@Override
+	public boolean isFinished() {
+		return true;
+	}
+
 	@Override
 	public void giveMessage(String message) {
 		System.out.println(message);

@@ -60,6 +60,11 @@ public class TextualInterface implements PlayerInterface {
 	}
 
 	@Override
+	public boolean isFinished() {
+		return true;
+	}
+
+	@Override
 	public void giveMoveResponse(boolean response) {
 	}
 
