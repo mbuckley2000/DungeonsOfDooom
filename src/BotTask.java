@@ -5,7 +5,7 @@
  * @since 03/03/2016
  */
 public interface BotTask {
-	boolean hasNextCommand();
+    boolean hasNextCommand();
 
-	String getNextCommand();
+    String getNextCommand();
 }

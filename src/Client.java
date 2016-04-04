@@ -15,120 +15,120 @@ import java.net.Socket;
  * @since 24/02/2016
  */
 public class Client {
-	private Socket socket;
-	private PrintWriter writer;
-	private BufferedReader reader;
-	private ServerListenerThread serverListenerThread;
+    private Socket socket;
+    private PrintWriter writer;
+    private BufferedReader reader;
+    private ServerListenerThread serverListenerThread;
 
-	/**
-	 * Constructor
-	 */
-	public Client(Socket socket, String name) {
-		int connectionAttempts = 0;
-		boolean connected = false;
+    /**
+     * Constructor
+     */
+    public Client(Socket socket, String name) {
+        int connectionAttempts = 0;
+        boolean connected = false;
 
-		while (!connected && connectionAttempts < 5) {
-			connectionAttempts++;
-			try {
-				this.socket = socket;
-				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				writer = new PrintWriter(socket.getOutputStream(), true);
+        while (!connected && connectionAttempts < 5) {
+            connectionAttempts++;
+            try {
+                this.socket = socket;
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                writer = new PrintWriter(socket.getOutputStream(), true);
 
-				writer.println("NAME " + name);
+                writer.println("NAME " + name);
 
-				serverListenerThread = new ServerListenerThread(reader);
-				new Thread(serverListenerThread).start();
+                serverListenerThread = new ServerListenerThread(reader);
+                new Thread(serverListenerThread).start();
 
-				connected = true;
+                connected = true;
 
-				Thread.sleep(1000); //Sleep to give outputClientThread time to validate connection
-			} catch (ConnectException e) {
-				System.err.println("Unable to connect: " + e.getMessage());
-				System.err.println("Attempting to re-establish connection");
-			} catch (IOException e) {
-				System.err.println("Unable to establish IO streams");
-				System.err.println("For debug:");
-				if (socket != null) {
-					System.err.println("Socket bound: " + socket.isBound());
-					System.err.println("Socket connected: " + socket.isConnected());
-					System.err.println("Socket closed: " + socket.isClosed());
-					System.err.println("Input shutdown: " + socket.isInputShutdown());
-					System.err.println("Output shutdown: " + socket.isOutputShutdown());
-				}
-				System.err.println("Attempting to re-establish connection");
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		if (connectionAttempts > 4) {
-			System.err.println("Maximum connection attempts exceeded");
-			System.err.println("Please check that the server is running on the specified address & port");
-			System.err.println("Please check that all ports are open and that no firewalls are blocking communication");
-		}
-	}
+                Thread.sleep(1000); //Sleep to give outputClientThread time to validate connection
+            } catch (ConnectException e) {
+                System.err.println("Unable to connect: " + e.getMessage());
+                System.err.println("Attempting to re-establish connection");
+            } catch (IOException e) {
+                System.err.println("Unable to establish IO streams");
+                System.err.println("For debug:");
+                if (socket != null) {
+                    System.err.println("Socket bound: " + socket.isBound());
+                    System.err.println("Socket connected: " + socket.isConnected());
+                    System.err.println("Socket closed: " + socket.isClosed());
+                    System.err.println("Input shutdown: " + socket.isInputShutdown());
+                    System.err.println("Output shutdown: " + socket.isOutputShutdown());
+                }
+                System.err.println("Attempting to re-establish connection");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (connectionAttempts > 4) {
+            System.err.println("Maximum connection attempts exceeded");
+            System.err.println("Please check that the server is running on the specified address & port");
+            System.err.println("Please check that all ports are open and that no firewalls are blocking communication");
+        }
+    }
 
-	public static boolean isAddressValid(String address) {
-		try {
-			if (address == null) return false;
+    public static boolean isAddressValid(String address) {
+        try {
+            if (address == null) return false;
 
-			if (address.isEmpty()) return false;
+            if (address.isEmpty()) return false;
 
-			if (address.equals("localhost")) return true;
+            if (address.equals("localhost")) return true;
 
-			String[] sections = address.split("\\.");
-			for (String section : sections) {
-				int sectionInt = Integer.parseInt(section);
-				if (sectionInt > 255 || sectionInt < 0) return false;
-			}
+            String[] sections = address.split("\\.");
+            for (String section : sections) {
+                int sectionInt = Integer.parseInt(section);
+                if (sectionInt > 255 || sectionInt < 0) return false;
+            }
 
-			if (sections.length != 4) return false;
+            if (sections.length != 4) return false;
 
-			return !address.endsWith(".");
+            return !address.endsWith(".");
 
-		} catch (NumberFormatException nfe) {
-			return false;
-		}
-	}
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
 
-	public static boolean isPortValid(int port) {
-		return (port > 0 && port < 65535);
-	}
+    public static boolean isPortValid(int port) {
+        return (port > 0 && port < 65535);
+    }
 
-	/**
-	 * @return Returns the message reader that prints and interprets all messages from the server
-	 */
-	public ServerListenerThread getServerListenerThread() {
-		return serverListenerThread;
-	}
+    /**
+     * @return Returns the message reader that prints and interprets all messages from the server
+     */
+    public ServerListenerThread getServerListenerThread() {
+        return serverListenerThread;
+    }
 
-	/**
-	 * @return True if the game is running
-	 */
-	public boolean isGameRunning() {
-		return serverListenerThread.isConnected();
-	}
+    /**
+     * @return True if the game is running
+     */
+    public boolean isGameRunning() {
+        return serverListenerThread.isConnected();
+    }
 
-	/**
-	 * Closes the socket, the ServerListenerThread, and all streams.
-	 */
-	public void close() {
-		try {
-			writer.close();
-			serverListenerThread.stop();
-			reader.close();
-			socket.close();
-			System.exit(0);
-		} catch (Exception e) {
-			System.exit(0);
-		}
-	}
+    /**
+     * Closes the socket, the ServerListenerThread, and all streams.
+     */
+    public void close() {
+        try {
+            writer.close();
+            serverListenerThread.stop();
+            reader.close();
+            socket.close();
+            System.exit(0);
+        } catch (Exception e) {
+            System.exit(0);
+        }
+    }
 
-	/**
-	 * Sends a string to the server
-	 *
-	 * @param string String to send
-	 */
-	public void send(String string) {
-		writer.println(string);
-	}
+    /**
+     * Sends a string to the server
+     *
+     * @param string String to send
+     */
+    public void send(String string) {
+        writer.println(string);
+    }
 }

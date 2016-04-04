@@ -2,25 +2,25 @@
  * Created by matt on 22/03/2016.
  */
 public interface PlayerInterface {
-	//Output
-	void giveLookResponse(char[][] response);
+    //Output
+    void giveLookResponse(char[][] response);
 
-	void giveHelloResponse(int response);
+    void giveHelloResponse(int response);
 
-	void givePickupResponse(boolean response);
+    void givePickupResponse(boolean response);
 
-	void giveMoveResponse(boolean response);
+    void giveMoveResponse(boolean response);
 
-	void giveMessage(String message);
+    void giveMessage(String message);
 
-	void giveWin();
+    void giveWin();
 
-	void giveLose();
+    void giveLose();
 
-	//Input
-	boolean hasNextCommand();
+    //Input
+    boolean hasNextCommand();
 
-	String getNextCommand();
+    String getNextCommand();
 
-	boolean isFinished();
+    boolean isFinished();
 }
