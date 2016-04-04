@@ -167,6 +167,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
         }
         if (controller.isQuitPressed()) {
             lastCommand = "QUIT";
+            finished = true;
             return lastCommand;
         }
         if (controller.isPickupPressed() && pickupResponseReceived) {
