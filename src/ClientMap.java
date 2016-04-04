@@ -16,12 +16,14 @@ public class ClientMap {
     private char[][] map;
     private int[] bounds;
     private boolean empty;
+    private int lookSize;
 
     /**
      * Constructs the AI ServerMap
      * Initialises the bounds to the middle of the map
      */
     public ClientMap() {
+        lookSize = 5;
         offset = new int[]{20, 20};
         map = new char[offset[0] * 2][offset[1] * 2];
         bounds = new int[4];
@@ -82,8 +84,13 @@ public class ClientMap {
     public void update(char[][] lookWindow, int[] botPos) {
         synchronized (map) {
             empty = false;
+            lookSize = lookWindow.length;
             replace(botPos[0] - lookWindow.length / 2, botPos[1] - lookWindow.length / 2, lookWindow);
         }
+    }
+
+    public int getLookSize() {
+        return lookSize;
     }
 
     /**
