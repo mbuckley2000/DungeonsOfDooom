@@ -84,7 +84,7 @@ public class ClientMap {
     public void update(char[][] lookWindow, int[] botPos) {
         synchronized (map) {
             empty = false;
-            lookSize = lookWindow.length;
+            lookSize = lookWindow.length + 1;
             replace(botPos[0] - lookWindow.length / 2, botPos[1] - lookWindow.length / 2, lookWindow);
         }
     }

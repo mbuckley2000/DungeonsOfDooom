@@ -259,6 +259,7 @@ public class RemoteClient implements Runnable, IGameLogic {
      */
     public void closeConnection() {
         try {
+            connected = false;
             clientSocket.close();
             System.out.println(address + "\t\t\t\t\tDisconnected");
             writer.close();

@@ -106,9 +106,8 @@ public class MapPanel extends JPanel {
                     //Drawing other players
                     if (knownMap[y][x] == 'P') {
                         g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
-                        double dist = Math.sqrt(Math.pow(y - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]), 2) + Math.pow(x - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]), 2));
-                        if (dist < map.getLookSize() / 2) { //If they are within the lookwindow
-                            System.out.println(dist);
+                        double distFromLocalPlayer = Math.sqrt(Math.pow(y - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]), 2) + Math.pow(x - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]), 2));
+                        if (distFromLocalPlayer < map.getLookSize() / 2) { //If they are within the lookwindow
                             g2.drawImage(playerSpriteSheet, screenX, screenY, screenX + tileSize, screenY + tileSize, 7 * 32, 4 * 32, 7 * 32 + tileSize, 4 * 32 + tileSize, null);
                         }
                     }
