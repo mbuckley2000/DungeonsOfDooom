@@ -20,6 +20,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	private int collectedGold;
 	private InetAddress address;
 	private PrintWriter writer;
+	private BufferedReader reader;
 	private Server server;
 	private String lastLookWindow;
 	private String name;
@@ -58,7 +59,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 		//new Thread(new ViewUpdaterThread()).start();
 
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			writer = new PrintWriter(clientSocket.getOutputStream(), true);
 			String input;
 
@@ -66,9 +67,9 @@ public class RemoteClient implements Runnable, IGameLogic {
 			sendChat("Welcome to the dungeon! Mwuahaha");
 
 			while (connected && server.isGameRunning()) {
-				input = reader.readLine().toUpperCase();
+				input = reader.readLine();
 				if (input != null) {
-					String response = parseInput(input);
+					String response = parseInput(input.toUpperCase());
 					if (response != null) {
 						writer.println(response);
 						if (!input.equals("LOOK")) {
@@ -81,14 +82,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 					closeConnection();
 				}
 			}
-
-			System.out.println(address + "\t\tDisconnected");
-			writer.close();
-			reader.close();
-			clientSocket.close();
 		} catch (IOException e) {
-			connected = false;
-			System.out.println(address + "\t\tDisconnected");
+			closeConnection();
 		}
 	}
 
@@ -135,8 +130,8 @@ public class RemoteClient implements Runnable, IGameLogic {
 			playerPosition = newPosition;
 			if (checkWin()) {
 				server.broadcastMessage("LOSE", this);
+				System.out.println(address + "\t\t\t\t\tWIN");
 				writer.println("WIN");
-				closeConnection();
 				server.shutDown();
 				return null;
 			}
@@ -227,6 +222,7 @@ public class RemoteClient implements Runnable, IGameLogic {
 	}
 
 	public void sendChat(String message) {
+		System.out.println(address + "\t\t\t\t\t" + message);
 		writer.println("C" + message);
 	}
 
@@ -262,7 +258,14 @@ public class RemoteClient implements Runnable, IGameLogic {
 	 *
 	 */
 	public void closeConnection() {
-		connected = false;
+		try {
+			clientSocket.close();
+			System.out.println(address + "\t\t\t\t\tDisconnected");
+			writer.close();
+			reader.close();
+		} catch (IOException e) {
+			System.err.println(address + "\t\t\t\t\tError closing connection");
+		}
 	}
 
 	/**

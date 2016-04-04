@@ -71,17 +71,29 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
 	@Override
 	public void giveWin() {
-		JDialog winDialog = new JDialog();
-		winDialog.add(new JLabel("You have won!"));
-		winDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		dispose();
+		MessageDialog dialog = new MessageDialog("You have won!");
+		while (!dialog.isDone()) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
 		finished = true;
 	}
 
 	@Override
 	public void giveLose() {
-		JDialog loseDialog = new JDialog();
-		loseDialog.add(new JLabel("Another player has won!"));
-		loseDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		dispose();
+		MessageDialog dialog = new MessageDialog("Another player has won!");
+		while (!dialog.isDone()) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
 		finished = true;
 	}
 
