@@ -170,7 +170,7 @@ public class Server {
     public void broadcastMessage(String message, RemoteClient... excludedClients) {
         for (RemoteClient client : remoteClients) {
             if (client.isConnected() && !Arrays.asList(excludedClients).contains(client)) {
-                client.sendChat(message);
+                client.sendLine("C" + message);
             }
         }
     }

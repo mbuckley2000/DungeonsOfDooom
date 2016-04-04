@@ -56,7 +56,7 @@ public class RemoteClient implements Runnable, IGameLogic {
      * Closes everything down cleanly when the loop is done
      */
     public void run() {
-        //new Thread(new ViewUpdaterThread()).start();
+        new Thread(new ViewUpdaterThread()).start();
 
         try {
             reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -64,7 +64,7 @@ public class RemoteClient implements Runnable, IGameLogic {
             String input;
 
             System.out.println(address + "\t\tConnected");
-            sendChat("Welcome to the dungeon! Mwuahaha");
+            sendLine("Welcome to the dungeon! Mwuahaha");
 
             while (connected && server.isGameRunning()) {
                 input = reader.readLine();
@@ -221,9 +221,9 @@ public class RemoteClient implements Runnable, IGameLogic {
         return answer;
     }
 
-    public void sendChat(String message) {
+    public void sendLine(String message) {
         System.out.println(address + "\t\t\t\t\t" + message);
-        writer.println("C" + message);
+        writer.println(message);
     }
 
     //Misc
@@ -314,7 +314,7 @@ public class RemoteClient implements Runnable, IGameLogic {
         public void run() {
             while (connected) {
                 try {
-                    Thread.sleep(200); //run on 200ms ticks, no need to spam. This is only for if a player moves in their getLookWindow
+                    Thread.sleep(50); //run on 50ms ticks, no need to spam. This is only for if a player moves in their getLookWindow
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
