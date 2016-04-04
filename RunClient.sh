@@ -1,10 +1,10 @@
 #!/bin/sh
 echo "Updating from GitHub..."
 git pull https://github.com/mbuckley2000/DungeonsOfDooom.git master
-echo "Compiling server..."
+echo "Compiling client..."
 mkdir out
 cd src
 javac -d ../out/ *.java
-echo "Running server..."
+echo "Running client..."
 cd ..
-java -cp out Server nogui
+java -cp out PlayGame
