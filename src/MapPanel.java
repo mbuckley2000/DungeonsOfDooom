@@ -24,7 +24,6 @@ public class MapPanel extends JPanel {
     private double scale;
     private int smoothness;
 
-
     public MapPanel(ClientMap map, PlayerPositionTracker positionTracker, int smoothness) {
         super();
         this.smoothness = smoothness;
