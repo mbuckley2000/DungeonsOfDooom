@@ -9,7 +9,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by matt on 21/03/2016.
+ * A subclass of JPanel that draws a given ClientMap.
+ * Requires a PlayerPositionTracker
  */
 public class MapPanel extends JPanel {
     private final int targetFramerate = 60;
@@ -29,7 +30,7 @@ public class MapPanel extends JPanel {
         this.smoothness = smoothness;
         scale = 1.0;//DPI scaling
         double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-        if (screenWidth > 1600) {
+        if (screenWidth > 2000) {
             scale = screenWidth / 1600;
         }
         this.map = map;
