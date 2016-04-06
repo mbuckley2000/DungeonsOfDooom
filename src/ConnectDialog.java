@@ -7,7 +7,10 @@ import java.awt.event.KeyListener;
 import java.net.Socket;
 
 /**
- * Created by matt on 23/03/2016.
+ * GUI dialog for entering server information and connecting to server
+ *
+ * @author mb2070
+ * @since 23/03/2016
  */
 public class ConnectDialog extends JFrame {
     private JTextField addressEntry;
@@ -133,14 +136,23 @@ public class ConnectDialog extends JFrame {
         return connected;
     }
 
+    /**
+     * @return The connection socket
+     */
     public Socket getSocket() {
         return socket;
     }
 
+    /**
+     * @return The player's chosen name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * @return True if bot was selected
+     */
     public boolean getBotMode() {
         return botCheckBox.isSelected();
     }
@@ -157,6 +169,9 @@ public class ConnectDialog extends JFrame {
         return name.length() >= 3 && name.length() <= 10;
     }
 
+    /**
+     * Used to connect the socket
+     */
     private class ConnectThread implements Runnable {
         public void run() {
             while (!connected) {
@@ -196,6 +211,9 @@ public class ConnectDialog extends JFrame {
         }
     }
 
+    /**
+     * Listens for enter keypress
+     */
     private class SubmitOnEnter implements KeyListener {
         @Override
         public void keyTyped(KeyEvent e) {

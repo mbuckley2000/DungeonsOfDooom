@@ -6,7 +6,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 /**
- * Created by matt on 22/03/2016.
+ * Component of the GUI that allows users to send and receive chat, as well as messages from the server
+ * @author mb2070
+ * @since 25/03/2016
  */
 public class ChatPanel extends JPanel {
     private JTextField messageEntry;
@@ -70,10 +72,17 @@ public class ChatPanel extends JPanel {
         });
     }
 
+    /**
+     * @return True if a message is ready to be sent
+     */
     public boolean hasMessage() {
         return sendButtonPressed && !messageEntry.getText().isEmpty();
     }
 
+    /**
+     *
+     * @return The message to be sent
+     */
     public String getMessage() {
         sendButtonPressed = false;
         String message = messageEntry.getText();
@@ -81,6 +90,10 @@ public class ChatPanel extends JPanel {
         return message;
     }
 
+    /**
+     * Prints a string to the output area
+     * @param string String to be printed
+     */
     public void println(String string) {
         messageListModel.addElement(string);
         receivePanel.revalidate();

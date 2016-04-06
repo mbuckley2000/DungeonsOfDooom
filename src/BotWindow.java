@@ -1,7 +1,9 @@
 import javax.swing.*;
 
 /**
- * Created by matt on 28/03/16.
+ * A simple window that displays the graphical map and the bot's progress
+ * @author mb2070
+ * @since 21/03/2016
  */
 public class BotWindow extends JFrame {
     public BotWindow(Bot bot) {

@@ -72,6 +72,13 @@ public class MapPanel extends JPanel {
         paintComponent(g);
     }
 
+    /**
+     * Draws the map
+     * Iterates through all onscreen tiles and displays their relevant image
+     * Darkens tiles outside of the look window
+     * Movement of the player is smoothed
+     * @param g
+     */
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
@@ -98,9 +105,9 @@ public class MapPanel extends JPanel {
                 if (screenX >= -tileSize && screenX < width && screenY >= -tileSize && screenY < height) {
                     Composite composite;
                     if (distFromLocalPlayer > (map.getLookSize() / 2)) { //If they are outside the lookwindow
-                        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)0.5);
+                        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 0.5);
                     } else {
-                        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)1);
+                        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 1);
                     }
                     g2.setComposite(composite);
                     if (knownMap[y][x] == '.') {
@@ -124,7 +131,7 @@ public class MapPanel extends JPanel {
         }
 
         //Draw player
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)1));
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 1));
 
         g2.drawImage(playerSpriteSheet, (width - tileSize) / 2, (height - tileSize) / 2, (width + tileSize) / 2, (height + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
 

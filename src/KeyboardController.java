@@ -2,7 +2,10 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 
 /**
- * Created by matt on 23/03/2016.
+ * Keyboard controller for the game.
+ * Arrow keys move, spacebar picks up, escape exits
+ * @since 23/03/2016
+ * @author mb2070
  */
 public class KeyboardController extends Controller {
     private Stopwatch stopwatch;

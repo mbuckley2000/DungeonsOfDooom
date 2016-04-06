@@ -1,5 +1,7 @@
 /**
- * Created by matt on 23/03/2016.
+ * Controller interface for the player
+ * @author mb2070
+ * @since 23/03/2016
  */
 public abstract class Controller {
     protected boolean quitPressed;
@@ -9,6 +11,10 @@ public abstract class Controller {
     private boolean lookPressed;
     private boolean helloPressed;
 
+    /**
+     *
+     * @return True if a new action is available
+     */
     public boolean hasAction() {
         return quitPressed || pickupPressed || lookPressed || helloPressed || movePressed;
     }

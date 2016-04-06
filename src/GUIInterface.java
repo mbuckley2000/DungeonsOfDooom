@@ -2,7 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by matt on 21/03/2016.
+ * GUI interface for the game
+ * @since 21/02/2016
+ * @author mb2070
  */
 public class GUIInterface extends JFrame implements PlayerInterface {
     private ClientMap map;
@@ -66,11 +68,19 @@ public class GUIInterface extends JFrame implements PlayerInterface {
         setVisible(true);
     }
 
+    /**
+     *
+     * @return True if all GUI operations are done
+     */
     @Override
     public boolean isFinished() {
         return finished;
     }
 
+
+    /*
+    ///Messages from the server are given to the interface here
+     */
     @Override
     public void giveWin() {
         dispose();
@@ -99,9 +109,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
         finished = true;
     }
 
-    /*
-    ///Messages from the server are given to the interface here
-     */
     @Override
     public void giveLookResponse(char[][] response) {
         map.update(response, positionTracker.getPosition());
