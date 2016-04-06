@@ -94,7 +94,15 @@ public class MapPanel extends JPanel {
             for (int x = 0; x < knownMap[0].length; x++) {
                 int screenX = x * tileSize + screenOffsetX;
                 int screenY = y * tileSize + screenOffsetY;
+                double distFromLocalPlayer = Math.sqrt(Math.pow(y - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]), 2) + Math.pow(x - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]), 2));
                 if (screenX >= -tileSize && screenX < width && screenY >= -tileSize && screenY < height) {
+                    Composite composite;
+                    if (distFromLocalPlayer > (map.getLookSize() / 2)) { //If they are outside the lookwindow
+                        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)0.5);
+                    } else {
+                        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)1);
+                    }
+                    g2.setComposite(composite);
                     if (knownMap[y][x] == '.') {
                         g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
                     } else if (knownMap[y][x] == 'G') {
@@ -107,7 +115,6 @@ public class MapPanel extends JPanel {
                     //Drawing other players
                     if (knownMap[y][x] == 'P') {
                         g2.drawImage(tileSet, screenX, screenY, screenX + tileSize, screenY + tileSize, 0, 0, tileSize, tileSize, null);
-                        double distFromLocalPlayer = Math.sqrt(Math.pow(y - (positionTracker.getPosition()[0] + map.getOffset()[0] - map.getBounds()[0]), 2) + Math.pow(x - (positionTracker.getPosition()[1] + map.getOffset()[1] - map.getBounds()[1]), 2));
                         if (distFromLocalPlayer < map.getLookSize() / 2) { //If they are within the lookwindow
                             g2.drawImage(playerSpriteSheet, screenX, screenY, screenX + tileSize, screenY + tileSize, 7 * 32, 4 * 32, 7 * 32 + tileSize, 4 * 32 + tileSize, null);
                         }
@@ -117,6 +124,8 @@ public class MapPanel extends JPanel {
         }
 
         //Draw player
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)1));
+
         g2.drawImage(playerSpriteSheet, (width - tileSize) / 2, (height - tileSize) / 2, (width + tileSize) / 2, (height + tileSize) / 2, playerSpritePos[0], playerSpritePos[1], playerSpritePos[0] + tileSize, playerSpritePos[1] + tileSize, null);
 
         setVisible(true);

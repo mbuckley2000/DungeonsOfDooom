@@ -12,10 +12,14 @@ public class MessageDialog extends JFrame {
     public MessageDialog(String message) {
         super(message);
         setLayout(new FlowLayout());
-        add(new JLabel(message));
+        JLabel label = new JLabel(message);
+        label.setFont(new Font("Helvetica", NORMAL, 16));
+        add(label);
         JButton button = new JButton("OK");
         add(button);
 
+        setPreferredSize(new Dimension(300, 150));
+        setLocation(800, 500);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();
         setVisible(true);

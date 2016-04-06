@@ -38,8 +38,10 @@ public class GUIInterface extends JFrame implements PlayerInterface {
         getContentPane().setLayout(gameWindowLayout);
 
         //Setup instructions label
-        JLabel instructionsLabel = new JLabel("Keyboard Controls:    Move: Arrow Keys    Pickup: Space    Quit: Escape");
+        JLabel instructionsLabel = new JLabel("Use arrow keys to move. Spacebar to pickup gold        ");
+        instructionsLabel.setFont(new Font("Helvetica", NORMAL, 16));
         progressLabel = new JLabel("Gold left to win: ");
+        progressLabel.setFont(new Font("Helvetica", NORMAL, 16));
         JPanel labels = new JPanel(new FlowLayout());
         labels.add(instructionsLabel);
         labels.add(progressLabel);
@@ -108,20 +110,17 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
     @Override
     public void giveHelloResponse(int response) {
-        System.out.println("GUI: Received hello response: " + response);
         progressLabel.setText("Gold left to win: " + response);
         helloResponseReceived = true;
     }
 
     @Override
     public void givePickupResponse(boolean response) {
-        System.out.println("GUI: Received pickup response: " + response);
         pickupResponseReceived = true;
     }
 
     @Override
     public void giveMoveResponse(boolean response) {
-        System.out.println("GUI: Received move response: " + response);
         if (response) {
             positionTracker.step();
         }
@@ -131,7 +130,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
 
     @Override
     public void giveMessage(String message) {
-        System.out.println("GUI: Received message: " + message);
         chatPanel.println(message);
     }
 
@@ -141,8 +139,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
      */
     @Override
     public boolean hasNextCommand() {
-        if (controller.hasAction()) System.out.println("GOT CONTROLLER ACTION");
-        return controller.hasAction() || lookNeeded || helloNeeded;
+        return controller.hasAction() || lookNeeded || helloNeeded || chatPanel.hasMessage();
     }
 
     public String getNextCommand() {

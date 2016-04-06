@@ -69,7 +69,7 @@ public class RemoteClient implements Runnable, IGameLogic {
             while (connected && server.isGameRunning()) {
                 input = reader.readLine();
                 if (input != null) {
-                    String response = parseInput(input.toUpperCase());
+                    String response = parseInput(input);
                     if (response != null) {
                         writer.println(response);
                         if (!input.equals("LOOK")) {

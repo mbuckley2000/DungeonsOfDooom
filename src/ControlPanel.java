@@ -50,6 +50,7 @@ public class ControlPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 1;
         c.ipady = 25;
+        c.insets = new Insets(10, 20, 10, 20);
         c.fill = GridBagConstraints.HORIZONTAL;
         add(pickupButton, c);
         c.gridx = 0;
@@ -60,7 +61,6 @@ public class ControlPanel extends JPanel {
         c.gridy = 3;
         c.ipady = 50;
         c.fill = GridBagConstraints.NONE;
-        c.insets = new Insets(5, 5, 5, 5);
         add(dPadPanel, c);
 
         setVisible(true);
