@@ -4,7 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by matt on 22/03/2016.
+ * Allows the suer to set their name midgame
+ *
+ * @author mb2070
+ * @since 22/3/2016
+ * @deprecated 01/04/2016
  */
 public class NamePanel extends JPanel {
     private JTextField nameTextField;

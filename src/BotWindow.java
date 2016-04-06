@@ -2,6 +2,7 @@ import javax.swing.*;
 
 /**
  * A simple window that displays the graphical map and the bot's progress
+ *
  * @author mb2070
  * @since 21/03/2016
  */

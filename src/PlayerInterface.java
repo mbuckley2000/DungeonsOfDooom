@@ -1,7 +1,12 @@
 /**
- * Created by matt on 22/03/2016.
+ * Interface for the player. Could be GUI, textual, or bot
+ *
+ * @author mb2070
+ * @since 22/03/2016
  */
 public interface PlayerInterface {
+
+    //These are all used to give the interface responses from the server
     //Output
     void giveLookResponse(char[][] response);
 
@@ -17,6 +22,7 @@ public interface PlayerInterface {
 
     void giveLose();
 
+    //These get the next command from the interface
     //Input
     boolean hasNextCommand();
 

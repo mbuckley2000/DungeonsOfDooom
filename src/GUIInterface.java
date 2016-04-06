@@ -3,8 +3,9 @@ import java.awt.*;
 
 /**
  * GUI interface for the game
- * @since 21/02/2016
+ *
  * @author mb2070
+ * @since 21/02/2016
  */
 public class GUIInterface extends JFrame implements PlayerInterface {
     private ClientMap map;
@@ -69,7 +70,6 @@ public class GUIInterface extends JFrame implements PlayerInterface {
     }
 
     /**
-     *
      * @return True if all GUI operations are done
      */
     @Override

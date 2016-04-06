@@ -77,6 +77,7 @@ public class MapPanel extends JPanel {
      * Iterates through all onscreen tiles and displays their relevant image
      * Darkens tiles outside of the look window
      * Movement of the player is smoothed
+     *
      * @param g
      */
     @Override

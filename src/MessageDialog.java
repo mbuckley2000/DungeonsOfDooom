@@ -4,7 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by matt on 04/04/16.
+ * Displays a message to the player
+ *
+ * @author mb2070
+ * @since 04/04/2016
  */
 public class MessageDialog extends JFrame {
     private boolean done;

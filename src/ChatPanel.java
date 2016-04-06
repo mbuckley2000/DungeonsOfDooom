@@ -7,6 +7,7 @@ import java.awt.event.KeyListener;
 
 /**
  * Component of the GUI that allows users to send and receive chat, as well as messages from the server
+ *
  * @author mb2070
  * @since 25/03/2016
  */
@@ -80,7 +81,6 @@ public class ChatPanel extends JPanel {
     }
 
     /**
-     *
      * @return The message to be sent
      */
     public String getMessage() {
@@ -92,6 +92,7 @@ public class ChatPanel extends JPanel {
 
     /**
      * Prints a string to the output area
+     *
      * @param string String to be printed
      */
     public void println(String string) {

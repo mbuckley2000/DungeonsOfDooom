@@ -1,9 +1,15 @@
 /**
- * Created by matt on 23/03/2016.
+ * Stopwatch timer class used for Vsync
+ *
+ * @author mb2070
+ * @since 23/03/2016
  */
 public class Stopwatch {
     private long startTime;
 
+    /**
+     * Constructs and starts the stopwatch
+     */
     public Stopwatch() {
         startTime = System.nanoTime();
     }

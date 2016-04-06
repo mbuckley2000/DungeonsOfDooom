@@ -2,7 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by matt on 28/03/16.
+ * Diplays player progress towards winning
+ * Deprecated.
+ *
+ * @author mb2070
+ * @since 28/03/2016
+ * @deprecated 01/04/2016
  */
 public class ProgressPanel extends JPanel {
     private int goldToWin;
