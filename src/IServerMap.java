@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -12,7 +11,7 @@ public interface IServerMap {
      * @return The map as a char array
      * @throws IOException Exception reading from BufferedReader
      */
-    void loadMap(File mapFile) throws IOException;
+    void loadMap(String filename) throws IOException;
 
     /**
      * finds a random position for the player in the map.
