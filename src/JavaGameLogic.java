@@ -52,7 +52,7 @@ public class JavaGameLogic implements IGameLogic {
                 return ("MF");
         }
 
-        if (server.getServerMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
+        if (server.getServerMap().getTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
             playerPosition = newPosition;
             return "MS";
         } else {
@@ -69,7 +69,7 @@ public class JavaGameLogic implements IGameLogic {
      */
     @Override
     public String pickup() {
-        if (server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
+        if (server.getServerMap().getTile(playerPosition[0], playerPosition[1]) == 'G') {
             collectedGold++;
             server.getServerMap().replaceTile(playerPosition[0], playerPosition[1], '.');
             return "PS" + collectedGold;
@@ -110,7 +110,7 @@ public class JavaGameLogic implements IGameLogic {
      * @return True if all conditions are met, false otherwise
      */
     public boolean checkWin() {
-        return collectedGold >= server.getServerMap().getWin() && server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
+        return collectedGold >= server.getServerMap().getWin() && server.getServerMap().getTile(playerPosition[0], playerPosition[1]) == 'E';
     }
 
     //Misc

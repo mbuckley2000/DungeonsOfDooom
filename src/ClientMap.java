@@ -19,7 +19,7 @@ public class ClientMap {
     private int lookSize;
 
     /**
-     * Constructs the AI ServerMap
+     * Constructs the AI JavaServerMap
      * Initialises the bounds to the middle of the map
      */
     public ClientMap() {

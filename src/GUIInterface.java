@@ -59,7 +59,7 @@ public class GUIInterface extends JFrame implements PlayerInterface {
         chatPanel = new ChatPanel();
         getContentPane().add(chatPanel, BorderLayout.PAGE_END);
 
-        //Setup ServerMap View
+        //Setup JavaServerMap View
         mapPanel = new MapPanel(map, positionTracker, 4);
         getContentPane().add(mapPanel, BorderLayout.CENTER);
 

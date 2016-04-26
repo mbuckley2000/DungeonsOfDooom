@@ -26,7 +26,7 @@ public class Server {
     private static boolean guiDisabled;
     private Set<RemoteClient> remoteClients;
     private boolean gameRunning;
-    private ServerMap serverMap;
+    private IServerMap serverMap;
     private ServerSocket serverSocket;
 
     /**
@@ -44,7 +44,7 @@ public class Server {
 
             //Setup
             //Load serverMap
-            serverMap = new ServerMap();
+            serverMap = new CServerMap();
 
             if (!guiDisabled) {
                 JFileChooser chooser = new JFileChooser();
@@ -60,7 +60,7 @@ public class Server {
                 }
             }
 
-            serverMap.readMap(mapFile);
+            serverMap.loadMap(mapFile);
 
             new Thread(new StalemateCheckingThread()).start();
         } catch (IOException e) {
@@ -147,7 +147,7 @@ public class Server {
      *
      * @return The game serverMap
      */
-    public ServerMap getServerMap() {
+    public IServerMap getServerMap() {
         return serverMap;
     }
 
@@ -228,7 +228,7 @@ public class Server {
         boolean clientConnected = false;
         for (RemoteClient client : remoteClients) {
             if (client.isConnected()) {
-                if ((client.getGameLogic().getGoldNeeded() <= serverMap.goldLeft()) || client.getGameLogic().getGoldNeeded() == 0) {
+                if ((client.getGameLogic().getGoldNeeded() <= serverMap.countRemainingGold()) || client.getGameLogic().getGoldNeeded() == 0) {
                     hit = true;
                 }
                 clientConnected = true;

@@ -7,7 +7,7 @@ import java.util.Random;
  * Stores level information
  * Can be loaded from txt files
  */
-public class ServerMap {
+public class JavaServerMap implements IServerMap {
 
     private char[][] map;
     private String mapName;
@@ -16,7 +16,7 @@ public class ServerMap {
     /**
      * Constructor
      */
-    public ServerMap() {
+    public JavaServerMap() {
         map = null;
         mapName = "";
         totalGoldOnMap = -1;
@@ -29,7 +29,7 @@ public class ServerMap {
      *
      * @param mapFile A File pointed to a correctly formatted map file
      */
-    public void readMap(File mapFile) {
+    public void loadMap(File mapFile) {
         // a buffered reader for the map
         BufferedReader reader = null;
 
@@ -45,7 +45,7 @@ public class ServerMap {
         }
 
         try {
-            map = loadMap(reader);
+            map = readMap(reader);
         } catch (IOException e) {
             System.err.println("map file invalid or wrongly formatted");
             System.exit(-1);
@@ -68,7 +68,7 @@ public class ServerMap {
      * @return The map as a char array
      * @throws IOException Exception reading from BufferedReader
      */
-    private char[][] loadMap(BufferedReader reader) throws IOException {
+    private char[][] readMap(BufferedReader reader) throws IOException {
 
         boolean error = false;
         ArrayList<char[]> tempMap = new ArrayList<>();
@@ -171,12 +171,12 @@ public class ServerMap {
             pos[0] = rand.nextInt(getMapHeight() - 1);
             pos[1] = rand.nextInt(getMapWidth() - 1);
             int counter = 1;
-            while (lookAtTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < getMapHeight() * getMapWidth()) {
+            while (getTile(pos[0], pos[1]) == '#' && !server.playerOnTile(pos[0], pos[1]) && counter < getMapHeight() * getMapWidth()) {
                 pos[1] = (int) (counter * Math.cos(counter));
                 pos[0] = (int) (counter * Math.sin(counter));
                 counter++;
             }
-            if (lookAtTile(pos[0], pos[1]) == '#') {
+            if (getTile(pos[0], pos[1]) == '#') {
                 return null;
             } else {
                 return pos;
@@ -193,7 +193,7 @@ public class ServerMap {
      * @param tile the char character of the tile to replace
      * @return The old character which was replaced will be returned.
      */
-    protected char replaceTile(int y, int x, char tile) {
+    public char replaceTile(int y, int x, char tile) {
         synchronized (map) {
             char output = map[y][x];
             map[y][x] = tile;
@@ -208,7 +208,7 @@ public class ServerMap {
      * @param x the horizontal position of the tile to look at
      * @return The character at the tile is returned
      */
-    protected char lookAtTile(int y, int x) {
+    public char getTile(int y, int x) {
         if (y < 0 || x < 0 || y >= map.length || x >= map[0].length)
             return '#';
 
@@ -224,7 +224,7 @@ public class ServerMap {
      * @param lookSize The lookSize defining the area which will be returned.
      * @return Returns a view window as a 2D char array of tiles
      */
-    protected char[][] getLookWindow(int y, int x, int lookSize) {
+    public char[][] getLookWindow(int y, int x, int lookSize) {
         char[][] reply = new char[lookSize][lookSize];
         for (int i = 0; i < lookSize; i++) {
             for (int j = 0; j < lookSize; j++) {
@@ -267,7 +267,7 @@ public class ServerMap {
     /**
      * @return The total gold left on the map
      */
-    public int goldLeft() {
+    public int countRemainingGold() {
         int goldCount = 0;
         for (char[] y : map) {
             for (char x : y) {
