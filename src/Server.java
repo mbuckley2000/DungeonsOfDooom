@@ -201,7 +201,7 @@ public class Server {
         boolean hit = false;
         for (RemoteClient connection : remoteClients) {
             if (connection != null) {
-                if (connection.isConnected() && connection.getPlayerPosition()[0] == y && connection.getPlayerPosition()[1] == x) {
+                if (connection.isConnected() && connection.getGameLogic().getPlayerPosition()[0] == y && connection.getGameLogic().getPlayerPosition()[1] == x) {
                     hit = true;
                 }
             }
@@ -228,7 +228,7 @@ public class Server {
         boolean clientConnected = false;
         for (RemoteClient client : remoteClients) {
             if (client.isConnected()) {
-                if ((client.getGoldNeeded() <= serverMap.goldLeft()) || client.getGoldNeeded() == 0) {
+                if ((client.getGameLogic().getGoldNeeded() <= serverMap.goldLeft()) || client.getGameLogic().getGoldNeeded() == 0) {
                     hit = true;
                 }
                 clientConnected = true;

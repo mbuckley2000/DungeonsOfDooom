@@ -13,18 +13,15 @@ import java.net.Socket;
  * @author mb2070
  * @since 07/03/2016
  */
-public class RemoteClient implements Runnable, IGameLogic {
+public class RemoteClient implements Runnable {
     private Socket clientSocket;
     private boolean connected;
-    private int[] playerPosition;
-    private int collectedGold;
     private InetAddress address;
     private PrintWriter writer;
     private BufferedReader reader;
     private Server server;
-    private String lastLookWindow;
     private String name;
-    private int lookSize;
+    private IGameLogic gameLogic;
 
     /**
      * Constructs the RemoteClient given the Socket and Server it is connected to
@@ -34,16 +31,15 @@ public class RemoteClient implements Runnable, IGameLogic {
      */
     RemoteClient(Server server, Socket clientSocket) {
         this.server = server;
+        gameLogic = new JavaGameLogic(server);
         this.clientSocket = clientSocket;
         connected = true;
-        collectedGold = 0;
-        lookSize = 5;
         int[] freePos = server.getServerMap().getFreeTile(server);
         if (freePos == null) {
             System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
             closeConnection();
         } else {
-            playerPosition = freePos;
+            gameLogic.setPlayerPosition(freePos);
         }
         address = clientSocket.getInetAddress();
     }
@@ -67,6 +63,14 @@ public class RemoteClient implements Runnable, IGameLogic {
             sendLine("Welcome to the dungeon! Mwuahaha");
 
             while (connected && server.isGameRunning()) {
+                //Check for win
+                if (gameLogic.checkWin()) {
+                    server.broadcastMessage("LOSE", this);
+                    System.out.println(address + "\t\t\t\t\tWIN");
+                    writer.println("WIN");
+                    server.shutDown();
+                }
+
                 input = reader.readLine();
                 if (input != null) {
                     String response = parseInput(input);
@@ -87,102 +91,6 @@ public class RemoteClient implements Runnable, IGameLogic {
         }
     }
 
-
-    //GameLogic (Command processing)
-
-    /**
-     * Processes the HELLO command
-     *
-     * @return String to be sent back to the Client (How much gold left they need to win)
-     */
-    public String hello() {
-        return "H" + getGoldNeeded();
-    }
-
-    /**
-     * Processes the MOVE command
-     * If the desired tile to move to is walkable and no player is on it, the move is allowed, otherwise it is denied
-     * Synchronised to prevent multiple players on the same tile
-     *
-     * @param direction The direction the client wants to move in
-     * @return The response to be sent back to the client: SUCCESS or FAIL, depending on if the move was allowed.
-     */
-    public synchronized String move(char direction) {
-        int[] newPosition = playerPosition.clone();
-        switch (direction) {
-            case 'N':
-                newPosition[0] -= 1;
-                break;
-            case 'E':
-                newPosition[1] += 1;
-                break;
-            case 'S':
-                newPosition[0] += 1;
-                break;
-            case 'W':
-                newPosition[1] -= 1;
-                break;
-            default:
-                return ("MF");
-        }
-
-        if (server.getServerMap().lookAtTile(newPosition[0], newPosition[1]) != '#' && !server.playerOnTile(newPosition[0], newPosition[1])) {
-            playerPosition = newPosition;
-            if (checkWin()) {
-                server.broadcastMessage("LOSE", this);
-                System.out.println(address + "\t\t\t\t\tWIN");
-                writer.println("WIN");
-                server.shutDown();
-                return null;
-            }
-            return "MS";
-        } else {
-            return "MF";
-        }
-    }
-
-    /**
-     * Processes the PICKUP command
-     * If gold is on the player's tile, the player's gold count goes up and the gold is replaced with an empty tile.
-     * No need for this to be synchronised, because movement is synchronised; two players cannot be on the same tile to pick up the same gold.
-     *
-     * @return The response to be sent back to the player
-     */
-    public String pickup() {
-        if (server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'G') {
-            collectedGold++;
-            server.getServerMap().replaceTile(playerPosition[0], playerPosition[1], '.');
-            return "PS" + collectedGold;
-        }
-
-        return "PF";
-    }
-
-    /**
-     * Processes the LOOK command
-     *
-     * @return The response to be sent back to the Client: A look window into the map, based on their current position
-     */
-    public String look() {
-        String output = "L" + lookSize;
-        char[][] lookReply = server.getServerMap().getLookWindow(playerPosition[0], playerPosition[1], lookSize);
-
-        for (int i = 0; i < lookSize; i++) {
-            for (int j = 0; j < lookSize; j++) {
-                if (server.playerOnTile(playerPosition[0] - (lookSize / 2) + i, playerPosition[1] - (lookSize / 2) + j)) {
-                    output += 'P';
-                } else {
-                    output += lookReply[j][i];
-                }
-            }
-            if (i != lookSize - 1) {
-                output += "\nL" + lookSize;
-            }
-        }
-        lastLookWindow = output;
-        return output;
-    }
-
     /**
      * Parses the input from the Client
      * Checks for valid commands and then calls the relevant method to get the response
@@ -195,18 +103,18 @@ public class RemoteClient implements Runnable, IGameLogic {
         String answer = null;
         switch (command[0].toUpperCase()) {
             case "HELLO":
-                answer = hello();
+                answer = gameLogic.hello();
                 break;
             case "MOVE":
                 if (command.length == 2) {
-                    answer = move(command[1].toUpperCase().charAt(0));
+                    answer = gameLogic.move(command[1].toUpperCase().charAt(0));
                 }
                 break;
             case "PICKUP":
-                answer = pickup();
+                answer = gameLogic.pickup();
                 break;
             case "LOOK":
-                answer = look();//.replaceAll(".(?!$)", "$0  ");  <-- This adds spacing to the window
+                answer = gameLogic.look();//.replaceAll(".(?!$)", "$0  ");  <-- This adds spacing to the window
                 break;
             case "NAME":
                 name = command[1];
@@ -224,31 +132,6 @@ public class RemoteClient implements Runnable, IGameLogic {
     public void sendLine(String message) {
         System.out.println(address + "\t\t\t\t\t" + message);
         writer.println(message);
-    }
-
-    //Misc
-
-    /**
-     * checks if the player collected all GOLD and is on the exit tile
-     *
-     * @return True if all conditions are met, false otherwise
-     */
-    private boolean checkWin() {
-        return collectedGold >= server.getServerMap().getWin() && server.getServerMap().lookAtTile(playerPosition[0], playerPosition[1]) == 'E';
-    }
-
-    /**
-     * @return The player position as an int array
-     */
-    public int[] getPlayerPosition() {
-        return playerPosition;
-    }
-
-    /**
-     * @return The amount of gold extra that the client needs to win
-     */
-    public int getGoldNeeded() {
-        return (server.getServerMap().getWin() - collectedGold);
     }
 
 
@@ -277,19 +160,23 @@ public class RemoteClient implements Runnable, IGameLogic {
      */
     public void reconnect(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        if (server.playerOnTile(playerPosition[0], playerPosition[1])) {
+        if (server.playerOnTile(gameLogic.getPlayerPosition()[0], gameLogic.getPlayerPosition()[1])) {
             //There is a player on out tile! Re-initialise player position
             int[] freePos = server.getServerMap().getFreeTile(server);
             if (freePos == null) {
                 System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");
                 closeConnection();
             } else {
-                playerPosition = freePos;
+                gameLogic.setPlayerPosition(freePos);
             }
         }
-        if (playerPosition != null) {
+        if (gameLogic.getPlayerPosition() != null) {
             connected = true;
         }
+    }
+
+    public IGameLogic getGameLogic() {
+        return gameLogic;
     }
 
     /**
@@ -319,8 +206,8 @@ public class RemoteClient implements Runnable, IGameLogic {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                String oldLookWindow = lastLookWindow;
-                String newLookWindow = look();
+                String oldLookWindow = gameLogic.getLastLookWindow();
+                String newLookWindow = gameLogic.look();
                 if (oldLookWindow != null) {
                     if (!oldLookWindow.equals(newLookWindow)) {
                         System.out.println("Sending lookwindow");

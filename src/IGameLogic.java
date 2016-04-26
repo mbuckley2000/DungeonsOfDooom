@@ -9,4 +9,14 @@ public interface IGameLogic {
     String pickup();
 
     String look();
+
+    int[] getPlayerPosition();
+
+    void setPlayerPosition(int[] playerPosition);
+
+    String getLastLookWindow();
+
+    int getGoldNeeded();
+
+    boolean checkWin();
 }
