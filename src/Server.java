@@ -44,7 +44,7 @@ public class Server {
 
             //Setup
             //Load serverMap
-            serverMap = new JavaServerMap();
+            serverMap = new CServerMap();
 
             if (!guiDisabled) {
                 JFileChooser chooser = new JFileChooser();
@@ -56,11 +56,10 @@ public class Server {
                     mapFile = chooser.getSelectedFile();
                 } else {
                     System.out.println("Using default map");
-
                 }
             }
 
-            serverMap.loadMap(mapFile.getPath());
+            serverMap.loadMap(mapFile.getAbsolutePath());
 
             new Thread(new StalemateCheckingThread()).start();
         } catch (IOException e) {
