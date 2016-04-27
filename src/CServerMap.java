@@ -5,6 +5,10 @@ import java.io.IOException;
  * Created by Matt Buckley on 26/04/16.
  */
 public class CServerMap implements IServerMap {
+    static {
+        System.load(System.getProperty("user.dir") + "/jni/libCDoD.so");
+    }
+
     @Override
     public native void loadMap(File mapFile) throws IOException;
 
