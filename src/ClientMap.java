@@ -101,10 +101,12 @@ public class ClientMap {
      * @param lookWindow Given getLookWindow
      */
     private void replace(int posY, int posX, char[][] lookWindow) {
-        for (int x = 0; x < lookWindow.length; x++) {
-            for (int y = 0; y < lookWindow.length; y++) {
-                if (lookWindow[y][x] != 'X' && !(x == lookWindow.length / 2 && y == lookWindow.length / 2)) {
-                    setTile(posY + y, posX + x, lookWindow[y][x]);
+        if (lookWindow[0].length == lookWindow[lookWindow.length - 1].length) {
+            for (int x = 0; x < lookWindow.length; x++) {
+                for (int y = 0; y < lookWindow.length; y++) {
+                    if (lookWindow[y][x] != 'X' && !(x == lookWindow.length / 2 && y == lookWindow.length / 2)) {
+                        setTile(posY + y, posX + x, lookWindow[y][x]);
+                    }
                 }
             }
         }

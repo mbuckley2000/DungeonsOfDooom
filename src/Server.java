@@ -73,7 +73,7 @@ public class Server {
      */
     public static void main(String args[]) {
         int port = 40004;
-        File mapFile = new File("maps/default_map.txt");
+        File mapFile = new File("maps/example_map.txt");
 
         for (String s : args) {
             try {

@@ -52,7 +52,7 @@ public class RemoteClient implements Runnable {
      * Closes everything down cleanly when the loop is done
      */
     public void run() {
-        new Thread(new ViewUpdaterThread()).start();
+        //new Thread(new ViewUpdaterThread()).start();
 
         try {
             reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
