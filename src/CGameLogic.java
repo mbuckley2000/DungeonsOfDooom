@@ -3,7 +3,7 @@
  */
 public class CGameLogic implements IGameLogic {
     static {
-        System.load(System.getProperty("user.dir") + "jni/libCDoD.so");
+        System.load(System.getProperty("user.dir") + "/jni/libCDoD.so");
     }
 
     @Override

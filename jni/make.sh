@@ -1,9 +1,11 @@
 #!/bin/bash
+echo "Copying c from clion project"
+rm CServerMap.c
+cp /home/matt/ClionProjects/cDoD/src/CServerMap.c CServerMap.c
+
 echo "Deleting old things"
 rm CGameLogic.h
 rm CServerMap.h
-rm CServerMap.so
-rm CServerMap.o
 rm libCDoD.so
 
 echo "Making headers"
@@ -23,5 +25,9 @@ gcc -fPIC -shared -I"/usr/java/jdk1.7.0_79/include" -I"/usr/java/jdk1.7.0_79/inc
 echo "Cleaning it all up"
 rm CGameLogic.h
 rm CServerMap.h
-rm CServerMap.so
-rm CServerMap.o
+rm CServerMap.c
+
+echo "Running"
+cd ..
+java -cp out/production/DungeonsOfDooom PlayGame&
+java -cp out/production/DungeonsOfDooom Server nogui
