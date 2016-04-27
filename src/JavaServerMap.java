@@ -29,12 +29,12 @@ public class JavaServerMap implements IServerMap {
      *
      * @param mapFile A File pointed to a correctly formatted map file
      */
-    public void loadMap(File mapFile) {
+    public void loadMap(String filename) {
         // a buffered reader for the map
         BufferedReader reader = null;
 
         try {
-            reader = new BufferedReader(new FileReader(mapFile));
+            reader = new BufferedReader(new FileReader(new File(filename)));
         } catch (FileNotFoundException e) {
             try {
                 reader = new BufferedReader(new FileReader(new File("maps", "example_map.txt")));
