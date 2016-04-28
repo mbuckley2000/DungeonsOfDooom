@@ -31,7 +31,7 @@ public class RemoteClient implements Runnable {
      */
     RemoteClient(Server server, Socket clientSocket) {
         this.server = server;
-        gameLogic = new JavaGameLogic(server);
+        gameLogic = new CGameLogic();
         this.clientSocket = clientSocket;
         connected = true;
         int[] freePos = server.getServerMap().getFreeTile(server);
@@ -52,7 +52,7 @@ public class RemoteClient implements Runnable {
      * Closes everything down cleanly when the loop is done
      */
     public void run() {
-        //new Thread(new ViewUpdaterThread()).start();
+        new Thread(new ViewUpdaterThread()).start();
 
         try {
             reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -107,9 +107,9 @@ public class RemoteClient implements Runnable {
                 break;
             case "MOVE":
                 if (command.length == 2) {
-                    server.loadGame("tempMap.txt");
+                    server.loadGame("out/tempMap.txt");
                     answer = gameLogic.move(command[1].toUpperCase().charAt(0));
-                    server.saveGame("tempMap.txt");
+                    server.saveGame("out/tempMap.txt");
                 }
                 break;
             case "PICKUP":
@@ -163,7 +163,7 @@ public class RemoteClient implements Runnable {
     public void reconnect(Socket clientSocket) {
         this.clientSocket = clientSocket;
         if (server.playerOnTile(gameLogic.getPlayerPosition()[0], gameLogic.getPlayerPosition()[1])) {
-            //There is a player on out tile! Re-initialise player position
+            //There is a player on our tile! Re-initialise player position
             int[] freePos = server.getServerMap().getFreeTile(server);
             if (freePos == null) {
                 System.err.println(clientSocket.getInetAddress() + "\t\tUnable to find empty tile for player. Closing connection");

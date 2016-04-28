@@ -101,7 +101,6 @@ public class JavaGameLogic implements IGameLogic {
             }
         }
         lastLookWindow = output;
-        System.out.println(output);
         return output;
     }
 

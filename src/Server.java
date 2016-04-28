@@ -248,7 +248,7 @@ public class Server {
 
     public void saveGame(String filename) {
         try {
-            serverMap.saveMap(filename);
+            serverMap.saveMap(new File(filename).getAbsolutePath());
             //File gameFile = new File(filename);
         } catch (IOException e) {
             e.printStackTrace();
@@ -257,7 +257,7 @@ public class Server {
 
     public void loadGame(String filename) {
         try {
-            serverMap.loadMap(filename);
+            serverMap.loadMap(new File(filename).getAbsolutePath());
             //File gameFile = new File(filename);
         } catch (IOException e) {
             e.printStackTrace();
