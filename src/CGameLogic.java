@@ -2,8 +2,16 @@
  * Created by Matt Buckley on 26/04/16.
  */
 public class CGameLogic implements IGameLogic {
+    private static int count = 0;
+
     static {
         System.load(System.getProperty("user.dir") + "/jni/libCDoD.so");
+    }
+
+    private int id;
+
+    public CGameLogic() {
+        id = count++;
     }
 
     @Override

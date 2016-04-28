@@ -246,6 +246,24 @@ public class Server {
         }
     }
 
+    public void saveGame(String filename) {
+        try {
+            serverMap.saveMap(filename);
+            //File gameFile = new File(filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadGame(String filename) {
+        try {
+            serverMap.loadMap(filename);
+            //File gameFile = new File(filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private class StalemateCheckingThread implements Runnable {
         @Override
         public void run() {

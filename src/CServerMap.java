@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -11,6 +10,9 @@ public class CServerMap implements IServerMap {
 
     @Override
     public native void loadMap(String filename) throws IOException;
+
+    @Override
+    public native void saveMap(String filename) throws IOException;
 
     @Override
     public native int[] getFreeTile(Server server);

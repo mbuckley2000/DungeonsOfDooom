@@ -22,6 +22,10 @@ public class JavaServerMap implements IServerMap {
         totalGoldOnMap = -1;
     }
 
+    @Override
+    public void saveMap(String filename) throws IOException {
+    }
+
     /**
      * Reads a map from a given file with the format:
      * name <mapName>

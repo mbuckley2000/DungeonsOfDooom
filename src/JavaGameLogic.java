@@ -88,7 +88,7 @@ public class JavaGameLogic implements IGameLogic {
         String output = "L" + lookSize;
         char[][] lookReply = server.getServerMap().getLookWindow(playerPosition[0], playerPosition[1], lookSize);
 
-        for (int i = 0; i < lookSize; i++) {
+        for (int i = 0; i < lookSize; i++) { //TODO: change max back to lookSize
             for (int j = 0; j < lookSize; j++) {
                 if (server.playerOnTile(playerPosition[0] - (lookSize / 2) + i, playerPosition[1] - (lookSize / 2) + j)) {
                     output += 'P';
@@ -101,6 +101,7 @@ public class JavaGameLogic implements IGameLogic {
             }
         }
         lastLookWindow = output;
+        System.out.println(output);
         return output;
     }
 

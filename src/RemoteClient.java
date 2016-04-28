@@ -31,7 +31,7 @@ public class RemoteClient implements Runnable {
      */
     RemoteClient(Server server, Socket clientSocket) {
         this.server = server;
-        gameLogic = new CGameLogic();
+        gameLogic = new JavaGameLogic(server);
         this.clientSocket = clientSocket;
         connected = true;
         int[] freePos = server.getServerMap().getFreeTile(server);
@@ -107,7 +107,9 @@ public class RemoteClient implements Runnable {
                 break;
             case "MOVE":
                 if (command.length == 2) {
+                    server.loadGame("tempMap.txt");
                     answer = gameLogic.move(command[1].toUpperCase().charAt(0));
+                    server.saveGame("tempMap.txt");
                 }
                 break;
             case "PICKUP":

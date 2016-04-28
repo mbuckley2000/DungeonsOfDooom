@@ -13,6 +13,8 @@ public interface IServerMap {
      */
     void loadMap(String filename) throws IOException;
 
+    void saveMap(String filename) throws IOException;
+
     /**
      * finds a random position for the player in the map.
      *
