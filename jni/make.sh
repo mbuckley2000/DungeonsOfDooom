@@ -25,7 +25,7 @@ javah -cp ../src CServerMap
 #gcc -I"/usr/java/jdk1.7.0_79/include" -I"/usr/java/jdk1.7.0_79/include/linux" -o libCDoD.so -shared -Wl,-soname,CServerMap.o -static -lc -lm
 
 echo "Compiling the library"
-gcc -fPIC -shared -I"/usr/java/jdk1.7.0_79/include" -I"/usr/java/jdk1.7.0_79/include/linux" -o libCDoD.so CServerMap.c -lm -lc
+gcc -fPIC -std=c99 -shared -I"/usr/java/jdk1.7.0_79/include" -I"/usr/java/jdk1.7.0_79/include/linux" -o libCDoD.so CServerMap.c -lm -lc
 
 echo "Cleaning it all up"
 rm CGameLogic.h
