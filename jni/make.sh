@@ -8,7 +8,12 @@ rm CGameLogic.h
 rm CServerMap.h
 rm libCDoD.so
 
+echo "Compiling Java"
+cd ../src
+javac -d ../out *.java
+
 echo "Making headers"
+cd ../jni
 javah -cp ../src CGameLogic
 javah -cp ../src CServerMap
 

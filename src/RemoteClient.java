@@ -113,7 +113,9 @@ public class RemoteClient implements Runnable {
                 }
                 break;
             case "PICKUP":
+                server.loadGame("out/tempMap.txt");
                 answer = gameLogic.pickup();
+                server.saveGame("out/tempMap.txt");
                 break;
             case "LOOK":
                 answer = gameLogic.look();//.replaceAll(".(?!$)", "$0  ");  <-- This adds spacing to the window

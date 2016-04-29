@@ -104,7 +104,7 @@ public class PlayGame {
                 if (playerInterface.hasNextCommand()) {
                     String input = playerInterface.getNextCommand();
                     if (input != null) {
-                        System.out.println("Sending: " + input);
+                        //System.out.println("Sending: " + input);
                         client.send(input);
                     } else {
                         System.err.println("FATAL: null response from user input get command");
