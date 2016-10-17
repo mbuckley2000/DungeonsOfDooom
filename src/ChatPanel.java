@@ -8,7 +8,7 @@ import java.awt.event.KeyListener;
 /**
  * Component of the GUI that allows users to send and receive chat, as well as messages from the server
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 25/03/2016
  */
 public class ChatPanel extends JPanel {

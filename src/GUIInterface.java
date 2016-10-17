@@ -4,7 +4,7 @@ import java.awt.*;
 /**
  * GUI interface for the game
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 21/02/2016
  */
 public class GUIInterface extends JFrame implements PlayerInterface {

@@ -1,7 +1,7 @@
 /**
  * Stopwatch timer class used for Vsync
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 23/03/2016
  */
 public class Stopwatch {

@@ -1,7 +1,7 @@
 /**
  * Controller interface for the player
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 23/03/2016
  */
 public abstract class Controller {

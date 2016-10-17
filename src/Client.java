@@ -11,7 +11,7 @@ import java.net.Socket;
  * Connects to server, performs very basic input filtering, and sends commands
  * All output from the server is printed and interpreted in a ServerListenerThread to prevent blocking
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 24/02/2016
  */
 public class Client {

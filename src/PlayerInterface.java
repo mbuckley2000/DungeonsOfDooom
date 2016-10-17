@@ -1,7 +1,7 @@
 /**
  * Interface for the player. Could be GUI, textual, or bot
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 22/03/2016
  */
 public interface PlayerInterface {

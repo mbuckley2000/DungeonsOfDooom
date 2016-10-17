@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 /**
  * Displays a message to the player
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 04/04/2016
  */
 public class MessageDialog extends JFrame {

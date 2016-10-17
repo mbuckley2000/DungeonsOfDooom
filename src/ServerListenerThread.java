@@ -8,7 +8,7 @@ import java.util.Queue;
  * Used by the Client class to print output from server in an asynchronous manner
  * Stores the last responses to each command to be publicly retrieved by the BOT
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 25/02/2016
  */
 public class ServerListenerThread implements Runnable {

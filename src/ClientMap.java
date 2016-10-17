@@ -8,7 +8,7 @@ import java.util.Stack;
  * Can be updated given the current client position and a look window received at that position
  * Includes tile searching and pathfinding functionality
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 29/02/2016
  */
 public class ClientMap {

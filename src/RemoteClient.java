@@ -10,7 +10,7 @@ import java.net.Socket;
  * Each client gets their own thread, so operations can happen simultaneously
  * Only MOVE is synchronised. This ensures that only one player can be on a single tile, removing the need to synchronise other methods such as PICKUP
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 07/03/2016
  */
 public class RemoteClient implements Runnable {

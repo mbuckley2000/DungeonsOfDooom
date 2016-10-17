@@ -1,7 +1,7 @@
 /**
  * tracks the client side position of the player relative to where they spawned
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 22/03/2016
  */
 public class PlayerPositionTracker {

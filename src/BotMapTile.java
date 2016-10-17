@@ -2,7 +2,7 @@
  * Used for Bot pathfinding
  * Contains an x and y position and a scoring system for pathfinding
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 02/03/2016
  */
 public class BotMapTile {

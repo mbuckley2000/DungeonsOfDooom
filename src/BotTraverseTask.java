@@ -5,7 +5,7 @@ import java.util.Stack;
  * Terminates if tile is unreachable, unwalkable, or if tile has been reached
  * Generates a new path after every move, to account for newly discovered map areas or obstacles
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 03/03/2016
  */
 public class BotTraverseTask implements BotTask {

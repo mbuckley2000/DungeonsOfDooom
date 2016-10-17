@@ -1,7 +1,7 @@
 /**
  * Interface for bot tasks. Explained in Bot
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 03/03/2016
  */
 public interface BotTask {

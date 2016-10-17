@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
  * Keyboard controller for the game.
  * Arrow keys move, spacebar picks up, escape exits
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 23/03/2016
  */
 public class KeyboardController extends Controller {

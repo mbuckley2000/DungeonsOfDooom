@@ -19,7 +19,7 @@ import java.util.Set;
  * If a player is standing where they used to be, they are re-initialised
  * Provides utility to check for stalemates (not enough gold left for anybody to win)
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 24/02/2016
  */
 public class Server {

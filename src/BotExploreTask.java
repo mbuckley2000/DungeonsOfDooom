@@ -7,7 +7,7 @@ import java.util.Collections;
  * If reachable gold is found and needed, it will spawn a RetrieveGoldTask to pick it up
  * If reachable exit is found and needed, it will spawn a TraverseTask to get there
  *
- * @author mb2070
+ * @author Matt Buckley
  * @since 03/03/2016
  */
 public class BotExploreTask implements BotTask {
