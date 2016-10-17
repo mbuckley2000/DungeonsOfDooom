@@ -44,7 +44,7 @@ public class Server {
 
             //Setup
             //Load serverMap
-            serverMap = new CServerMap();
+            serverMap = new JavaServerMap();
 
             if (!guiDisabled) {
                 JFileChooser chooser = new JFileChooser();

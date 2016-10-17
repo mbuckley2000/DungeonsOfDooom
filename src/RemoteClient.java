@@ -31,7 +31,7 @@ public class RemoteClient implements Runnable {
      */
     RemoteClient(Server server, Socket clientSocket) {
         this.server = server;
-        gameLogic = new CGameLogic();
+        gameLogic = new JavaGameLogic(server);
         this.clientSocket = clientSocket;
         connected = true;
         int[] freePos = server.getServerMap().getFreeTile(server);
